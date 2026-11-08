@@ -155,7 +155,8 @@ static bool drawPlaybackBar(uint64_t position, uint64_t totalSamples, uint32_t s
     double fraction = (double)position / (double)totalSamples;
     fraction = std::clamp(fraction, 0.0, 1.0);
     if (active && trackWidth > 0.0f) {
-        fraction = std::clamp((ImGui::GetIO().MousePos.x - pMin.x) / trackWidth, 0.0, 1.0);
+        const float mouseFraction = (ImGui::GetIO().MousePos.x - pMin.x) / trackWidth;
+        fraction = (double)std::clamp(mouseFraction, 0.0f, 1.0f);
         *seekTarget = (uint64_t)(fraction * (double)totalSamples);
     }
 
