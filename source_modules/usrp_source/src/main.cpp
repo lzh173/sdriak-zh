@@ -159,7 +159,7 @@ public:
 
         // Get bandwidth ranges
         bandwidths.clear();
-        bandwidths.define(0, "Auto", 0);
+        bandwidths.define(0, "自动", 0);
         uhd::meta_range_t bwRange = dev->get_rx_bandwidth_range(chanId);
         for (const auto& r : bwRange) {
             double step = (r.step() == 0.0) ? 100e3 : r.step();
@@ -325,14 +325,14 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_usrp_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_usrp_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->selectedSer);
             core::setInputSampleRate(_this->sampleRate);
         }
 
         if (_this->channels.size() > 1) {
-            SmGui::LeftLabel("Channel");
+            SmGui::LeftLabel("信道");
             SmGui::FillWidth();
             SmGui::ForceSync();
             if (SmGui::Combo(CONCAT("##_usrp_ch_sel_", _this->name), &_this->chanId, _this->channels.txt)) {
@@ -346,7 +346,7 @@ private:
         if (_this->running) { SmGui::EndDisabled(); }
 
         if (_this->antennas.size() > 1) {
-            SmGui::LeftLabel("Antenna");
+            SmGui::LeftLabel("天线");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_usrp_ant_sel_", _this->name), &_this->antId, _this->antennas.txt)) {
                 if (_this->running) {
@@ -359,7 +359,7 @@ private:
         }
 
         if (_this->bandwidths.size() > 2) {
-            SmGui::LeftLabel("Bandwidth");
+            SmGui::LeftLabel("带宽");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_usrp_bw_sel_", _this->name), &_this->bwId, _this->bandwidths.txt)) {
                 if (_this->running) {
@@ -372,7 +372,7 @@ private:
         }
 
         if (_this->clockSources.size() > 1) {
-            SmGui::LeftLabel("Clock");
+            SmGui::LeftLabel("时钟");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_usrp_clk_sel_", _this->name), &_this->csId, _this->clockSources.txt)) {
                 if (_this->running) {
@@ -384,7 +384,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("Gain");
+        SmGui::LeftLabel("增益");
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_usrp_gain_", _this->name), &_this->gain, _this->gainRange.start(), _this->gainRange.stop(), _this->gainRange.step(), SmGui::FMT_STR_FLOAT_DB_ONE_DECIMAL)) {
             if (_this->running) {

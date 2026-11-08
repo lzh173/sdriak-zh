@@ -138,21 +138,21 @@ private:
         _this->symDiag.draw();
 
         if (_this->logsVisible) {
-            if (ImGui::Button("Hide logs", ImVec2(menuWidth, 0))) { _this->logsVisible = false; }
+            if (ImGui::Button("隐藏日志", ImVec2(menuWidth, 0))) { _this->logsVisible = false; }
         }
         else {
-            if (ImGui::Button("Show logs", ImVec2(menuWidth, 0))) { _this->logsVisible = true; }
+            if (ImGui::Button("显示日志", ImVec2(menuWidth, 0))) { _this->logsVisible = true; }
         }
 
         if (_this->logsVisible) {
             std::lock_guard<std::mutex> lck(_this->logsMtx);
 
-            ImGui::Begin("Falcon9 Telemetry");
+            ImGui::Begin("Falcon9 遥测");
             ImGui::BeginTabBar("Falcon9Tabs");
 
             // GPS Logs
             ImGui::BeginTabItem("GPS");
-            if (ImGui::Button("Clear logs##GPSClear")) { _this->gpsLogs.clear(); }
+            if (ImGui::Button("清除日志##GPSClear")) { _this->gpsLogs.clear(); }
             ImGui::BeginChild(ImGuiID("GPSChild"));
             ImGui::TextUnformatted(_this->gpsLogs.c_str());
             ImGui::SetScrollHereY(1.0f);

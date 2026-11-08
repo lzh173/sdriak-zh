@@ -223,7 +223,7 @@ namespace freq_input {
         // Page toggle plus the dialog's one dismiss control, in the same place
         // on every page -- the pages below no longer carry a Cancel of their
         // own. `page` is the segment index by construction.
-        static const char* pageLabels[] = { "BAND", "SPECTRUM", "Frequency" };
+        static const char* pageLabels[] = { "频段", "频谱", "频率" };
         const float closeW = m.toggleHeight;
         if (doSegmentedControl("##sdrpp_freq_input_page", page, pageLabels, 3,
                                ImVec2(m.totalWidth - closeW - sp, m.toggleHeight)))

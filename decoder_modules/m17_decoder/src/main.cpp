@@ -150,27 +150,27 @@ private:
             if (!_this->lsf.valid) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Source");
+                ImGui::TextUnformatted("源");
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted("--");
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Destination");
+                ImGui::TextUnformatted("目标");
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted("--");
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Data Type");
+                ImGui::TextUnformatted("数据类型");
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted("--");
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Encryption");
+                ImGui::TextUnformatted("加密");
                 ImGui::TableSetColumnIndex(1);
-                ImGui::TextUnformatted("-- (Subtype --)");
+                ImGui::TextUnformatted("--（子类型 --）");
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
@@ -181,27 +181,27 @@ private:
             else {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Source");
+                ImGui::TextUnformatted("源");
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted(_this->lsf.src.c_str());
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Destination");
+                ImGui::TextUnformatted("目标");
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted(_this->lsf.dst.c_str());
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Data Type");
+                ImGui::TextUnformatted("数据类型");
                 ImGui::TableSetColumnIndex(1);
                 ImGui::TextUnformatted(M17DataTypesTxt[_this->lsf.dataType]);
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted("Encryption");
+                ImGui::TextUnformatted("加密");
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%s (Subtype %d)", M17EncryptionTypesTxt[_this->lsf.encryptionType], _this->lsf.encryptionSubType);
+                ImGui::Text("%s（子类型 %d）", M17EncryptionTypesTxt[_this->lsf.encryptionType], _this->lsf.encryptionSubType);
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
@@ -212,7 +212,7 @@ private:
             ImGui::EndTable();
         }
 
-        if (ImGui::Checkbox(CONCAT("Show Reference Lines##m17_showlines_", _this->name), &_this->showLines)) {
+        if (ImGui::Checkbox(CONCAT("显示参考线##m17_showlines_", _this->name), &_this->showLines)) {
             if (_this->showLines) {
                 _this->diag.lines.push_back(-1.0);
                 _this->diag.lines.push_back(-1.0/3.0);
@@ -225,13 +225,13 @@ private:
             config.edit().section(_this->name).set("showLines", _this->showLines);
         }
 
-        ImGui::TextUnformatted("Status:");
+        ImGui::TextUnformatted("状态：");
         ImGui::SameLine();
         if (_this->decoder.isReceiving()) {
-            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Receiving");
+            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "接收中");
         }
         else {
-            ImGui::TextUnformatted("Idle");
+            ImGui::TextUnformatted("空闲");
         }
 
         if (!_this->enabled) { style::endDisabled(); }

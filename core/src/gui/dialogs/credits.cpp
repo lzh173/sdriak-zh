@@ -69,29 +69,29 @@ namespace credits {
         ImGui::Spacing();
         ImGui::Spacing();
 
-        ImGui::TextUnformatted("Maintained by Vojtech Bubnik (OK1IAK), original software by Alexandre Rouma (ON5RYZ) with the help of\n\n");
+        ImGui::TextUnformatted("由 Vojtech Bubnik（OK1IAK）维护，原始软件由 Alexandre Rouma（ON5RYZ）在以下人员的协助下开发\n\n");
 
         ImGui::Columns(4, "CreditColumns", true);
 
-        ImGui::TextUnformatted("Contributors");
+        ImGui::TextUnformatted("贡献者");
         for (int i = 0; i < sdrpp_credits::contributorCount; i++) {
             ImGui::BulletText("%s", sdrpp_credits::contributors[i]);
         }
 
         ImGui::NextColumn();
-        ImGui::TextUnformatted("Libraries");
+        ImGui::TextUnformatted("第三方库");
         for (int i = 0; i < sdrpp_credits::libraryCount; i++) {
             ImGui::BulletText("%s", sdrpp_credits::libraries[i]);
         }
 
         ImGui::NextColumn();
-        ImGui::TextUnformatted("Hardware Donators");
+        ImGui::TextUnformatted("硬件捐赠者");
         for (int i = 0; i < sdrpp_credits::hardwareDonatorCount; i++) {
             ImGui::BulletText("%s", sdrpp_credits::hardwareDonators[i]);
         }
 
         ImGui::NextColumn();
-        ImGui::TextUnformatted("Patrons");
+        ImGui::TextUnformatted("赞助者");
         for (int i = 0; i < sdrpp_credits::patronCount; i++) {
             ImGui::BulletText("%s", sdrpp_credits::patrons[i]);
         }
@@ -101,10 +101,10 @@ namespace credits {
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
-        ImGui::TextUnformatted("SDRIAK v" VERSION_STR " (Built at " __TIME__ ", " __DATE__ ")");
-        ImGui::TextUnformatted("Copyright (C) 2020-2026 Alexandre Rouma, Vojtech Bubnik and contributors");
-        ImGui::TextUnformatted("This program comes with ABSOLUTELY NO WARRANTY. It is free software under the GNU GPL version 3.");
-        ImGui::TextUnformatted("See https://www.gnu.org/licenses/gpl-3.0.html and the licenses folder in the resources directory.");
+        ImGui::TextUnformatted("SDRIAK v" VERSION_STR "（构建于 " __TIME__ "，" __DATE__ "）");
+        ImGui::TextUnformatted("版权所有（C）2020-2026 Alexandre Rouma、Vojtech Bubnik 及贡献者");
+        ImGui::TextUnformatted("本程序不提供任何担保。它是遵循 GNU GPL 第 3 版发布的自由软件。");
+        ImGui::TextUnformatted("参见 https://www.gnu.org/licenses/gpl-3.0.html 以及资源目录下的 licenses 文件夹。");
 
         ImGuiIO& io = ImGui::GetIO();
         float dragThreshold = std::max(io.MouseDragThreshold, style::dp(6.0f));

@@ -43,9 +43,9 @@ namespace demod {
 
         void showMenu() {
             float menuWidth = ImGui::GetContentRegionAvail().x;
-            ImGui::LeftLabel("AGC Mode");
+            ImGui::LeftLabel("AGC 模式");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-            if (ImGui::Combo(("##_radio_am_agc_mode_" + name).c_str(), &agcMode, "Off\0Carrier\0Audio\0")) {
+            if (ImGui::Combo(("##_radio_am_agc_mode_" + name).c_str(), &agcMode, "关闭\0载波\0音频\0")) {
                 demod.setAGCMode((dsp::demod::AM<dsp::stereo_t>::AGCMode)agcMode);
                 agcGain = std::clamp<float>(20.0f * log10f(demod.getAGCGain()), -10.0f, 90.0f);
                 saveConf("agcMode", agcMode);
@@ -59,7 +59,7 @@ namespace demod {
                 agcGain = std::clamp<float>(20.0f * log10f(demod.getAGCGain()), -10.0f, 90.0f);
                 ImGui::BeginDisabled();
             }
-            ImGui::LeftLabel("Gain");
+            ImGui::LeftLabel("增益");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::SliderFloat(("##_radio_am_gain_" + name).c_str(), &agcGain, -10.0f, 90.0f, "%.0f dB")) {
                 demod.setAGCGain(powf(10.0f, agcGain / 20.0f));
@@ -67,13 +67,13 @@ namespace demod {
             }
             if (agcEnabled) { ImGui::EndDisabled(); }
             else { ImGui::BeginDisabled(); }
-            ImGui::LeftLabel("AGC Attack");
+            ImGui::LeftLabel("AGC 起控时间");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::SliderFloat(("##_radio_am_agc_attack_" + name).c_str(), &agcAttack, 1.0f, 200.0f)) {
                 demod.setAGCAttack(agcAttack / getIFSampleRate());
                 saveConf("agcAttack", agcAttack);
             }
-            ImGui::LeftLabel("AGC Decay");
+            ImGui::LeftLabel("AGC 释放时间");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::SliderFloat(("##_radio_am_agc_decay_" + name).c_str(), &agcDecay, 1.0f, 20.0f)) {
                 demod.setAGCDecay(agcDecay / getIFSampleRate());

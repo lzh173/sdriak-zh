@@ -468,7 +468,7 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         const bool playing = gui::mainWindow.isPlaying();
 
         ImGui::BeginDisabled(playing);
-        if (ImGui::Button("Choose on map...")) {
+        if (ImGui::Button("在地图上选择…")) {
             _this->selector.openPopup();
         }
         ImGui::EndDisabled();
@@ -505,7 +505,7 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         if (!_this->recentServers.empty()) {
             ImGui::BeginDisabled(playing);
             ImGui::SetNextItemWidth(-1);
-            if (ImGui::BeginCombo(("##_kiwisdr_recent_" + _this->name).c_str(), "Recent...")) {
+            if (ImGui::BeginCombo(("##_kiwisdr_recent_" + _this->name).c_str(), "最近…")) {
                 int pick = -1, remove = -1;
                 const float btn = ImGui::GetFrameHeight();
                 const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
@@ -543,19 +543,19 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         }
 
         if (!_this->kiwisdrLoc.empty())
-            SmGui::TextF("Loc: %s", _this->kiwisdrLoc.c_str());
-        SmGui::TextF("Status: %s", _this->kiwiSdrClient.getConnectionStatus().c_str());
+            SmGui::TextF("位置：%s", _this->kiwisdrLoc.c_str());
+        SmGui::TextF("状态：%s", _this->kiwiSdrClient.getConnectionStatus().c_str());
 
         std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         auto tmm = safeLocalTime(t);
         char streamTime[64];
         strftime(streamTime, sizeof(streamTime), "%Y-%m-%d %H:%M:%S", &tmm);
-        SmGui::TextF("Stream pos: %s", streamTime);
+        SmGui::TextF("流位置：%s", streamTime);
 
         // Network prebuffer: trades latency for immunity against connection
         // jitter (mobile links). Takes effect live, including while playing.
         int bufMs = _this->bufferMs.load();
-        SmGui::LeftLabel("Buffer (ms)");
+        SmGui::LeftLabel("缓冲（ms）");
         SmGui::FillWidth();
         if (SmGui::SliderInt(("##_kiwisdr_buffer_ms_" + _this->name).c_str(), &bufMs, BUFFER_MS_MIN, BUFFER_MS_MAX)) {
             _this->bufferMs.store(bufMs);
@@ -568,7 +568,7 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         const std::string agcId = "AGC##_kiwisdr_agc_" + _this->name;
         agcChanged |= SmGui::Checkbox(agcId.c_str(), &agc.enabled);
         SmGui::SameLine();
-        const std::string hangId = "Hang##_kiwisdr_agc_hang_" + _this->name;
+        const std::string hangId = "保持##_kiwisdr_agc_hang_" + _this->name;
         agcChanged |= SmGui::Checkbox(hangId.c_str(), &agc.hang);
 
         auto slider = [&](const char* label, const char* id, int* value, int min, int max, SmGui::FormatString format) {
@@ -579,12 +579,12 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         };
 
         if (agc.enabled) {
-            agcChanged |= slider("Threshold", "##_kiwisdr_agc_threshold_", &agc.thresholdDb, -130, 0, SmGui::FMT_STR_INT_DB);
-            agcChanged |= slider("Slope", "##_kiwisdr_agc_slope_", &agc.slopeDb, 0, 10, SmGui::FMT_STR_INT_DB);
-            agcChanged |= slider("Decay", "##_kiwisdr_agc_decay_", &agc.decayMs, 20, 5000, SmGui::FMT_STR_INT_DEFAULT);
+            agcChanged |= slider("阈值", "##_kiwisdr_agc_threshold_", &agc.thresholdDb, -130, 0, SmGui::FMT_STR_INT_DB);
+            agcChanged |= slider("斜率", "##_kiwisdr_agc_slope_", &agc.slopeDb, 0, 10, SmGui::FMT_STR_INT_DB);
+            agcChanged |= slider("释放时间", "##_kiwisdr_agc_decay_", &agc.decayMs, 20, 5000, SmGui::FMT_STR_INT_DEFAULT);
         }
         else {
-            agcChanged |= slider("Gain", "##_kiwisdr_agc_gain_", &agc.manualGainDb, 0, 120, SmGui::FMT_STR_INT_DB);
+            agcChanged |= slider("增益", "##_kiwisdr_agc_gain_", &agc.manualGainDb, 0, 120, SmGui::FMT_STR_INT_DB);
         }
         if (agcChanged) {
             _this->kiwiSdrClient.setAgc(agc);

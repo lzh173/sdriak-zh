@@ -40,9 +40,9 @@ public:
         samplerates.define(3.2e6, "3.2MHz", 3.2e6);
 
         // Define direct sampling modes
-        directSamplingModes.define(0, "Disabled", 0);
-        directSamplingModes.define(1, "I branch", 1);
-        directSamplingModes.define(2, "Q branch", 2);
+        directSamplingModes.define(0, "禁用", 0);
+        directSamplingModes.define(1, "I 路", 1);
+        directSamplingModes.define(2, "Q 路", 2);
 
         // Select the default samplerate instead of id 0
         srId = samplerates.valueId(2.4e6);
@@ -182,9 +182,9 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Direct Sampling");
+        SmGui::LeftLabel("直接采样");
         SmGui::FillWidth();
-        if (SmGui::Combo(CONCAT("##_rtltcp_ds_", _this->name), &_this->directSamplingId, "Disabled\0I branch\0Q branch\0")) {
+        if (SmGui::Combo(CONCAT("##_rtltcp_ds_", _this->name), &_this->directSamplingId, "禁用\0I 路\0Q 路\0")) {
             if (_this->running) {
                 _this->client->setDirectSampling(_this->directSamplingId);
                 _this->client->setGainIndex(_this->gain);
@@ -192,7 +192,7 @@ private:
             config.edit().set("directSamplingMode", _this->directSamplingId);
         }
 
-        SmGui::LeftLabel("PPM Correction");
+        SmGui::LeftLabel("PPM 校正");
         SmGui::FillWidth();
         if (SmGui::InputInt(CONCAT("##_rtltcp_ppm_", _this->name), &_this->ppm, 1, 10)) {
             if (_this->running) {
@@ -202,7 +202,7 @@ private:
         }
 
         if (_this->tunerAGC) { SmGui::BeginDisabled(); }
-        SmGui::LeftLabel("Gain");
+        SmGui::LeftLabel("增益");
         SmGui::FillWidth();
         if (SmGui::SliderInt(CONCAT("##_gain_select_", _this->name), &_this->gain, 0, 28, SmGui::FMT_STR_NONE)) {
             if (_this->running) {
@@ -212,14 +212,14 @@ private:
         }
         if (_this->tunerAGC) { SmGui::EndDisabled(); }
 
-        if (SmGui::Checkbox(CONCAT("Bias-T##_biast_select_", _this->name), &_this->biasTee)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##_biast_select_", _this->name), &_this->biasTee)) {
             if (_this->running) {
                 _this->client->setBiasTee(_this->biasTee);
             }
             config.edit().set("biasTee", _this->biasTee);
         }
 
-        if (SmGui::Checkbox(CONCAT("Offset Tuning##_biast_select_", _this->name), &_this->offsetTuning)) {
+        if (SmGui::Checkbox(CONCAT("偏移调谐##_biast_select_", _this->name), &_this->offsetTuning)) {
             if (_this->running) {
                 _this->client->setOffsetTuning(_this->offsetTuning);
             }
@@ -237,7 +237,7 @@ private:
         }
 
         SmGui::ForceSync();
-        if (SmGui::Checkbox("Tuner AGC", &_this->tunerAGC)) {
+        if (SmGui::Checkbox("调谐器 AGC", &_this->tunerAGC)) {
             if (_this->running) {
                 _this->client->setGainMode(!_this->tunerAGC);
                 if (!_this->tunerAGC) {

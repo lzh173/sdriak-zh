@@ -114,7 +114,7 @@ private:
             }
 
             // Fill in the rest of the details and send to discord
-            presence.details = "Listening to";
+            presence.details = "正在收听";
             presence.state = freq;
             Discord_UpdatePresence(&presence);
         }
@@ -128,7 +128,7 @@ private:
         Discord_Initialize(DISCORD_APP_ID, &handlers, 1, "");
 
         // Set the first presence
-        presence.details = "Initializing rich presence...";
+        presence.details = "正在初始化 Rich Presence…";
         presence.startTimestamp = time(0);
         presence.largeImageKey = "sdriak_large";
         presence.smallImageKey = "github";

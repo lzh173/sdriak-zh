@@ -77,7 +77,7 @@ KiwiSDRMapSelector::KiwiSDRMapSelector(const std::string& root, ConfigManager* c
 }
 
 void KiwiSDRMapSelector::openPopup() {
-    ImGui::OpenPopup((configPrefix + ": The KiwiSDR Map").c_str());
+    ImGui::OpenPopup((configPrefix + "：KiwiSDR 地图").c_str());
 }
 
 void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const std::string&, const std::optional<ServerEntry::FrequencyBand>&)> onSelected) {
@@ -89,7 +89,7 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
     const bool desktopPopup = true;
     const bool fullscreenPopup = false;
 #endif
-    const std::string popupTitle = configPrefix + ": The KiwiSDR Map";
+    const std::string popupTitle = configPrefix + "：KiwiSDR 地图";
     const bool lockedFullscreenPopup = fullscreenPopup || (desktopPopup && mapPopupMaximized);
     const ImVec2 popupPos = lockedFullscreenPopup ? ImVec2(0.0f, 0.0f) : displaySize * 0.125f;
     const ImVec2 popupSize = lockedFullscreenPopup ? displaySize : displaySize * 0.75f;
@@ -123,7 +123,7 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
     // recognizer also leaves NoScrollWithMouse windows alone.
     ImGui::BeginChild("##geomap-kiwisdr", ImVec2(contentSize.x, ImMax(1.0f, contentSize.y - footerHeight)), true,
                       ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    const char* filterButtonLabel = showExtApiOnly ? "Show all stations" : "Show EXT API only";
+    const char* filterButtonLabel = showExtApiOnly ? "显示全部站点" : "仅显示 EXT API 站点";
     // Bump button alpha for the whole map control row (Zoom/Reset/filter
     // submitted inside geoMap.draw, plus the "Hide full" button on the
     // same line below) — those buttons sit over the map and the default
@@ -156,7 +156,7 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
     // to the other mode.
     ImGui::SameLine();
     const char* markerStyleLabel = (markerStyle == MarkerStyle::StatusColored)
-        ? "Hide full servers" : "Show full as red";
+        ? "隐藏满员站点" : "满员站点显示为红色";
     if (ImGui::Button(markerStyleLabel)) {
         markerStyle = (markerStyle == MarkerStyle::StatusColored)
             ? MarkerStyle::HideFull : MarkerStyle::StatusColored;
@@ -175,11 +175,11 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
             ImGui::Text("%s", error.c_str());
         }
         else {
-            ImGui::Text("Loading KiwiSDR servers list..");
+            ImGui::Text("正在加载 KiwiSDR 服务器列表……");
         }
     }
     else {
-        ImGui::Text("%d KiwiSDR servers", (int)servers.size());
+        ImGui::Text("%d 个 KiwiSDR 服务器", (int)servers.size());
         // Markers are drawn from inside geoMap.draw via the overlay slot
         // so they sit under the button row. handleHitTest is input-only
         // and runs here.
@@ -196,14 +196,14 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
             ImGui::Text("%s", testStatus.c_str());
         }
         if (!testError.empty()) {
-            ImGui::Text("Server test error: %s", testError.c_str());
+            ImGui::Text("服务器测试错误：%s", testError.c_str());
         }
     }
 
     ImGui::EndChild();
 
     if (desktopPopup) {
-        if (ImGui::Button(mapPopupMaximized ? "Restore" : "Maximize")) {
+        if (ImGui::Button(mapPopupMaximized ? "还原" : "最大化")) {
             if (mapPopupMaximized) {
                 mapPopupMaximized = false;
                 if (mapPopupRestoreValid) {
@@ -222,7 +222,7 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
         }
         ImGui::SameLine();
     }
-    if (ImGui::Button("Cancel")) {
+    if (ImGui::Button("取消")) {
         ImGui::CloseCurrentPopup();
     }
     // Phone-landscape: the Test button lives here in the fixed footer (not in
@@ -232,7 +232,7 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
         if (const ServerEntry* sel = selectedServer()) {
             ImGui::SameLine();
             ImGui::BeginDisabled(tester.isInProgress());
-            const bool doTest = ImGui::Button("Test server");
+            const bool doTest = ImGui::Button("测试服务器");
             ImGui::EndDisabled();
             if (doTest) {
                 tester.start(sel->url, sel->loc, sel->band);
@@ -241,7 +241,7 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
     }
     if (auto ok = tester.lastOk()) {
         ImGui::SameLine();
-        if (ImGui::Button(("Use tested server: " + ok->hostPort).c_str())) {
+        if (ImGui::Button(("使用已测试服务器：" + ok->hostPort).c_str())) {
             onSelected(ok->hostPort, ok->loc, ok->band);
             ImGui::CloseCurrentPopup();
         }
@@ -378,9 +378,9 @@ void KiwiSDRMapSelector::drawMarkers() {
         // Brief tooltip — full details are in the selection panel after click.
         std::ostringstream ss;
         ss << hovered->name << "\n"
-           << "Loc: " << hovered->loc;
+           << "位置：" << hovered->loc;
         if (hovered->band) {
-            ss << "\nBand: " << formatBandMHz(*hovered->band);
+            ss << "\n频段：" << formatBandMHz(*hovered->band);
         }
         ImGui::SetTooltip("%s", ss.str().c_str());
     }
@@ -417,7 +417,7 @@ void KiwiSDRMapSelector::handleHitTest() {
 
 void KiwiSDRMapSelector::drawClusterPicker() {
     if (!ImGui::BeginPopup("##kiwi-cluster-pick", ImGuiWindowFlags_NoMove)) return;
-    ImGui::TextUnformatted("Multiple stations here - pick one:");
+    ImGui::TextUnformatted("此处有多个站点，请选择：");
     // Cap the visible height so a dense cluster (e.g. central Europe) scrolls
     // instead of running off the screen; zooming in still thins the stack.
     const float rowH = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
@@ -450,34 +450,34 @@ void KiwiSDRMapSelector::drawSelectionPanel(bool showTestButton) {
         doOverlayText("%s", s.name.c_str());
         doOverlayText("%s", s.loc.c_str());
         if (s.band) {
-            doOverlayText("Band: %s", formatBandMHz(*s.band).c_str());
+            doOverlayText("频段：%s", formatBandMHz(*s.band).c_str());
         }
         if (!s.antenna.empty()) {
-            doOverlayText("ANT: %s", s.antenna.c_str());
+            doOverlayText("天线：%s", s.antenna.c_str());
         }
         if (!s.sdrHardware.empty()) {
-            doOverlayText("HW: %s", s.sdrHardware.c_str());
+            doOverlayText("硬件：%s", s.sdrHardware.c_str());
         }
         if (!s.swVersion.empty()) {
-            doOverlayText("VER: %s", s.swVersion.c_str());
+            doOverlayText("版本：%s", s.swVersion.c_str());
         }
         if (!s.qth.empty()) {
-            doOverlayText("QTH: %s", s.qth.c_str());
+            doOverlayText("QTH：%s", s.qth.c_str());
         }
         if (s.maxSnr > 0) {
-            doOverlayText("SNR: %d", (int)s.maxSnr);
+            doOverlayText("SNR：%d", (int)s.maxSnr);
         }
         if (s.usersmax > 0) {
-            doOverlayText("USR: %d/%d", s.users, s.usersmax);
+            doOverlayText("用户：%d/%d", s.users, s.usersmax);
         }
-        doOverlayText("EXT API: %d", s.extApi);
-        doOverlayText("URL: %s", s.url.c_str());
+        doOverlayText("扩展 API：%d", s.extApi);
+        doOverlayText("网址：%s", s.url.c_str());
 
         // On phone-landscape the Test action is drawn in the fixed footer
         // instead (see drawPopup), so skip it here.
         if (showTestButton) {
             ImGui::BeginDisabled(tester.isInProgress());
-            const bool doTest = ImGui::Button("Test server");
+            const bool doTest = ImGui::Button("测试服务器");
             ImGui::EndDisabled();
             if (doTest) {
                 tester.start(s.url, s.loc, s.band);

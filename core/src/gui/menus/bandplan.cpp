@@ -11,7 +11,7 @@ namespace bandplanmenu {
     bool bandPlanEnabled;
     int bandPlanPos = 0;
 
-    const char* bandPlanPosTxt = "Bottom\0Top\0";
+    const char* bandPlanPosTxt = "底部\0顶部\0";
 
     namespace {
         bandplan::BandPlan_t* getPlan(int index) {
@@ -84,7 +84,7 @@ namespace bandplanmenu {
 
     void draw(void* ctx) {
         if (bandplan::bandplanNames.empty()) {
-            ImGui::TextDisabled("No band plans available");
+            ImGui::TextDisabled("无可用频段规划");
             return;
         }
         bandplanId = std::clamp(
@@ -100,7 +100,7 @@ namespace bandplanmenu {
         }
         ImGui::PopItemWidth();
 
-        ImGui::LeftLabel("Position");
+        ImGui::LeftLabel("位置");
         ImGui::SetNextItemWidth(menuColumnWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo("##_bandplan_pos_", &bandPlanPos, bandPlanPosTxt)) {
             gui::waterfall.setBandPlanPos(bandPlanPos);
@@ -109,13 +109,13 @@ namespace bandplanmenu {
 
         const bandplan::BandPlan_t* plan = getPlan(bandplanId);
         if (!plan) {
-            ImGui::TextDisabled("Selected band plan is unavailable");
+            ImGui::TextDisabled("所选频段规划不可用");
             return;
         }
-        ImGui::Text("Country: %s (%s)", plan->countryName.c_str(), plan->countryCode.c_str());
-        ImGui::Text("Author: %s", plan->authorName.c_str());
+        ImGui::Text("国家：%s（%s）", plan->countryName.c_str(), plan->countryCode.c_str());
+        ImGui::Text("作者：%s", plan->authorName.c_str());
         if (!plan->authorURL.empty() && plan->authorURL != "none") {
-            ImGui::TextWrapped("Author URL: %s", plan->authorURL.c_str());
+            ImGui::TextWrapped("作者网址：%s", plan->authorURL.c_str());
         }
     }
 };

@@ -42,7 +42,7 @@ const sdrplay_api_Rsp2_AntennaSelectT rsp2_antennaPorts[] = {
     sdrplay_api_Rsp2_ANTENNA_B,
 };
 
-const char* rsp2_antennaPortsTxt = "Port A\0Port B\0Hi-Z\0";
+const char* rsp2_antennaPortsTxt = "端口 A\0端口 B\0高阻\0";
 
 const sdrplay_api_RspDx_AntennaSelectT rspdx_antennaPorts[] = {
     sdrplay_api_RspDx_ANTENNA_A,
@@ -50,7 +50,7 @@ const sdrplay_api_RspDx_AntennaSelectT rspdx_antennaPorts[] = {
     sdrplay_api_RspDx_ANTENNA_C
 };
 
-const char* rspdx_antennaPortsTxt = "Port A\0Port B\0Port C\0";
+const char* rspdx_antennaPortsTxt = "端口 A\0端口 B\0端口 C\0";
 
 struct ifMode_t {
     sdrplay_api_If_kHzT ifValue;
@@ -70,15 +70,15 @@ ifMode_t ifModes[] = {
 };
 
 const char* ifModeTxt =
-    "ZeroIF\0"
-    "LowIF 2048KHz, IFBW 1536KHz\0"
-    "LowIF 2048KHz, IFBW 5000KHz\0"
-    "LowIF 1620KHz, IFBW 1536KHz\0"
-    "LowIF 450KHz, IFBW 600KHz\0"
-    "LowIF 450KHz, IFBW 300KHz\0"
-    "LowIF 450KHz, IFBW 200KHz\0";
+    "零中频\0"
+    "低中频 2048KHz，IFBW 1536KHz\0"
+    "低中频 2048KHz，IFBW 5000KHz\0"
+    "低中频 1620KHz，IFBW 1536KHz\0"
+    "低中频 450KHz，IFBW 600KHz\0"
+    "低中频 450KHz，IFBW 300KHz\0"
+    "低中频 450KHz，IFBW 200KHz\0";
 
-const char* rspduo_antennaPortsTxt = "Tuner 1 (50Ohm)\0Tuner 1 (Hi-Z)\0Tuner 2 (50Ohm)\0";
+const char* rspduo_antennaPortsTxt = "调谐器 1（50Ω）\0调谐器 1（高阻）\0调谐器 2（50Ω）\0";
 
 #define MAX_DEV_COUNT   16
 
@@ -280,7 +280,7 @@ public:
         bandwidths.define(6e6, "6MHz", sdrplay_api_BW_6_000);
         bandwidths.define(7e6, "7MHz", sdrplay_api_BW_7_000);
         bandwidths.define(8e6, "8MHz", sdrplay_api_BW_8_000);
-        bandwidths.define(0, "Auto", sdrplay_api_BW_Undefined);
+        bandwidths.define(0, "自动", sdrplay_api_BW_Undefined);
 
         channelParams = openDevParams->rxChannelA;
 
@@ -634,13 +634,13 @@ private:
             SmGui::SameLine();
             SmGui::FillWidth();
             SmGui::ForceSync();
-            if (SmGui::Button(CONCAT("Refresh##sdrplay_refresh", _this->name))) {
+            if (SmGui::Button(CONCAT("刷新##sdrplay_refresh", _this->name))) {
                 _this->refresh();
                 _this->selectByName(_this->selectedName);
                 core::setInputSampleRate(_this->sampleRate);
             }
 
-            SmGui::LeftLabel("Bandwidth");
+            SmGui::LeftLabel("带宽");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##sdrplay_bw", _this->name), &_this->bandwidthId, _this->bandwidths.txt)) {
                 _this->bandwidth = (_this->bandwidthId == 8) ? preferedBandwidth[_this->srId] : _this->bandwidths[_this->bandwidthId];
@@ -654,13 +654,13 @@ private:
         else {
             SmGui::FillWidth();
             SmGui::ForceSync();
-            if (SmGui::Button(CONCAT("Refresh##sdrplay_refresh", _this->name))) {
+            if (SmGui::Button(CONCAT("刷新##sdrplay_refresh", _this->name))) {
                 _this->refresh();
                 _this->selectByName(_this->selectedName);
             }
         }
 
-        SmGui::LeftLabel("IF Mode");
+        SmGui::LeftLabel("中频模式");
         SmGui::FillWidth();
         SmGui::ForceSync();
         if (SmGui::Combo(CONCAT("##sdrplay_ifmode", _this->name), &_this->ifModeId, ifModeTxt)) {
@@ -694,7 +694,7 @@ private:
         if (_this->running) { SmGui::EndDisabled(); }
 
         if (_this->selectedName != "") {
-            SmGui::LeftLabel("LNA Gain");
+            SmGui::LeftLabel("低噪放增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##sdrplay_lna_gain", _this->name), &_this->lnaGain, _this->lnaSteps - 1, 0, SmGui::FMT_STR_NONE)) {
                 if (_this->running) {
@@ -705,7 +705,7 @@ private:
             }
 
             if (_this->agc > 0) { SmGui::BeginDisabled(); }
-            SmGui::LeftLabel("IF Gain");
+            SmGui::LeftLabel("中频增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##sdrplay_gain", _this->name), &_this->gain, 59, 20, SmGui::FMT_STR_NONE)) {
                 if (_this->running) {
@@ -716,7 +716,7 @@ private:
             }
             if (_this->agc > 0) { SmGui::EndDisabled(); }
 
-            SmGui::LeftLabel("PPM Correction");
+            SmGui::LeftLabel("PPM 校正");
             SmGui::FillWidth();
             if (SmGui::InputFloat(CONCAT("##sdrplay_ppm", _this->name), &_this->ppm, 0.01f, 0.1f, "%.2f")) {
                 _this->ppm = clampPPM(_this->ppm);
@@ -756,7 +756,7 @@ private:
             }
 
             SmGui::ForceSync();
-            if (SmGui::Checkbox(CONCAT("IF AGC##sdrplay_agc", _this->name), &_this->agc)) {
+            if (SmGui::Checkbox(CONCAT("中频 AGC##sdrplay_agc", _this->name), &_this->agc)) {
                 if (_this->running) {
                     _this->channelParams->ctrlParams.agc.enable = _this->agc ? sdrplay_api_AGC_CTRL_EN : sdrplay_api_AGC_DISABLE;
                     if (_this->agc) {
@@ -778,7 +778,7 @@ private:
             SmGui::SameLine();
             SmGui::FillWidth();
             SmGui::ForceSync();
-            if (SmGui::Button(CONCAT("Parameters##sdrplay_agc_edit_btn", _this->name))) {
+            if (SmGui::Button(CONCAT("参数##sdrplay_agc_edit_btn", _this->name))) {
                 _this->agcParamEdit = true;
                 _this->_agcAttack = _this->agcAttack;
                 _this->_agcDecay = _this->agcDecay;
@@ -811,19 +811,19 @@ private:
             }
         }
         else {
-            SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "No device available");
+            SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "无可用设备");
         }
     }
 
     bool agcParamMenu(bool& valid) {
         bool open = true;
         gui::mainWindow.lockWaterfallControls = true;
-        SmGui::OpenPopup("Edit##sdrplay_source_edit_agc_params_");
-        if (SmGui::BeginPopup("Edit##sdrplay_source_edit_agc_params_", ImGuiWindowFlags_NoResize)) {
+        SmGui::OpenPopup("编辑##sdrplay_source_edit_agc_params_");
+        if (SmGui::BeginPopup("编辑##sdrplay_source_edit_agc_params_", ImGuiWindowFlags_NoResize)) {
             if (SmGui::BeginTable(("sdrplay_source_agc_param_tbl" + name).c_str(), 2)) {
                 SmGui::TableNextRow();
                 SmGui::TableSetColumnIndex(0);
-                SmGui::LeftLabel("Attack");
+                SmGui::LeftLabel("起控时间");
                 SmGui::TableSetColumnIndex(1);
                 SmGui::SetNextItemWidth(100);
                 SmGui::InputInt("ms##sdrplay_source_agc_attack", &_agcAttack);
@@ -831,7 +831,7 @@ private:
 
                 SmGui::TableNextRow();
                 SmGui::TableSetColumnIndex(0);
-                SmGui::LeftLabel("Decay");
+                SmGui::LeftLabel("释放时间");
                 SmGui::TableSetColumnIndex(1);
                 SmGui::SetNextItemWidth(100);
                 SmGui::InputInt("ms##sdrplay_source_agc_decay", &_agcDecay);
@@ -839,7 +839,7 @@ private:
 
                 SmGui::TableNextRow();
                 SmGui::TableSetColumnIndex(0);
-                SmGui::LeftLabel("Decay Delay");
+                SmGui::LeftLabel("释放延迟");
                 SmGui::TableSetColumnIndex(1);
                 SmGui::SetNextItemWidth(100);
                 SmGui::InputInt("ms##sdrplay_source_agc_decay_delay", &_agcDecayDelay);
@@ -847,7 +847,7 @@ private:
 
                 SmGui::TableNextRow();
                 SmGui::TableSetColumnIndex(0);
-                SmGui::LeftLabel("Decay Threshold");
+                SmGui::LeftLabel("释放阈值");
                 SmGui::TableSetColumnIndex(1);
                 SmGui::SetNextItemWidth(100);
                 SmGui::InputInt("dB##sdrplay_source_agc_decay_thresh", &_agcDecayThreshold);
@@ -855,7 +855,7 @@ private:
 
                 SmGui::TableNextRow();
                 SmGui::TableSetColumnIndex(0);
-                SmGui::LeftLabel("Setpoint");
+                SmGui::LeftLabel("设定值");
                 SmGui::TableSetColumnIndex(1);
                 SmGui::SetNextItemWidth(100);
                 SmGui::InputInt("dBFS##sdrplay_source_agc_setpoint", &_agcSetPoint);
@@ -865,13 +865,13 @@ private:
             }
 
             SmGui::ForceSync();
-            if (SmGui::Button(" Apply ")) {
+            if (SmGui::Button(" 应用 ")) {
                 open = false;
                 valid = true;
             }
             SmGui::SameLine();
             SmGui::ForceSync();
-            if (SmGui::Button("Cancel")) {
+            if (SmGui::Button("取消")) {
                 open = false;
                 valid = false;
             }
@@ -885,21 +885,21 @@ private:
     }
 
     void RSP1AMenu() {
-        if (SmGui::Checkbox(CONCAT("FM/MW Notch##sdrplay_rsp1a_fmmwnotch", name), &rsp1a_fmmwNotch)) {
+        if (SmGui::Checkbox(CONCAT("FM/MW 陷波##sdrplay_rsp1a_fmmwnotch", name), &rsp1a_fmmwNotch)) {
             if (running) {
                 openDevParams->devParams->rsp1aParams.rfNotchEnable = rsp1a_fmmwNotch;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_Rsp1a_RfNotchControl, sdrplay_api_Update_Ext1_None);
             }
             config.edit().section("devices", selectedName).set("fmmwNotch", rsp1a_fmmwNotch);
         }
-        if (SmGui::Checkbox(CONCAT("DAB Notch##sdrplay_rsp1a_dabnotch", name), &rsp1a_dabNotch)) {
+        if (SmGui::Checkbox(CONCAT("DAB 陷波##sdrplay_rsp1a_dabnotch", name), &rsp1a_dabNotch)) {
             if (running) {
                 openDevParams->devParams->rsp1aParams.rfDabNotchEnable = rsp1a_dabNotch;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_Rsp1a_RfDabNotchControl, sdrplay_api_Update_Ext1_None);
             }
             config.edit().section("devices", selectedName).set("dabNotch", rsp1a_dabNotch);
         }
-        if (SmGui::Checkbox(CONCAT("Bias-T##sdrplay_rsp1a_biast", name), &rsp1a_biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##sdrplay_rsp1a_biast", name), &rsp1a_biasT)) {
             if (running) {
                 channelParams->rsp1aTunerParams.biasTEnable = rsp1a_biasT;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_Rsp1a_BiasTControl, sdrplay_api_Update_Ext1_None);
@@ -909,7 +909,7 @@ private:
     }
 
     void RSP2Menu() {
-        SmGui::LeftLabel("Antenna");
+        SmGui::LeftLabel("天线");
         SmGui::FillWidth();
         SmGui::ForceSync();
         if (SmGui::Combo(CONCAT("##sdrplay_rsp2_ant", name), &rsp2_antennaPort, rsp2_antennaPortsTxt)) {
@@ -924,7 +924,7 @@ private:
 
         // The notch is only available on the 50Ohm ports
         if (rsp2_antennaPort != 2) {
-            if (SmGui::Checkbox(CONCAT("MW/FM Notch##sdrplay_rsp2_fmmwnotch", name), &rsp2_fmmwNotch)) {
+            if (SmGui::Checkbox(CONCAT("MW/FM 陷波##sdrplay_rsp2_fmmwnotch", name), &rsp2_fmmwNotch)) {
                 if (running) {
                     channelParams->rsp2TunerParams.rfNotchEnable = rsp2_fmmwNotch;
                     sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_Rsp2_RfNotchControl, sdrplay_api_Update_Ext1_None);
@@ -935,11 +935,11 @@ private:
         else {
             SmGui::BeginDisabled();
             bool dummy = false;
-            SmGui::Checkbox(CONCAT("MW/FM Notch##sdrplay_rsp2_fmmwnotch", name), &dummy);
+            SmGui::Checkbox(CONCAT("MW/FM 陷波##sdrplay_rsp2_fmmwnotch", name), &dummy);
             SmGui::EndDisabled();
         }
         
-        if (SmGui::Checkbox(CONCAT("Bias-T##sdrplay_rsp2_biast", name), &rsp2_biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##sdrplay_rsp2_biast", name), &rsp2_biasT)) {
             if (running) {
                 channelParams->rsp2TunerParams.biasTEnable = rsp2_biasT;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_Rsp2_BiasTControl, sdrplay_api_Update_Ext1_None);
@@ -949,7 +949,7 @@ private:
     }
 
     void RSPduoMenu() {
-        SmGui::LeftLabel("Antenna");
+        SmGui::LeftLabel("天线");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##sdrplay_rspduo_ant", name), &rspduo_antennaPort, rspduo_antennaPortsTxt)) {
             if (running) {
@@ -957,7 +957,7 @@ private:
             }
             config.edit().section("devices", selectedName).set("antenna", rspduo_antennaPort);
         }
-        if (SmGui::Checkbox(CONCAT("FM/MW Notch##sdrplay_rspduo_fmmwnotch", name), &rspduo_fmmwNotch)) {
+        if (SmGui::Checkbox(CONCAT("FM/MW 陷波##sdrplay_rspduo_fmmwnotch", name), &rspduo_fmmwNotch)) {
             if (running) {
                 channelParams->rspDuoTunerParams.rfNotchEnable = rspduo_fmmwNotch;
                 channelParams->rspDuoTunerParams.tuner1AmNotchEnable = rspduo_fmmwNotch;
@@ -966,14 +966,14 @@ private:
             }
             config.edit().section("devices", selectedName).set("fmmwnotch", rspduo_fmmwNotch);
         }
-        if (SmGui::Checkbox(CONCAT("DAB Notch##sdrplay_rspduo_dabnotch", name), &rspduo_dabNotch)) {
+        if (SmGui::Checkbox(CONCAT("DAB 陷波##sdrplay_rspduo_dabnotch", name), &rspduo_dabNotch)) {
             if (running) {
                 channelParams->rspDuoTunerParams.rfDabNotchEnable = rspduo_dabNotch;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_RspDuo_RfDabNotchControl, sdrplay_api_Update_Ext1_None);
             }
             config.edit().section("devices", selectedName).set("dabNotch", rspduo_dabNotch);
         }
-        if (SmGui::Checkbox(CONCAT("Bias-T##sdrplay_rspduo_biast", name), &rspduo_biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##sdrplay_rspduo_biast", name), &rspduo_biasT)) {
             if (running) {
                 channelParams->rspDuoTunerParams.biasTEnable = rspduo_biasT;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_RspDuo_BiasTControl, sdrplay_api_Update_Ext1_None);
@@ -983,7 +983,7 @@ private:
     }
 
     void RSPdxMenu() {
-        SmGui::LeftLabel("Antenna");
+        SmGui::LeftLabel("天线");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##sdrplay_rspdx_ant", name), &rspdx_antennaPort, rspdx_antennaPortsTxt)) {
             if (running) {
@@ -993,21 +993,21 @@ private:
             config.edit().section("devices", selectedName).set("antenna", rspdx_antennaPort);
         }
 
-        if (SmGui::Checkbox(CONCAT("FM/MW Notch##sdrplay_rspdx_fmmwnotch", name), &rspdx_fmmwNotch)) {
+        if (SmGui::Checkbox(CONCAT("FM/MW 陷波##sdrplay_rspdx_fmmwnotch", name), &rspdx_fmmwNotch)) {
             if (running) {
                 openDevParams->devParams->rspDxParams.rfNotchEnable = rspdx_fmmwNotch;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_None, sdrplay_api_Update_RspDx_RfNotchControl);
             }
             config.edit().section("devices", selectedName).set("fmmwNotch", rspdx_fmmwNotch);
         }
-        if (SmGui::Checkbox(CONCAT("DAB Notch##sdrplay_rspdx_dabnotch", name), &rspdx_dabNotch)) {
+        if (SmGui::Checkbox(CONCAT("DAB 陷波##sdrplay_rspdx_dabnotch", name), &rspdx_dabNotch)) {
             if (running) {
                 openDevParams->devParams->rspDxParams.rfDabNotchEnable = rspdx_dabNotch;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_None, sdrplay_api_Update_RspDx_RfDabNotchControl);
             }
             config.edit().section("devices", selectedName).set("dabNotch", rspdx_dabNotch);
         }
-        if (SmGui::Checkbox(CONCAT("Bias-T##sdrplay_rspdx_biast", name), &rspdx_biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##sdrplay_rspdx_biast", name), &rspdx_biasT)) {
             if (running) {
                 openDevParams->devParams->rspDxParams.biasTEnable = rspdx_biasT;
                 sdrplay_api_Update(openDev.dev, openDev.tuner, sdrplay_api_Update_None, sdrplay_api_Update_RspDx_BiasTControl);
@@ -1017,7 +1017,7 @@ private:
     }
 
     void RSPUnsupportedMenu() {
-        SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Device currently unsupported");
+        SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "暂不支持该设备");
     }
 
     static void streamCB(short* xi, short* xq, sdrplay_api_StreamCbParamsT* params,

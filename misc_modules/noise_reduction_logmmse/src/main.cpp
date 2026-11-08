@@ -164,7 +164,7 @@ private:
     void menuHandler() {
         if (!enabled) { style::beginDisabled(); }
 
-        if (ImGui::Checkbox("Baseband NR##_sdrpp_if_nr", &ifnr)) {
+        if (ImGui::Checkbox("基带降噪##_sdrpp_if_nr", &ifnr)) {
             config.edit().set("IFNR", ifnr);
             if (ifnr) { // toggled on - attempt to run.
                 ifnrProcessor.stopReason = nullptr;
@@ -172,10 +172,10 @@ private:
             actuateIFNR();
         }
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("LogMMSE noise reduction on the whole IQ stream, before the\n"
-                              "FFT and all demodulators: cleans the waterfall and every VFO.\n"
-                              "Adapts continuously, no silence training needed.\n"
-                              "CPU-intensive at high sample rates.");
+            ImGui::SetTooltip("对整个 IQ 流的 LogMMSE 降噪，位于\n"
+                              "FFT 和所有解调器之前：净化瀑布图和每个 VFO。\n"
+                              "持续自适应，无需静音训练。\n"
+                              "高采样率下 CPU 占用较高。");
         }
         ImGui::SameLine();
         const char* stopReason = ifnrProcessor.stopReason;
@@ -200,9 +200,9 @@ private:
                 std::string cpuLabel = cpuText + "##_sdrpp_ifnr_cpu_load";
                 bool clicked = ImGui::Selectable(cpuLabel.c_str(), false, ImGuiSelectableFlags_None, textSize);
                 if (ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Baseband NR processing load. Above ~95%% the NR shuts off\n"
-                                      "automatically; click to disable that safeguard (strikethrough\n"
-                                      "= safeguard off).");
+                    ImGui::SetTooltip("基带降噪处理负载。超过约 95%% 时降噪会自动\n"
+                                      "关闭；点击可禁用该保护（文字带删除线\n"
+                                      "表示保护已关闭）。");
                 }
                 if (clicked) {
                     disableCpuDeactivation = !disableCpuDeactivation;
@@ -224,7 +224,7 @@ private:
         for (auto& [k, v] : afnrProcessors2) {
             // Track the sink's audio rate (cheap; applied by the DSP thread only on change)
             v->setAudioSampleRate((int)sigpath::sinkManager.getStreamSampleRate(k));
-            if (ImGui::Checkbox(("Audio NR (OMLSA) " + k + "##_radio_omlsa_nr_" + k).c_str(), &v->allowed)) {
+            if (ImGui::Checkbox(("音频降噪（OMLSA） " + k + "##_radio_omlsa_nr_" + k).c_str(), &v->allowed)) {
                 core::modComManager.callInterface(k, v->allowed ? RADIO_IFACE_CMD_ENABLE_IN_AFCHAIN : RADIO_IFACE_CMD_DISABLE_IN_AFCHAIN, v.get(), NULL);
                 // Disabling joins the block's worker thread, so the buffer can
                 // be cleared here; otherwise stale audio would flush on re-enable.
@@ -232,16 +232,16 @@ private:
                 config.edit().set("AF_NR2_" + k, v->allowed);
             }
             if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("OMLSA-MCRA speech denoiser on this radio's audio output.\n"
-                                  "Best on SSB/AM voice; degrades digital modes and music.\n"
-                                  "Output is mono. Adds roughly one block (~32 ms) of latency.");
+                ImGui::SetTooltip("对本电台音频输出使用 OMLSA-MCRA 语音降噪。\n"
+                                  "在 SSB/AM 语音上效果最佳；会降低数字模式和音乐的音质。\n"
+                                  "输出为单声道，会增加约一个块（约 32 ms）的延迟。");
             }
             ImGui::SameLine();
             ImGui::Text("%0.01f", 32767.0 / v->scaled);
             if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Recent peak audio level into the denoiser (1.0 = full scale).\n"
-                                  "The NR processes in 16-bit fixed point and auto-scales to\n"
-                                  "this level to preserve headroom.");
+                ImGui::SetTooltip("进入降噪器的最近音频峰值（1.0 = 满量程）。\n"
+                                  "降噪以 16 位定点处理，并自动缩放到\n"
+                                  "该电平以保留余量。");
             }
         }
 

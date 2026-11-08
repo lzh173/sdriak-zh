@@ -284,7 +284,7 @@ void KiwiSDRTester::start(std::string url, std::string loc, std::optional<Server
             return;
         }
         inProgress = true;
-        status = "Testing server " + url + " ...";
+        status = "正在测试服务器 " + url + " ...";
         error.clear();
         lastOkServer.reset();
     }
@@ -340,7 +340,7 @@ void KiwiSDRTester::testThreadFn(std::string url, std::string loc, std::optional
         auto parsedUrl = url::parseHttpHostPort(url);
         if (parsedUrl) {
             const std::string hostPort = parsedUrl->host + ":" + std::to_string(parsedUrl->port);
-            setStatus("Testing server " + hostPort + "...");
+            setStatus("正在测试服务器 " + hostPort + "...");
             testClient.init(hostPort);
             testClient.onSamples = [&](const dsp::complex_t*, int count) {
                 if (count > 0) {
@@ -350,7 +350,7 @@ void KiwiSDRTester::testThreadFn(std::string url, std::string loc, std::optional
             };
             testClient.onConnected = [&]() {
                 connectedFlag = true;
-                setStatus("Connected to server " + hostPort + " ...");
+                setStatus("已连接到服务器 " + hostPort + " ...");
                 const uint64_t testFrequency = band ? (band->startHz + band->endHz) / 2 : 14074000;
                 testClient.tune(double(testFrequency), KiwiSDRClient::TUNE_IQ);
             };
@@ -358,11 +358,11 @@ void KiwiSDRTester::testThreadFn(std::string url, std::string loc, std::optional
                 disconnectedFlag = true;
                 std::lock_guard<std::mutex> lock(stateMutex);
                 if (plannedDisconnect.load()) {
-                    status = "Got some data. Server OK: " + url;
+                    status = "已收到数据，服务器正常：" + url;
                     lastOkServer = OkServer{hostPort, loc, band};
                 }
                 else {
-                    status = "Disconnect, no data. Server NOT OK: " + url;
+                    status = "已断开，无数据，服务器异常：" + url;
                 }
             };
             testClient.start();
@@ -378,7 +378,7 @@ void KiwiSDRTester::testThreadFn(std::string url, std::string loc, std::optional
             }
             testClient.stop();
             if (isCanceled()) {
-                setStatus("Server test canceled");
+                setStatus("服务器测试已取消");
             }
             else if (connectedFlag.load()) {
                 auto disconnectWaitStart = Clock::now();
@@ -388,17 +388,17 @@ void KiwiSDRTester::testThreadFn(std::string url, std::string loc, std::optional
                 flog::info("Disconnected ok");
             }
             else {
-                setStatus("Could not connect to server: " + url);
+                setStatus("无法连接到服务器：" + url);
                 std::this_thread::sleep_for(1s);
             }
         }
         else {
-            setStatus("Unsupported URL scheme (only http:// is supported): " + url);
+            setStatus("不支持的 URL 方案（仅支持 http://）：" + url);
         }
     }
     catch (const std::exception& e) {
         std::lock_guard<std::mutex> lock(stateMutex);
-        status = "Server test error";
+        status = "服务器测试错误";
         error = e.what();
     }
 

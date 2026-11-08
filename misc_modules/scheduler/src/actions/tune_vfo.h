@@ -14,8 +14,8 @@ namespace sched_action {
     const int tuningModeCount = sizeof(tuningModes) / sizeof(int);
 
     const char* tuningModesStr[] = {
-        "Normal",
-        "Center"
+        "正常",
+        "居中"
     };
 
     class TuneVFOClass : public ActionClass {
@@ -79,15 +79,15 @@ namespace sched_action {
             ImGui::SetNextItemWidth(250 - ImGui::GetCursorPosX());
             ImGui::Combo("##scheduler_action_tunevfo_edit_vfo", &vfoNameId, vfoNamesTxt.c_str());
 
-            ImGui::LeftLabel("Frequency");
+            ImGui::LeftLabel("频率");
             ImGui::SetNextItemWidth(250 - ImGui::GetCursorPosX());
             ImGui::InputDouble("Hz##scheduler_action_tunevfo_edit_freq", &tmpFrequency);
 
-            ImGui::LeftLabel("Tuning Mode");
+            ImGui::LeftLabel("调谐模式");
             ImGui::SetNextItemWidth(250 - ImGui::GetCursorPosX());
             ImGui::Combo("##scheduler_action_tunevfo_edit_tmode", &tuningModeId, tuningModesTxt.c_str());
 
-            if (ImGui::Button("Apply")) {
+            if (ImGui::Button("应用")) {
                 vfoName = vfoNames[vfoNameId];
                 frequency = tmpFrequency;
                 tuningMode = tuningModes[tuningModeId];
@@ -95,7 +95,7 @@ namespace sched_action {
                 return false;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Cancel")) {
+            if (ImGui::Button("取消")) {
                 valid = false;
                 return false;
             }
@@ -108,7 +108,7 @@ namespace sched_action {
             if (config.contains("frequency")) { frequency = config["frequency"]; }
             if (config.contains("tuningMode")) { tuningMode = config["tuningMode"]; }
 
-            name = "Tune \"" + vfoName + "\" to " + utils::formatFreq(frequency);
+            name = "调谐 \"" + vfoName + "\" 至 " + utils::formatFreq(frequency);
         }
 
         json saveToConfig() {

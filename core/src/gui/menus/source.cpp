@@ -64,7 +64,7 @@ namespace sourcemenu {
     void selectOffsetById(int id) {
         // Update the offset mode
         offsetId = id;
-        selectedOffset = offsets.name(id);
+        selectedOffset = offsets.key(id);
 
         // Update the offset
         updateOffset();
@@ -72,13 +72,13 @@ namespace sourcemenu {
 
     void selectOffsetByName(const std::string& name) {
         // If the name doesn't exist, select 'None'
-        if (!offsets.nameExists(name)) {
+        if (!offsets.keyExists(name)) {
             selectOffsetById(OFFSET_ID_NONE);
             return;
         }
 
         // Select using the ID associated with the name
-        selectOffsetById(offsets.nameId(name));
+        selectOffsetById(offsets.keyId(name));
     }
 
     void refreshSources() {
@@ -134,8 +134,8 @@ namespace sourcemenu {
         namedOffsets.clear();
 
         // Define special offset modes
-        offsets.define("None", OFFSET_ID_NONE);
-        offsets.define("Manual", OFFSET_ID_MANUAL);
+        offsets.define("None", "无", OFFSET_ID_NONE);
+        offsets.define("Manual", "手动", OFFSET_ID_MANUAL);
 
         // Load custom offsets
         {
@@ -158,7 +158,7 @@ namespace sourcemenu {
         reloadOffsets();
 
         // Define decimation values
-        decimations.define(1, "None", 1);
+        decimations.define(1, "无", 1);
         decimations.define(2, "2x", 2);
         decimations.define(4, "4x", 4);
         decimations.define(8, "8x", 8);
@@ -227,12 +227,12 @@ namespace sourcemenu {
     void addOffsetDialog() {
         gui::mainWindow.lockWaterfallControls = true;
 
-        const char* id = "Add offset##sdrpp_add_offset_dialog_";
+        const char* id = "添加偏移##sdrpp_add_offset_dialog_";
         if (addOffsetDlg.begin(id, ImGuiWindowFlags_NoResize)) {
-            ImGui::LeftLabelFill("Name");
+            ImGui::LeftLabelFill("名称");
             ImGui::InputText("##sdrpp_add_offset_name", newOffsetName, 1023);
 
-            ImGui::LeftLabelFill("Offset");
+            ImGui::LeftLabelFill("偏移");
             ImGui::InputDouble("##sdrpp_add_offset_offset", &newOffset);
 
             bool nameExists = offsets.nameExists(newOffsetName);
@@ -240,13 +240,13 @@ namespace sourcemenu {
             bool denyApply = !newOffsetName[0] || nameExists || reservedName;
 
             if (nameExists) {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "An offset with the given name already exists.");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "该名称的偏移已存在。");
             }
             else if (reservedName) {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "The given name is reserved.");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "该名称为保留名称。");
             }
 
-            if (addOffsetDlg.applyButton("Apply", denyApply)) {
+            if (addOffsetDlg.applyButton("应用", denyApply)) {
                 addOffset(newOffsetName, newOffset);
                 addOffsetDlg.close();
             }
@@ -277,17 +277,17 @@ namespace sourcemenu {
 
         sigpath::sourceManager.showSelectedMenu();
 
-        if (ImGui::Checkbox("IQ Correction##_sdrpp_iq_corr", &iqCorrection)) {
+        if (ImGui::Checkbox("IQ 校正##_sdrpp_iq_corr", &iqCorrection)) {
             sigpath::iqFrontEnd.setDCBlocking(iqCorrection);
             core::configManager.edit().set("iqCorrection", iqCorrection);
         }
 
-        if (ImGui::Checkbox("Invert IQ##_sdrpp_inv_iq", &invertIQ)) {
+        if (ImGui::Checkbox("反转 IQ##_sdrpp_inv_iq", &invertIQ)) {
             sigpath::iqFrontEnd.setInvertIQ(invertIQ);
             core::configManager.edit().set("invertIQ", invertIQ);
         }
 
-        ImGui::LeftLabel("Offset mode");
+        ImGui::LeftLabel("偏移模式");
         ImGui::SetNextItemWidth(itemWidth - ImGui::GetCursorPosX() - 2.0f*(lineHeight + 1.5f*spacing));
         if (ImGui::Combo("##_sdrpp_offset", &offsetId, offsets.txt)) {
             selectOffsetById(offsetId);
@@ -304,13 +304,13 @@ namespace sourcemenu {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - spacing);
         if (ImGui::Button("+##_sdrpp_offset_add_", ImVec2(lineHeight + 0.5f*spacing, 0))) {
-            strcpy(newOffsetName, "New Offset");
+            strcpy(newOffsetName, "新偏移");
             addOffsetDlg.request();
         }
 
         // Offset delete confirmation
         if (ImGui::GenericDialog("sdrpp_del_offset_confirm", showDelOffsetDialog, GENERIC_DIALOG_BUTTONS_YES_NO, []() {
-            ImGui::Text("Deleting offset named \"%s\". Are you sure?", delOffsetName.c_str());
+            ImGui::Text("确定删除名为“%s”的偏移吗？", delOffsetName.c_str());
         }) == GENERIC_DIALOG_BUTTON_YES) {
             delOffset(delOffsetName);
         }
@@ -319,7 +319,7 @@ namespace sourcemenu {
         if (addOffsetDlg.isOpen()) { addOffsetDialog(); }
 
         if (offsetId != OFFSET_ID_NONE) {
-            ImGui::LeftLabel("Offset");
+            ImGui::LeftLabel("偏移");
             ImGui::FillWidth();
             if (offsetId == OFFSET_ID_MANUAL) {
                 if (ImGui::InputDouble("##freq_offset", &manualOffset, 1.0, 100.0)) {
@@ -335,7 +335,7 @@ namespace sourcemenu {
         }
 
         if (running) { style::beginDisabled(); }
-        ImGui::LeftLabel("Decimation");
+        ImGui::LeftLabel("抽取");
         ImGui::FillWidth();
         if (ImGui::Combo("##source_decim", &decimId, decimations.txt)) {
             sigpath::iqFrontEnd.setDecimation(decimations.value(decimId));

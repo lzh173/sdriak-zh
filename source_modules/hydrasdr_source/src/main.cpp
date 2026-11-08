@@ -160,7 +160,7 @@ public:
 
             if (count == 0) {
                 flog::warn("No DDC algorithms found, using default");
-                algorithms.define("47_opt", "47-Tap Optimized (default)", 0);
+                algorithms.define("47_opt", "47 抽头优化（默认）", 0);
             }
         }
         // No algorithms available for lib < 1.1.0
@@ -318,7 +318,7 @@ public:
             uint32_t bwList[256];
             memset(bwList, 0, sizeof(bwList));
             // Add "Auto" as first option (HYDRASDR_BANDWIDTH_AUTO = auto-select bandwidth)
-            bandwidths.define(HYDRASDR_BANDWIDTH_AUTO, "Auto", HYDRASDR_BANDWIDTH_AUTO);
+            bandwidths.define(HYDRASDR_BANDWIDTH_AUTO, "自动", HYDRASDR_BANDWIDTH_AUTO);
             int ret = hydrasdr_get_bandwidths(dev, bwList, 0);
             if (ret == 0 && bwList[0] > 0 && bwList[0] < 256) {
                 int bwCount = bwList[0];
@@ -612,7 +612,7 @@ private:
             }
         }
         if (!_this->serverMode && ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Select HydraSDR device by serial number");
+            ImGui::SetTooltip("按序列号选择 HydraSDR 设备");
         }
 
         if (SmGui::Combo(CONCAT("##_hydrasdr_sr_sel_", _this->name), &_this->srId, _this->samplerates.txt)) {
@@ -623,13 +623,13 @@ private:
             }
         }
         if (!_this->serverMode && ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Sample rate (cannot be changed while running)");
+            ImGui::SetTooltip("采样率（运行时不可更改）");
         }
 
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_hydrasdr_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_hydrasdr_refr_", _this->name))) {
 #ifdef __ANDROID__
             _this->refreshAndroidSelection();
 #else
@@ -640,7 +640,7 @@ private:
 #endif
         }
         if (!_this->serverMode && ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Refresh device list and sample rates");
+            ImGui::SetTooltip("刷新设备列表与采样率");
         }
 
         // High Definition mode checkbox (cannot be changed while running)
@@ -650,7 +650,7 @@ private:
             }
         }
         if (!_this->serverMode && ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("High Definition: better signal quality but more USB bandwidth");
+            ImGui::SetTooltip("高清模式：信号质量更好，但占用更多 USB 带宽");
         }
         // Display HW sample rate, bandwidth, and decimation factor when streaming
         if (_this->running && _this->openDev) {
@@ -670,7 +670,7 @@ private:
                 // Format bandwidth with smart units (0 = Auto)
                 double bw = devInfo.current_bandwidth;
                 if (bw <= 0) {
-                    snprintf(bwStr, sizeof(bwStr), "Auto");
+                    snprintf(bwStr, sizeof(bwStr), "自动");
                 } else {
                     const char* bwUnit = (bw >= 1e6) ? "MHz" : "kHz";
                     double bwVal = (bw >= 1e6) ? (bw / 1e6) : (bw / 1e3);
@@ -679,7 +679,7 @@ private:
                     else
                         snprintf(bwStr, sizeof(bwStr), "%.2f%s", bwVal, bwUnit);
                 }
-                SmGui::TextF("HW SR:%s BW:%s Decim:%d",
+                SmGui::TextF("硬件采样率：%s 带宽：%s 抽取：%d",
                              hwSrStr, bwStr, devInfo.current_decimation_factor);
             }
         }
@@ -688,7 +688,7 @@ private:
 
         // Bandwidth selector (can be changed while running)
         if (!_this->bandwidths.empty()) {
-            SmGui::LeftLabel("Bandwidth");
+            SmGui::LeftLabel("带宽");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_hydrasdr_bw_sel_", _this->name), &_this->bwId, _this->bandwidths.txt)) {
                 // Set bandwidth (HYDRASDR_BANDWIDTH_AUTO = Auto mode, resets to auto-bandwidth selection)
@@ -700,7 +700,7 @@ private:
                 }
             }
             if (!_this->serverMode && ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("RF bandwidth filter (Auto = auto-select based on sample rate)");
+                ImGui::SetTooltip("射频带宽滤波器（自动 = 按采样率自动选择）");
             }
         }
 
@@ -708,7 +708,7 @@ private:
         if (!_this->algorithms.empty()) {
             if (_this->running) { SmGui::BeginDisabled(); }
 
-            SmGui::LeftLabel("DDC Algorithm");
+            SmGui::LeftLabel("DDC 算法");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_hydrasdr_algo_sel_", _this->name), &_this->algoId, _this->algorithms.txt)) {
                 if (_this->selectedSerStr != "") {
@@ -716,7 +716,7 @@ private:
                 }
             }
             if (!_this->serverMode && ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Digital Down Converter algorithm for decimation");
+                ImGui::SetTooltip("用于抽取的数字下变频算法");
             }
 
             if (_this->running) { SmGui::EndDisabled(); }
@@ -750,7 +750,7 @@ private:
             // Temperature display with auto-refresh checkbox
             if (_this->hasTemperatureSensor) {
                 SmGui::ForceSync();
-                if (SmGui::Checkbox(CONCAT("Temperature Auto##_hydrasdr_temp_", _this->name), &_this->autoRefreshTemp)) {
+                if (SmGui::Checkbox(CONCAT("温度自动刷新##_hydrasdr_temp_", _this->name), &_this->autoRefreshTemp)) {
                     if (_this->autoRefreshTemp) {
                         // Trigger immediate refresh
                         _this->lastTempUpdate = std::chrono::steady_clock::now() - std::chrono::seconds(2);
@@ -758,23 +758,23 @@ private:
                 }
                 SmGui::SameLine();
                 if (_this->temperatureValid) {
-                    SmGui::TextF("%.1f DegC", _this->currentTemperature);
+                    SmGui::TextF("%.1f ℃", _this->currentTemperature);
                 } else {
-                    SmGui::Text("-- DegC");
+                    SmGui::Text("-- ℃");
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Auto-refresh temperature every second");
+                    ImGui::SetTooltip("每秒自动刷新温度");
                 }
             }
 
             // Dropped buffers display (only show if there are dropped buffers)
             if (_this->droppedBuffers > 0) {
-                SmGui::LeftLabel("Buffers");
-                SmGui::TextF("%llu dropped!", (unsigned long long)_this->droppedBuffers);
+                SmGui::LeftLabel("缓冲");
+                SmGui::TextF("%llu 个已丢弃！", (unsigned long long)_this->droppedBuffers);
             }
         }
 
-        SmGui::LeftLabel("Antenna Port");
+        SmGui::LeftLabel("天线端口");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_hydrasdr_port_", _this->name), &_this->portId, _this->ports.txt)) {
             if (_this->running) {
@@ -785,7 +785,7 @@ private:
             }
         }
         if (!_this->serverMode && ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("RF input port selection");
+            ImGui::SetTooltip("射频输入端口选择");
         }
 
         // Gain mode selection - dynamic based on device capabilities
@@ -813,7 +813,7 @@ private:
             // Sensitive mode (if available)
             if (_this->hasSensitivityGain) {
                 SmGui::ForceSync();
-                if (SmGui::RadioButton(CONCAT("Sensitive##_hydrasdr_gm_", _this->name), _this->gainMode == 0)) {
+                if (SmGui::RadioButton(CONCAT("灵敏##_hydrasdr_gm_", _this->name), _this->gainMode == 0)) {
                     _this->gainMode = 0;
                     if (_this->running) {
                         _this->applyGains();
@@ -823,7 +823,7 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Optimized for weak signal reception");
+                    ImGui::SetTooltip("针对弱信号接收优化");
                 }
                 SmGui::NextColumn();
             }
@@ -831,7 +831,7 @@ private:
             // Linear mode (if available)
             if (_this->hasLinearityGain) {
                 SmGui::ForceSync();
-                if (SmGui::RadioButton(CONCAT("Linear##_hydrasdr_gm_", _this->name), _this->gainMode == 1)) {
+                if (SmGui::RadioButton(CONCAT("线性##_hydrasdr_gm_", _this->name), _this->gainMode == 1)) {
                     _this->gainMode = 1;
                     if (_this->running) {
                         _this->applyGains();
@@ -841,7 +841,7 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Linear gain for strong signals, reduces distortion");
+                    ImGui::SetTooltip("用于强信号的线性增益，可减小失真");
                 }
                 SmGui::NextColumn();
             }
@@ -849,7 +849,7 @@ private:
             // Free mode (if any individual gain controls available)
             if (hasFreeMode) {
                 SmGui::ForceSync();
-                if (SmGui::RadioButton(CONCAT("Free##_hydrasdr_gm_", _this->name), _this->gainMode == 2)) {
+                if (SmGui::RadioButton(CONCAT("自由##_hydrasdr_gm_", _this->name), _this->gainMode == 2)) {
                     _this->gainMode = 2;
                     if (_this->running) {
                         _this->applyGains();
@@ -859,7 +859,7 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Manual control of individual gain stages");
+                    ImGui::SetTooltip("手动控制各个增益级");
                 }
             }
 
@@ -869,7 +869,7 @@ private:
 
         // Gain sliders - dynamic based on mode and device capabilities
         if (_this->gainMode == 0 && _this->hasSensitivityGain) {
-            SmGui::LeftLabel("Gain");
+            SmGui::LeftLabel("增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_hydrasdr_sens_gain_", _this->name), &_this->sensitiveGain,
                                  _this->sensitiveGainMin, _this->sensitiveGainMax)) {
@@ -881,11 +881,11 @@ private:
                 }
             }
             if (!_this->serverMode && ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Sensitivity gain: higher = more sensitive to weak signals");
+                ImGui::SetTooltip("灵敏度增益：越大对弱信号越灵敏");
             }
         }
         else if (_this->gainMode == 1 && _this->hasLinearityGain) {
-            SmGui::LeftLabel("Gain");
+            SmGui::LeftLabel("增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_hydrasdr_lin_gain_", _this->name), &_this->linearGain,
                                  _this->linearGainMin, _this->linearGainMax)) {
@@ -897,7 +897,7 @@ private:
                 }
             }
             if (!_this->serverMode && ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Linearity gain: lower = less distortion for strong signals");
+                ImGui::SetTooltip("线性度增益：越小则强信号失真越小");
             }
         }
         else if (_this->gainMode == 2 || (hasFreeMode && !hasGlobalModes)) {
@@ -905,7 +905,7 @@ private:
             // LNA Gain
             if (_this->hasLnaGain) {
                 if (_this->hasLnaAgc && _this->lnaAgc) { SmGui::BeginDisabled(); }
-                SmGui::LeftLabel("LNA Gain");
+                SmGui::LeftLabel("低噪放增益");
                 SmGui::FillWidth();
                 if (SmGui::SliderInt(CONCAT("##_hydrasdr_lna_gain_", _this->name), &_this->lnaGain,
                                      _this->lnaGainMin, _this->lnaGainMax)) {
@@ -917,7 +917,7 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Low Noise Amplifier gain (first stage)");
+                    ImGui::SetTooltip("低噪放增益（第一级）");
                 }
                 if (_this->hasLnaAgc && _this->lnaAgc) { SmGui::EndDisabled(); }
             }
@@ -925,7 +925,7 @@ private:
             // RF Gain
             if (_this->hasRfGain) {
                 if (_this->hasRfAgc && _this->rfAgc) { SmGui::BeginDisabled(); }
-                SmGui::LeftLabel("RF Gain");
+                SmGui::LeftLabel("射频增益");
                 SmGui::FillWidth();
                 if (SmGui::SliderInt(CONCAT("##_hydrasdr_rf_gain_", _this->name), &_this->rfGain,
                                      _this->rfGainMin, _this->rfGainMax)) {
@@ -937,7 +937,7 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("RF amplifier gain (after LNA)");
+                    ImGui::SetTooltip("射频放大器增益（低噪放之后）");
                 }
                 if (_this->hasRfAgc && _this->rfAgc) { SmGui::EndDisabled(); }
             }
@@ -945,7 +945,7 @@ private:
             // Mixer Gain
             if (_this->hasMixerGain) {
                 if (_this->hasMixerAgc && _this->mixerAgc) { SmGui::BeginDisabled(); }
-                SmGui::LeftLabel("Mixer Gain");
+                SmGui::LeftLabel("混频器增益");
                 SmGui::FillWidth();
                 if (SmGui::SliderInt(CONCAT("##_hydrasdr_mix_gain_", _this->name), &_this->mixerGain,
                                      _this->mixerGainMin, _this->mixerGainMax)) {
@@ -957,7 +957,7 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Mixer stage gain");
+                    ImGui::SetTooltip("混频级增益");
                 }
                 if (_this->hasMixerAgc && _this->mixerAgc) { SmGui::EndDisabled(); }
             }
@@ -965,7 +965,7 @@ private:
             // Filter Gain
             if (_this->hasFilterGain) {
                 if (_this->hasFilterAgc && _this->filterAgc) { SmGui::BeginDisabled(); }
-                SmGui::LeftLabel("Filter Gain");
+                SmGui::LeftLabel("滤波增益");
                 SmGui::FillWidth();
                 if (SmGui::SliderInt(CONCAT("##_hydrasdr_filt_gain_", _this->name), &_this->filterGain,
                                      _this->filterGainMin, _this->filterGainMax)) {
@@ -977,14 +977,14 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("IF filter stage gain");
+                    ImGui::SetTooltip("中频滤波级增益");
                 }
                 if (_this->hasFilterAgc && _this->filterAgc) { SmGui::EndDisabled(); }
             }
 
             // VGA Gain
             if (_this->hasVgaGain) {
-                SmGui::LeftLabel("VGA Gain");
+                SmGui::LeftLabel("VGA 增益");
                 SmGui::FillWidth();
                 if (SmGui::SliderInt(CONCAT("##_hydrasdr_vga_gain_", _this->name), &_this->vgaGain,
                                      _this->vgaGainMin, _this->vgaGainMax)) {
@@ -996,14 +996,14 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Variable Gain Amplifier (final IF stage)");
+                    ImGui::SetTooltip("可变增益放大器（末级中频）");
                 }
             }
 
             // AGC Control - only show if device supports AGC AND the corresponding gain is displayed
             if (_this->hasLnaAgc && _this->hasLnaGain) {
                 SmGui::ForceSync();
-                if (SmGui::Checkbox(CONCAT("LNA AGC##_hydrasdr_", _this->name), &_this->lnaAgc)) {
+                if (SmGui::Checkbox(CONCAT("低噪放 AGC##_hydrasdr_", _this->name), &_this->lnaAgc)) {
                     if (_this->running) {
                         if (_this->lnaAgc) {
                             hydrasdr_set_gain(_this->openDev, HYDRASDR_GAIN_TYPE_LNA_AGC, 1);
@@ -1018,12 +1018,12 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Automatic Gain Control for LNA stage");
+                    ImGui::SetTooltip("低噪放级的自动增益控制");
                 }
             }
             if (_this->hasRfAgc && _this->hasRfGain) {
                 SmGui::ForceSync();
-                if (SmGui::Checkbox(CONCAT("RF AGC##_hydrasdr_", _this->name), &_this->rfAgc)) {
+                if (SmGui::Checkbox(CONCAT("射频 AGC##_hydrasdr_", _this->name), &_this->rfAgc)) {
                     if (_this->running) {
                         if (_this->rfAgc) {
                             hydrasdr_set_gain(_this->openDev, HYDRASDR_GAIN_TYPE_RF_AGC, 1);
@@ -1038,12 +1038,12 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Automatic Gain Control for RF stage");
+                    ImGui::SetTooltip("射频级的自动增益控制");
                 }
             }
             if (_this->hasMixerAgc && _this->hasMixerGain) {
                 SmGui::ForceSync();
-                if (SmGui::Checkbox(CONCAT("Mixer AGC##_hydrasdr_", _this->name), &_this->mixerAgc)) {
+                if (SmGui::Checkbox(CONCAT("混频器 AGC##_hydrasdr_", _this->name), &_this->mixerAgc)) {
                     if (_this->running) {
                         if (_this->mixerAgc) {
                             hydrasdr_set_gain(_this->openDev, HYDRASDR_GAIN_TYPE_MIXER_AGC, 1);
@@ -1058,12 +1058,12 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Automatic Gain Control for Mixer stage");
+                    ImGui::SetTooltip("混频级的自动增益控制");
                 }
             }
             if (_this->hasFilterAgc && _this->hasFilterGain) {
                 SmGui::ForceSync();
-                if (SmGui::Checkbox(CONCAT("Filter AGC##_hydrasdr_", _this->name), &_this->filterAgc)) {
+                if (SmGui::Checkbox(CONCAT("滤波 AGC##_hydrasdr_", _this->name), &_this->filterAgc)) {
                     if (_this->running) {
                         if (_this->filterAgc) {
                             hydrasdr_set_gain(_this->openDev, HYDRASDR_GAIN_TYPE_FILTER_AGC, 1);
@@ -1078,13 +1078,13 @@ private:
                     }
                 }
                 if (!_this->serverMode && ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Automatic Gain Control for IF Filter stage");
+                    ImGui::SetTooltip("中频滤波级的自动增益控制");
                 }
             }
         }
 
         // Bias T
-        if (SmGui::Checkbox(CONCAT("Bias T##_hydrasdr_", _this->name), &_this->biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##_hydrasdr_", _this->name), &_this->biasT)) {
             if (_this->running) {
                 hydrasdr_set_rf_bias(_this->openDev, _this->biasT);
             }
@@ -1093,7 +1093,7 @@ private:
             }
         }
         if (!_this->serverMode && ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Enable DC bias voltage on antenna input (for active antennas/LNAs)");
+            ImGui::SetTooltip("在天线输入端提供直流偏置电压（用于有源天线或低噪放）");
         }
     }
 

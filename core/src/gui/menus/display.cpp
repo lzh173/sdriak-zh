@@ -159,20 +159,20 @@ namespace displaymenu {
     void draw(void* ctx) {
         thememenu::draw(ctx);
 
-        if (ImGui::Checkbox("Show Waterfall##_sdrpp", &showWaterfall)) {
+        if (ImGui::Checkbox("显示瀑布图##_sdrpp", &showWaterfall)) {
             setWaterfallShown(showWaterfall);
         }
 
-        if (ImGui::Checkbox("Full Waterfall Update##_sdrpp", &fullWaterfallUpdate)) {
+        if (ImGui::Checkbox("瀑布图全量刷新##_sdrpp", &fullWaterfallUpdate)) {
             gui::waterfall.setFullWaterfallUpdate(fullWaterfallUpdate);
             core::configManager.edit().set("fullWaterfallUpdate", fullWaterfallUpdate);
         }
 
-        if (ImGui::Checkbox("Lock Menu Order##_sdrpp", &gui::menu.locked)) {
+        if (ImGui::Checkbox("锁定菜单顺序##_sdrpp", &gui::menu.locked)) {
             core::configManager.edit().set("lockMenuOrder", gui::menu.locked);
         }
 
-        if (ImGui::Checkbox("FFT Hold##_sdrpp", &fftHold)) {
+        if (ImGui::Checkbox("FFT 保持##_sdrpp", &fftHold)) {
             gui::waterfall.setFFTHold(fftHold);
             core::configManager.edit().set("fftHold", fftHold);
         }
@@ -183,7 +183,7 @@ namespace displaymenu {
             core::configManager.edit().set("fftHoldSpeed", fftHoldSpeed);
         }
 
-        if (ImGui::Checkbox("FFT Smoothing##_sdrpp", &fftSmoothing)) {
+        if (ImGui::Checkbox("FFT 平滑##_sdrpp", &fftSmoothing)) {
             gui::waterfall.setFFTSmoothing(fftSmoothing);
             core::configManager.edit().set("fftSmoothing", fftSmoothing);
         }
@@ -195,12 +195,12 @@ namespace displaymenu {
             core::configManager.edit().set("fftSmoothingSpeed", fftSmoothingSpeed);
         }
 
-        if (ImGui::Checkbox("Touch-Friendly UI##_sdrpp", &style::touchStyle)) {
+        if (ImGui::Checkbox("触屏友好界面##_sdrpp", &style::touchStyle)) {
             style::applyScaledStyle(thememenu::applyTheme);
             core::configManager.edit().set("touchStyle", style::touchStyle);
         }
 
-        ImGui::LeftLabel("UI Scale Adjustment");
+        ImGui::LeftLabel("界面缩放");
         ImGui::FillWidth();
         // Factors that would clamp at the 1.0 effective-scale floor on this
         // display (detected DPI scale x factor < 1) silently do nothing, so
@@ -220,7 +220,7 @@ namespace displaymenu {
             ImGui::EndCombo();
         }
 
-        ImGui::LeftLabelFill("FFT Framerate");
+        ImGui::LeftLabelFill("FFT 刷新率");
         if (ImGui::InputInt("##sdrpp_fft_rate", &fftRate, 1, 10)) {
             fftRate = std::max<int>(1, fftRate);
             sigpath::iqFrontEnd.setFFTRate(fftRate);
@@ -228,20 +228,20 @@ namespace displaymenu {
             core::configManager.edit().set("fftRate", fftRate);
         }
 
-        ImGui::LeftLabelFill("FFT Size");
+        ImGui::LeftLabelFill("FFT 大小");
         if (ImGui::Combo("##sdrpp_fft_size", &fftSizeId, fftSizes.txt)) {
             sigpath::iqFrontEnd.setFFTSize(fftSizes.value(fftSizeId));
             core::configManager.edit().set("fftSize", fftSizes.key(fftSizeId));
         }
 
-        ImGui::LeftLabelFill("FFT Window");
+        ImGui::LeftLabelFill("FFT 窗函数");
         if (ImGui::Combo("##sdrpp_fft_window", &selectedWindow, fftWindows.txt)) {
             sigpath::iqFrontEnd.setFFTWindow(fftWindows.value(selectedWindow));
             core::configManager.edit().set("fftWindow", fftWindows.key(selectedWindow));
         }
 
         if (colorMapNames.size() > 0) {
-            ImGui::LeftLabelFill("Color Map");
+            ImGui::LeftLabelFill("色图");
             if (ImGui::Combo("##_sdrpp_color_map_sel", &colorMapId, colorMapNamesTxt.c_str())) {
                 const colormaps::Map& map = colormaps::maps.at(colorMapNames[colorMapId]);
                 gui::waterfall.updatePalletteFromArray(
@@ -249,7 +249,7 @@ namespace displaymenu {
                 core::configManager.edit().set("colorMap", colorMapNames[colorMapId]);
                 colorMapAuthor = map.author;
             }
-            ImGui::Text("Color map Author: %s", colorMapAuthor.c_str());
+            ImGui::Text("色图作者：%s", colorMapAuthor.c_str());
         }
 
     }

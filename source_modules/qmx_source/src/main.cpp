@@ -372,7 +372,7 @@ private:
             config.edit().set("audioDevice", dev);
         }
 
-        float refreshBtnWidth = std::max(90.0f, ImGui::CalcTextSize("Refresh").x + (ImGui::GetStyle().FramePadding.x * 2.0f) + 4.0f);
+        float refreshBtnWidth = std::max(90.0f, ImGui::CalcTextSize("刷新").x + (ImGui::GetStyle().FramePadding.x * 2.0f) + 4.0f);
         float serialComboWidth = ImGui::GetContentRegionAvail().x - refreshBtnWidth - ImGui::GetStyle().ItemSpacing.x;
         SmGui::SetNextItemWidth(std::max(1.0f, serialComboWidth));
         SmGui::ForceSync();
@@ -383,7 +383,7 @@ private:
         }
 
         SmGui::SameLine();
-        if (SmGui::Button(CONCAT("Refresh##_qmx_refr_", self->name), ImVec2(refreshBtnWidth, 0))) {
+        if (SmGui::Button(CONCAT("刷新##_qmx_refr_", self->name), ImVec2(refreshBtnWidth, 0))) {
             self->refresh();
             self->selectAudioDevice(self->selectedAudioDevice);
             self->selectSerialPort(self->selectedSerialPort);
@@ -392,17 +392,17 @@ private:
         if (self->running)
             SmGui::EndDisabled();
 
-        SmGui::Text("IQ Audio:");
+        SmGui::Text("IQ 音频：");
         SmGui::SameLine();
         if (self->selectedAudioDevice.empty())
-            SmGui::Text("Not selected");
+            SmGui::Text("未选择");
         else
             SmGui::Text(self->audioDevices.value(self->audioDevId).label.c_str());
 
-        SmGui::Text("CAT:");
+        SmGui::Text("CAT：");
         SmGui::SameLine();
         if (self->selectedSerialPort.empty())
-            SmGui::Text("Manual tune only");
+            SmGui::Text("仅手动调谐");
         else if (self->running)
             SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), self->serialPorts.value(self->serialPortId).label.c_str());
         else
@@ -412,7 +412,7 @@ private:
         if (self->running)
             SmGui::BeginDisabled();
 
-        float refreshBtnWidth = std::max(90.0f, ImGui::CalcTextSize("Refresh").x + (ImGui::GetStyle().FramePadding.x * 2.0f) + 4.0f);
+        float refreshBtnWidth = std::max(90.0f, ImGui::CalcTextSize("刷新").x + (ImGui::GetStyle().FramePadding.x * 2.0f) + 4.0f);
         float deviceComboWidth = ImGui::GetContentRegionAvail().x - refreshBtnWidth - ImGui::GetStyle().ItemSpacing.x;
         SmGui::SetNextItemWidth(std::max(1.0f, deviceComboWidth));
         SmGui::ForceSync();
@@ -422,16 +422,16 @@ private:
         }
 
         SmGui::SameLine();
-        if (SmGui::Button(CONCAT("Refresh##_qmx_refr_", self->name), ImVec2(refreshBtnWidth, 0)))
+        if (SmGui::Button(CONCAT("刷新##_qmx_refr_", self->name), ImVec2(refreshBtnWidth, 0)))
             self->refreshAndroidDeviceSelection();
 
         if (self->running)
             SmGui::EndDisabled();
 
-        SmGui::Text("Device:");
+        SmGui::Text("设备：");
         SmGui::SameLine();
         if (self->selectedAndroidDevice.empty())
-            SmGui::Text("Not connected");
+            SmGui::Text("未连接");
         else if (self->running)
             SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), self->selectedAndroidDevice.c_str());
         else
@@ -440,7 +440,7 @@ private:
         if (android_get_device_api_level() < __ANDROID_API_P__ || backend::audioOutputUsesOpenSLES()) {
             SmGui::TextColored(
                 ImVec4(1.0f, 0.3f, 0.3f, 1.0f),
-                "Disable 'USB audio routing' in Android developer options."
+                "请在 Android 开发者选项中关闭“USB 音频路由”。"
             );
         }
 #endif
@@ -452,7 +452,7 @@ private:
 
         bool syncVfoCb = self->sync.getSyncVfo();
         SmGui::ForceSync();
-        if (SmGui::Checkbox(CONCAT("Sync VFO##_qmx_sync_vfo_", self->name), &syncVfoCb)) {
+        if (SmGui::Checkbox(CONCAT("同步 VFO##_qmx_sync_vfo_", self->name), &syncVfoCb)) {
             self->sync.setSyncVfo(syncVfoCb);
             config.edit().set("syncVfo", syncVfoCb);
         }
@@ -461,64 +461,64 @@ private:
 
         const auto& st = self->sync.currentStatus();
         if (st.empty()) {
-            SmGui::Text("CAT Status:");
+            SmGui::Text("CAT 状态：");
             SmGui::SameLine();
-            SmGui::Text(self->running ? "Waiting for QMX status" : "Unavailable");
+            SmGui::Text(self->running ? "等待 QMX 状态" : "不可用");
             return;
         }
 
-        SmGui::Text("State:");
+        SmGui::Text("收发状态：");
         SmGui::SameLine();
         if (st.hasTransmit() && st.transmit)
             SmGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "TX");
         else if (st.hasTransmit())
             SmGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "RX");
         else
-            SmGui::Text("Unknown");
+            SmGui::Text("未知");
 
-        SmGui::Text("Mode:");
+        SmGui::Text("模式：");
         SmGui::SameLine();
         SmGui::Text(formatModeLabel(st).c_str());
 
-        SmGui::Text("Rig Freq:");
+        SmGui::Text("电台频率：");
         SmGui::SameLine();
         if (st.hasFrequency())
             SmGui::TextF("%.0f Hz", static_cast<double>(st.frequency));
         else
-            SmGui::Text("Unknown");
+            SmGui::Text("未知");
 
         if (st.hasRxVfo() || st.hasTxVfo() || st.hasSplit()) {
-            SmGui::Text("VFO:");
+            SmGui::Text("VFO：");
             SmGui::SameLine();
-            SmGui::TextF("RX %s  TX %s  Split %s",
+            SmGui::TextF("接收 %s  发射 %s  异频 %s",
                          formatVfoLabel(st.rxVfo),
                          formatVfoLabel(st.txVfo),
-                         st.hasSplit() ? (st.split ? "On" : "Off") : "?");
+                         st.hasSplit() ? (st.split ? "开" : "关") : "?");
         }
 
         if (st.hasRit() || st.hasRitEnabled()) {
-            SmGui::Text("RIT:");
+            SmGui::Text("RIT：");
             SmGui::SameLine();
             if (st.hasRit())
-                SmGui::TextF("%s %d Hz", st.hasRitEnabled() ? (st.ritEnabled ? "On" : "Off") : "", st.ritHz);
+                SmGui::TextF("%s %d Hz", st.hasRitEnabled() ? (st.ritEnabled ? "开" : "关") : "", st.ritHz);
             else
-                SmGui::Text(st.ritEnabled ? "On" : "Off");
+                SmGui::Text(st.ritEnabled ? "开" : "关");
         }
 
         if (st.hasSMeter() && (!st.hasTransmit() || !st.transmit)) {
-            SmGui::Text("S-Meter:");
+            SmGui::Text("S 表：");
             SmGui::SameLine();
             SmGui::TextF("%d dB", st.sMeterDb);
         }
 
         if (st.hasPower()) {
-            SmGui::Text("Power:");
+            SmGui::Text("功率：");
             SmGui::SameLine();
             SmGui::TextF("%.1f W", st.powerTenthsW / 10.0f);
         }
 
         if (st.hasSWR()) {
-            SmGui::Text("SWR:");
+            SmGui::Text("驻波比：");
             SmGui::SameLine();
             SmGui::TextF("%.2f:1", st.swrHundredths / 100.0f);
         }

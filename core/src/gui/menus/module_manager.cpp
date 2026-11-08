@@ -38,8 +38,8 @@ namespace module_manager_menu {
         float btnSize = ImGui::GetFrameHeight();
 
         if (ImGui::BeginTable("Module Manager Table", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY, ImVec2(0, style::dp(200.0f)))) {
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Type");
+            ImGui::TableSetupColumn("名称");
+            ImGui::TableSetupColumn("类型");
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, btnSize + cellpad.x);
             ImGui::TableSetupScrollFreeze(3, 1);
             ImGui::TableHeadersRow();
@@ -65,7 +65,7 @@ namespace module_manager_menu {
         }
 
         if (ImGui::GenericDialog("module_mgr_confirm_", confirmOpened, GENERIC_DIALOG_BUTTONS_YES_NO, []() {
-                ImGui::Text("Deleting \"%s\". Are you sure?", toBeRemoved.c_str());
+                ImGui::Text("确定删除“%s”吗？", toBeRemoved.c_str());
             }) == GENERIC_DIALOG_BUTTON_YES) {
             core::moduleManager.deleteInstance(toBeRemoved);
             modified = true;
@@ -77,8 +77,8 @@ namespace module_manager_menu {
 
         // Add module row with slightly different settings
         if (ImGui::BeginTable("Module Manager Add Table", 3)) {
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Type");
+            ImGui::TableSetupColumn("名称");
+            ImGui::TableSetupColumn("类型");
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, btnSize + cellpad.x);
             
             ImGui::TableNextRow();
@@ -99,7 +99,7 @@ namespace module_manager_menu {
                     modified = true;
                 }
                 else {
-                    errorMessage = "Could not create new instance of " + modTypes[modTypeId];
+                    errorMessage = "无法创建新的模块实例：" + modTypes[modTypeId];
                     errorOpen = true;
                 }
             }

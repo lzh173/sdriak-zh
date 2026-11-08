@@ -42,7 +42,7 @@ public:
         sampleTypeList.define("Float32", dsp::compression::PCM_TYPE_F32);
         sampleTypeId = sampleTypeList.valueId(dsp::compression::PCM_TYPE_I16);
 
-        prebufferList.define("Disabled", 0);
+        prebufferList.define("Disabled", "禁用", 0);
         prebufferList.define("50 ms", 50);
         prebufferList.define("100 ms", 100);
         prebufferList.define("250 ms", 250);
@@ -201,10 +201,10 @@ private:
         gui::mainWindow.playButtonLocked = !connected;
 
         ImGui::GenericDialog("##sdrpp_srv_src_err_dialog", _this->serverBusy, GENERIC_DIALOG_BUTTONS_OK, [=](){
-            ImGui::TextUnformatted("This server is already in use.");
+            ImGui::TextUnformatted("该服务器已被占用。");
         });
         ImGui::GenericDialog("##sdrpp_srv_src_auth_dialog", _this->authFailed, GENERIC_DIALOG_BUTTONS_OK, [=](){
-            ImGui::TextUnformatted("Authentication failed.");
+            ImGui::TextUnformatted("身份验证失败。");
         });
 
         if (connected || connecting) { style::beginDisabled(); }
@@ -218,13 +218,13 @@ private:
             config.edit().set("port", _this->port);
             _this->loadPasswordForServer();
         }
-        ImGui::LeftLabel("Password");
+        ImGui::LeftLabel("密码");
         ImGui::FillWidth();
-        if (ImGui::InputTextWithHint(CONCAT("##sdrpp_srv_srv_password_", _this->name), _this->savedAuthKeyValid ? "Saved" : "", _this->password, sizeof(_this->password), ImGuiInputTextFlags_Password)) {
+        if (ImGui::InputTextWithHint(CONCAT("##sdrpp_srv_srv_password_", _this->name), _this->savedAuthKeyValid ? "已保存" : "", _this->password, sizeof(_this->password), ImGuiInputTextFlags_Password)) {
             _this->savePasswordForServer();
         }
         if (_this->savedAuthKeyValid && _this->password[0] == 0) {
-            if (ImGui::Button(CONCAT("Forget saved password##sdrpp_srv_srv_password_forget_", _this->name), ImVec2(menuWidth, 0))) {
+            if (ImGui::Button(CONCAT("忘记已保存的密码##sdrpp_srv_srv_password_forget_", _this->name), ImVec2(menuWidth, 0))) {
                 _this->clearPasswordForServer();
             }
         }
@@ -232,10 +232,10 @@ private:
 
         if (_this->running) { style::beginDisabled(); }
         if (connecting) { style::beginDisabled(); }
-        if (!connected && ImGui::Button("Connect##sdrpp_srv_source", ImVec2(menuWidth, 0))) {
+        if (!connected && ImGui::Button("连接##sdrpp_srv_source", ImVec2(menuWidth, 0))) {
             _this->tryConnect();
         }
-        else if (connected && ImGui::Button("Disconnect##sdrpp_srv_source", ImVec2(menuWidth, 0))) {
+        else if (connected && ImGui::Button("断开##sdrpp_srv_source", ImVec2(menuWidth, 0))) {
             _this->client->close();
         }
         if (connecting) { style::endDisabled(); }
@@ -243,7 +243,7 @@ private:
 
 
         if (connected) {
-            ImGui::LeftLabel("Sample type");
+            ImGui::LeftLabel("采样类型");
             ImGui::FillWidth();
             if (ImGui::Combo("##sdrpp_srv_source_samp_type", &_this->sampleTypeId, _this->sampleTypeList.txt)) {
                 _this->client->setSampleType(_this->sampleTypeList[_this->sampleTypeId]);
@@ -252,14 +252,14 @@ private:
                 config.edit().section("servers", _this->devConfName).set("sampleType", _this->sampleTypeList.key(_this->sampleTypeId));
             }
             
-            if (ImGui::Checkbox("Compression", &_this->compression)) {
+            if (ImGui::Checkbox("压缩", &_this->compression)) {
                 _this->client->setCompression(_this->compression);
 
                 // Save config
                 config.edit().section("servers", _this->devConfName).set("compression", _this->compression);
             }
 
-            ImGui::LeftLabel("RX prebuffer");
+            ImGui::LeftLabel("接收预缓冲");
             ImGui::FillWidth();
             if (ImGui::Combo("##sdrpp_srv_source_rx_prebuf", &_this->rxPrebufferId, _this->prebufferList.txt)) {
                 int prebufferMsec = _this->prebufferList[_this->rxPrebufferId];
@@ -269,7 +269,7 @@ private:
 
             bool dummy = true;
             style::beginDisabled();
-            ImGui::Checkbox("Full IQ", &dummy);
+            ImGui::Checkbox("完整 IQ", &dummy);
             style::endDisabled();
 
             // Calculate datarate
@@ -279,27 +279,27 @@ private:
                 _this->frametimeCounter = 0;
             }
 
-            ImGui::TextUnformatted("Status:");
+            ImGui::TextUnformatted("状态：");
             ImGui::SameLine();
             int bufferPercent = _this->client->getRxPrebufferPercent();
             if (bufferPercent >= 0) {
-                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected (%.3f Mbit/s, %d%% buffer)", _this->datarate, bufferPercent);
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "已连接（%.3f Mbit/s，缓冲 %d%%）", _this->datarate, bufferPercent);
             }
             else {
                 // Prebuffer disabled: the stream is a live bypass.
-                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected (%.3f Mbit/s, live)", _this->datarate);
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "已连接（%.3f Mbit/s，实时）", _this->datarate);
             }
 
-            ImGui::CollapsingHeader("Source [REMOTE]", ImGuiTreeNodeFlags_DefaultOpen);
+            ImGui::CollapsingHeader("信号源 [远程]", ImGuiTreeNodeFlags_DefaultOpen);
 
             _this->client->showMenu();
         }
         else {
-            ImGui::TextUnformatted("Status:");
+            ImGui::TextUnformatted("状态：");
             ImGui::SameLine();
-            ImGui::TextUnformatted(connecting ? "Connecting..." : "Not connected (--.--- Mbit/s)");
+            ImGui::TextUnformatted(connecting ? "正在连接…" : "未连接（--.--- Mbit/s）");
             if (!connecting && !_this->connector.lastError().empty()) {
-                ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "Connection failed: %s", _this->connector.lastError().c_str());
+                ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "连接失败：%s", _this->connector.lastError().c_str());
             }
         }
     }

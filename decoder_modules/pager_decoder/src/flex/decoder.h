@@ -33,7 +33,7 @@ public:
     }
 
     void showMenu() {
-        ImGui::LeftLabel("Baudrate");
+        ImGui::LeftLabel("波特率");
         ImGui::FillWidth();
         if (ImGui::Combo(("##pager_decoder_flex_br_" + name).c_str(), &brId, baudrates.txt)) {
             // TODO

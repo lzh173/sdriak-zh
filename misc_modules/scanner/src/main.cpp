@@ -51,39 +51,39 @@ private:
         bool running = _this->running.load(std::memory_order_relaxed);
 
         if (running) { ImGui::BeginDisabled(); }
-        ImGui::LeftLabel("Start");
+        ImGui::LeftLabel("起始");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputDouble("##start_freq_scanner", &_this->startFreq, 100.0, 100000.0, "%0.0f")) {
             _this->startFreq = round(_this->startFreq);
         }
-        ImGui::LeftLabel("Stop");
+        ImGui::LeftLabel("终止");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputDouble("##stop_freq_scanner", &_this->stopFreq, 100.0, 100000.0, "%0.0f")) {
             _this->stopFreq = round(_this->stopFreq);
         }
-        ImGui::LeftLabel("Interval");
+        ImGui::LeftLabel("间隔");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputDouble("##interval_scanner", &_this->interval, 100.0, 100000.0, "%0.0f")) {
             _this->interval = round(_this->interval);
         }
-        ImGui::LeftLabel("Passband Ratio (%)");
+        ImGui::LeftLabel("通带比例（%）");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputDouble("##pb_ratio_scanner", &_this->passbandRatio, 1.0, 10.0, "%0.0f")) {
             _this->passbandRatio = std::clamp<double>(round(_this->passbandRatio), 1.0, 100.0);
         }
-        ImGui::LeftLabel("Tuning Time (ms)");
+        ImGui::LeftLabel("调谐时间（ms）");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##tuning_time_scanner", &_this->tuningTime, 100, 1000)) {
             _this->tuningTime = std::clamp<int>(_this->tuningTime, 100, 10000.0);
         }
-        ImGui::LeftLabel("Linger Time (ms)");
+        ImGui::LeftLabel("停留时间（ms）");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##linger_time_scanner", &_this->lingerTime, 100, 1000)) {
             _this->lingerTime = std::clamp<int>(_this->lingerTime, 100, 10000.0);
         }
         if (running) { ImGui::EndDisabled(); }
 
-        ImGui::LeftLabel("Level");
+        ImGui::LeftLabel("电平");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         ImGui::SliderFloat("##scanner_level", &_this->level, -150.0, 0.0);
 
@@ -106,23 +106,23 @@ private:
         ImGui::EndTable();
 
         if (!running) {
-            if (ImGui::ActionButton("Start##scanner_start")) {
+            if (ImGui::ActionButton("开始##scanner_start")) {
                 _this->start();
             }
-            ImGui::Text("Status: Idle");
+            ImGui::Text("状态：空闲");
         }
         else {
-            if (ImGui::ActionButton("Stop##scanner_start")) {
+            if (ImGui::ActionButton("停止##scanner_start")) {
                 _this->stop();
             }
             if (_this->receiving) {
-                ImGui::TextColored(ImVec4(0, 1, 0, 1), "Status: Receiving");
+                ImGui::TextColored(ImVec4(0, 1, 0, 1), "状态：接收中");
             }
             else if (_this->tuning) {
-                ImGui::TextColored(ImVec4(0, 1, 1, 1), "Status: Tuning");
+                ImGui::TextColored(ImVec4(0, 1, 1, 1), "状态：调谐中");
             }
             else {
-                ImGui::TextColored(ImVec4(1, 1, 0, 1), "Status: Scanning");
+                ImGui::TextColored(ImVec4(1, 1, 0, 1), "状态：扫描中");
             }
         }
     }

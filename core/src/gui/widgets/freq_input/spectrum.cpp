@@ -152,7 +152,7 @@ namespace freq_input {
         }
 
         if (ranges.empty()) {
-            ImGui::TextDisabled("No spectrum ranges in the tuning range");
+            ImGui::TextDisabled("调谐范围内无频谱范围");
         }
         else {
             // Columns follow the width, rows what is left of the page under
@@ -209,12 +209,12 @@ namespace freq_input {
 
                 if (ImGui::IsItemHovered()) {
                     ImGui::SetTooltip(
-                        "%s\n%s\nStable ID: %s%s",
+                        "%s\n%s\n稳定 ID：%s%s",
                         range.name.data(),
                         compactRange(range.startHz, range.endHz).c_str(),
                         range.rangeId.data(),
                         available.partial
-                            ? "\nPartially covered by the active source" : "");
+                            ? "\n部分被当前信号源覆盖" : "");
                 }
 
                 if (!selected) { continue; }
@@ -246,7 +246,7 @@ namespace freq_input {
         }
 
         if (hasPartialRange) {
-            ImGui::TextDisabled("* Range limited by the source");
+            ImGui::TextDisabled("* 范围受信号源限制");
         }
         return out;
     }

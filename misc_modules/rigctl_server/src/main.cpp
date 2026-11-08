@@ -128,7 +128,7 @@ private:
         }
         if (listening) { style::endDisabled(); }
 
-        ImGui::LeftLabel("Controlled VFO");
+        ImGui::LeftLabel("受控 VFO");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         {
             std::lock_guard lck(_this->vfoMtx);
@@ -140,7 +140,7 @@ private:
             }
         }
 
-        ImGui::LeftLabel("Controlled Recorder");
+        ImGui::LeftLabel("受控录音");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         {
             std::lock_guard lck(_this->vfoMtx);
@@ -152,39 +152,39 @@ private:
             }
         }
 
-        ImGui::BeginTable(CONCAT("Stop##_rigctl_srv_tbl_", _this->name), 2);
+        ImGui::BeginTable(CONCAT("停止##_rigctl_srv_tbl_", _this->name), 2);
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        if (ImGui::Checkbox(CONCAT("Tuning##_rigctl_srv_tune_ena_", _this->name), &_this->tuningEnabled)) {
+        if (ImGui::Checkbox(CONCAT("调谐##_rigctl_srv_tune_ena_", _this->name), &_this->tuningEnabled)) {
             config.edit().section(_this->name).set("tuning", _this->tuningEnabled);
         }
         ImGui::TableSetColumnIndex(1);
-        if (ImGui::Checkbox(CONCAT("Recording##_rigctl_srv_tune_ena_", _this->name), &_this->recordingEnabled)) {
+        if (ImGui::Checkbox(CONCAT("录制##_rigctl_srv_tune_ena_", _this->name), &_this->recordingEnabled)) {
             config.edit().section(_this->name).set("recording", _this->recordingEnabled);
         }
         ImGui::EndTable();
 
-        if (ImGui::Checkbox(CONCAT("Listen on startup##_rigctl_srv_auto_lst_", _this->name), &_this->autoStart)) {
+        if (ImGui::Checkbox(CONCAT("启动时监听##_rigctl_srv_auto_lst_", _this->name), &_this->autoStart)) {
             config.edit().section(_this->name).set("autoStart", _this->autoStart);
         }
 
-        if (listening && ImGui::ActionButton(CONCAT("Stop##_rigctl_srv_stop_", _this->name))) {
+        if (listening && ImGui::ActionButton(CONCAT("停止##_rigctl_srv_stop_", _this->name))) {
             _this->stopServer();
         }
-        else if (!listening && ImGui::ActionButton(CONCAT("Start##_rigctl_srv_stop_", _this->name))) {
+        else if (!listening && ImGui::ActionButton(CONCAT("开始##_rigctl_srv_stop_", _this->name))) {
             _this->startServer();
         }
 
-        ImGui::TextUnformatted("Status:");
+        ImGui::TextUnformatted("状态：");
         ImGui::SameLine();
         if (_this->client && _this->client->isOpen()) {
-            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Connected");
+            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "已连接");
         }
         else if (listening) {
-            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Listening");
+            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "监听中");
         }
         else {
-            ImGui::TextUnformatted("Idle");
+            ImGui::TextUnformatted("空闲");
         }
     }
 

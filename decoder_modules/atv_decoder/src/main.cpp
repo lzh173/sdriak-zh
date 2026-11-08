@@ -93,34 +93,34 @@ class ATVDecoderModule : public ModuleManager::Instance {
         ImGui::FillWidth();
         _this->img.draw();
 
-        ImGui::TextUnformatted("Horizontal Sync:");
+        ImGui::TextUnformatted("行同步：");
         ImGui::SameLine();
         if (_this->sync.locked > 750) {
-            ImGui::TextColored(ImVec4(0, 1, 0, 1), "Locked");
+            ImGui::TextColored(ImVec4(0, 1, 0, 1), "已锁定");
         }
         else {
-            ImGui::TextUnformatted("Not locked");
+            ImGui::TextUnformatted("未锁定");
         }
 
-        ImGui::TextUnformatted("Vertical Sync:");
+        ImGui::TextUnformatted("场同步：");
         ImGui::SameLine();
         if (_this->vlock > 15) {
-            ImGui::TextColored(ImVec4(0, 1, 0, 1), "Locked");
+            ImGui::TextColored(ImVec4(0, 1, 0, 1), "已锁定");
         }
         else {
-            ImGui::TextUnformatted("Not locked");
+            ImGui::TextUnformatted("未锁定");
         }
 
-        ImGui::Checkbox("Fast Lock", &_this->sync.fastLock);
-        ImGui::Checkbox("Color Mode", &_this->colorMode);
+        ImGui::Checkbox("快速锁定", &_this->sync.fastLock);
+        ImGui::Checkbox("彩色模式", &_this->colorMode);
 
         if (!_this->enabled) {
             style::endDisabled();
         }
 
-        ImGui::Text("Gain: %f", _this->gain);
-        ImGui::Text("Offset: %f", _this->offset);
-        ImGui::Text("Subcarrier: %f", _this->subcarrierFreq);
+        ImGui::Text("增益：%f", _this->gain);
+        ImGui::Text("偏移：%f", _this->offset);
+        ImGui::Text("副载波：%f", _this->subcarrierFreq);
     }
 
     uint32_t pp = 0;

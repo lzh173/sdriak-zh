@@ -52,7 +52,7 @@ public:
         strcpy(nameTemplate, "$t_$f_$h-$m-$s_$d-$M-$y");
 
         // Define the time zones
-        timezones.define("local", "Local", TIME_ZONE_LOCAL);
+        timezones.define("local", "本地", TIME_ZONE_LOCAL);
         timezones.define("utc", "UTC", TIME_ZONE_UTC);
 
         // Define option lists
@@ -259,12 +259,12 @@ private:
         if (_this->recording) { style::beginDisabled(); }
         ImGui::BeginGroup();
         ImGui::Columns(2, CONCAT("RecorderModeColumns##_", _this->name), false);
-        if (ImGui::RadioButton(CONCAT("Baseband##_recorder_mode_", _this->name), _this->recMode == RECORDER_MODE_BASEBAND)) {
+        if (ImGui::RadioButton(CONCAT("基带##_recorder_mode_", _this->name), _this->recMode == RECORDER_MODE_BASEBAND)) {
             _this->recMode = RECORDER_MODE_BASEBAND;
             config.edit().section(_this->name).set("mode", _this->recMode);
         }
         ImGui::NextColumn();
-        if (ImGui::RadioButton(CONCAT("Audio##_recorder_mode_", _this->name), _this->recMode == RECORDER_MODE_AUDIO)) {
+        if (ImGui::RadioButton(CONCAT("音频##_recorder_mode_", _this->name), _this->recMode == RECORDER_MODE_AUDIO)) {
             _this->recMode = RECORDER_MODE_AUDIO;
             config.edit().section(_this->name).set("mode", _this->recMode);
         }
@@ -278,19 +278,19 @@ private:
             }
         }
 
-        ImGui::LeftLabel("Name template");
+        ImGui::LeftLabel("文件名模板");
         ImGui::FillWidth();
         if (ImGui::InputText(CONCAT("##_recorder_name_template_", _this->name), _this->nameTemplate, 1023)) {
             config.edit().section(_this->name).set("nameTemplate", _this->nameTemplate);
         }
 
-        ImGui::LeftLabel("Time zone");
+        ImGui::LeftLabel("时区");
         ImGui::FillWidth();
         if (ImGui::Combo(CONCAT("##_recorder_timezone_", _this->name), &_this->timezoneId, _this->timezones.txt)) {
             config.edit().section(_this->name).set("timezone", _this->timezones.key(_this->timezoneId));
         }
 
-        ImGui::LeftLabel("Container");
+        ImGui::LeftLabel("容器");
         ImGui::FillWidth();
         if (ImGui::Combo(CONCAT("##_recorder_container_", _this->name), &_this->containerId, _this->containers.txt)) {
             // The sample type choices depend on the container; save the
@@ -304,7 +304,7 @@ private:
 
         // Opus quality is set by bitrate, not sample type — swap the control.
         if (_this->containers[_this->containerId] == wav::FORMAT_OPUS) {
-            ImGui::LeftLabel("Bitrate");
+            ImGui::LeftLabel("比特率");
             ImGui::FillWidth();
             if (ImGui::SliderInt(CONCAT("##_recorder_opus_br_", _this->name), &_this->opusBitrate, 16, 256, "%d kbps")) {
                 _this->opusBitrate = std::clamp<int>(_this->opusBitrate, 16, 256);
@@ -312,7 +312,7 @@ private:
             }
         }
         else {
-            ImGui::LeftLabel("Sample type");
+            ImGui::LeftLabel("采样类型");
             ImGui::FillWidth();
             if (ImGui::Combo(CONCAT("##_recorder_st_", _this->name), &_this->sampleTypeId, _this->sampleTypes.txt)) {
                 config.edit().section(_this->name).set("sampleType", _this->sampleTypes.key(_this->sampleTypeId));
@@ -324,7 +324,7 @@ private:
         // Show additional audio options
         if (_this->recMode == RECORDER_MODE_AUDIO) {
             if (_this->recording) { style::beginDisabled(); }
-            ImGui::LeftLabel("Stream");
+            ImGui::LeftLabel("音频流");
             ImGui::FillWidth();
             if (ImGui::Combo(CONCAT("##_recorder_stream_", _this->name), &_this->streamId, _this->audioStreams.txt)) {
                 _this->selectStream(_this->audioStreams.value(_this->streamId));
@@ -345,12 +345,12 @@ private:
             }
 
             if (_this->recording) { style::beginDisabled(); }
-            if (ImGui::Checkbox(CONCAT("Stereo##_recorder_stereo_", _this->name), &_this->stereo)) {
+            if (ImGui::Checkbox(CONCAT("立体声##_recorder_stereo_", _this->name), &_this->stereo)) {
                 config.edit().section(_this->name).set("stereo", _this->stereo);
             }
             if (_this->recording) { style::endDisabled(); }
 
-            if (ImGui::Checkbox(CONCAT("Ignore silence##_recorder_ignore_silence_", _this->name), &_this->ignoreSilence)) {
+            if (ImGui::Checkbox(CONCAT("忽略静音##_recorder_ignore_silence_", _this->name), &_this->ignoreSilence)) {
                 config.edit().section(_this->name).set("ignoreSilence", _this->ignoreSilence);
             }
         }
@@ -364,25 +364,25 @@ private:
         if (_this->containers[_this->containerId] == wav::FORMAT_OPUS && !_this->recording) {
             if (_this->recMode != RECORDER_MODE_AUDIO) {
                 canRecord = false;
-                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Opus records audio only");
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Opus 仅支持录制音频");
             }
             else if (!_this->selectedStreamName.empty() &&
                      !wav::Writer::isOpusSamplerateSupported(sigpath::sinkManager.getStreamSampleRate(_this->selectedStreamName))) {
                 canRecord = false;
-                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Opus needs 8/12/16/24/48 kHz audio");
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Opus 需要 8/12/16/24/48 kHz 音频");
             }
         }
 
         if (!_this->recording) {
             if (!canRecord) { style::beginDisabled(); }
-            if (ImGui::ActionButton(CONCAT("Record##_recorder_rec_", _this->name))) {
+            if (ImGui::ActionButton(CONCAT("录制##_recorder_rec_", _this->name))) {
                 _this->start();
             }
             if (!canRecord) { style::endDisabled(); }
-            ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_Text), "Idle --:--:--");
+            ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_Text), "空闲 --:--:--");
         }
         else {
-            if (ImGui::ActionButton(CONCAT("Stop##_recorder_rec_", _this->name))) {
+            if (ImGui::ActionButton(CONCAT("停止##_recorder_rec_", _this->name))) {
                 _this->stop();
             }
             uint64_t seconds = _this->writer.getSamplesWritten() / _this->samplerate;
@@ -390,10 +390,10 @@ private:
             tm* dtm = gmtime(&diff);
 
             if (_this->ignoreSilence && _this->ignoringSilence) {
-                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Paused %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
+                ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "已暂停 %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
             }
             else {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Recording %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "录制中 %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
             }
         }
     }

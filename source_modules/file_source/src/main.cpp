@@ -121,7 +121,7 @@ static bool isPlayable(SampleReader* reader) {
 
 class FileSourceModule : public ModuleManager::Instance {
 public:
-    FileSourceModule(std::string name) : fileSelect("", { "IQ Recordings (*.wav *.flac)", "*.wav *.flac", "All Files", "*" }) {
+    FileSourceModule(std::string name) : fileSelect("", { "IQ 录音 (*.wav *.flac)", "*.wav *.flac", "所有文件", "*" }) {
         this->name = name;
 
         if (core::args["server"].b()) { return; }

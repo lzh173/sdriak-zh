@@ -215,7 +215,7 @@ public:
 
         if (showWindow) {
             gui::mainWindow.lockWaterfallControls = true;
-            ImGui::Begin("NOAA HRPT Decoder");
+            ImGui::Begin("NOAA HRPT 解码器");
             ImGui::BeginTabBar("NOAAHRPTTabs");
 
             if (ImGui::BeginTabItem("AVHRR RGB(221)")) {
@@ -283,7 +283,7 @@ public:
             ImGui::End();
         }
 
-        ImGui::Checkbox("Show Image", &showWindow);
+        ImGui::Checkbox("显示图像", &showWindow);
     };
 
 private:

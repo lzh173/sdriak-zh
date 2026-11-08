@@ -142,7 +142,7 @@ public:
             config.edit().section(_streamName).set("port", port);
         }
 
-        ImGui::LeftLabel("Protocol");
+        ImGui::LeftLabel("协议");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo(CONCAT("##_network_sink_mode_", _streamName), &modeId, sinkModesTxt)) {
             config.edit().section(_streamName).set("protocol", modeId);
@@ -150,7 +150,7 @@ public:
 
         if (listening) { style::endDisabled(); }
 
-        ImGui::LeftLabel("Samplerate");
+        ImGui::LeftLabel("采样率");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo(CONCAT("##_network_sink_sr_", _streamName), &srId, sampleRatesTxt.c_str())) {
             sampleRate = sampleRates[srId];
@@ -159,31 +159,31 @@ public:
             config.edit().section(_streamName).set("sampleRate", sampleRate);
         }
 
-        if (ImGui::Checkbox(CONCAT("Stereo##_network_sink_stereo_", _streamName), &stereo)) {
+        if (ImGui::Checkbox(CONCAT("立体声##_network_sink_stereo_", _streamName), &stereo)) {
             stop();
             start();
             config.edit().section(_streamName).set("stereo", stereo);
         }
 
-        if (listening && ImGui::Button(CONCAT("Stop##_network_sink_stop_", _streamName), ImVec2(menuWidth, 0))) {
+        if (listening && ImGui::Button(CONCAT("停止##_network_sink_stop_", _streamName), ImVec2(menuWidth, 0))) {
             stopServer();
             config.edit().section(_streamName).set("listening", false);
         }
-        else if (!listening && ImGui::Button(CONCAT("Start##_network_sink_stop_", _streamName), ImVec2(menuWidth, 0))) {
+        else if (!listening && ImGui::Button(CONCAT("开始##_network_sink_stop_", _streamName), ImVec2(menuWidth, 0))) {
             startServer();
             config.edit().section(_streamName).set("listening", true);
         }
 
-        ImGui::TextUnformatted("Status:");
+        ImGui::TextUnformatted("状态：");
         ImGui::SameLine();
         if (conn && conn->isOpen()) {
-            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), (modeId == SINK_MODE_TCP) ? "Connected" : "Sending");
+            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), (modeId == SINK_MODE_TCP) ? "已连接" : "发送中");
         }
         else if (listening) {
-            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Listening");
+            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "正在监听");
         }
         else {
-            ImGui::TextUnformatted("Idle");
+            ImGui::TextUnformatted("空闲");
         }
     }
 

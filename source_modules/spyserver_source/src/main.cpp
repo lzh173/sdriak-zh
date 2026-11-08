@@ -195,10 +195,10 @@ private:
         // without the matching BeginDisabled() in the frame where Connect was
         // clicked, corrupting ImGui's style stack.
         if (connecting) { SmGui::BeginDisabled(); }
-        if (!connected && SmGui::Button("Connect##spyserver_source")) {
+        if (!connected && SmGui::Button("连接##spyserver_source")) {
             _this->tryConnect();
         }
-        else if (connected && SmGui::Button("Disconnect##spyserver_source")) {
+        else if (connected && SmGui::Button("断开##spyserver_source")) {
             _this->client->close();
         }
         if (connecting) { SmGui::EndDisabled(); }
@@ -207,7 +207,7 @@ private:
 
         if (connected) {
             if (_this->running) { SmGui::BeginDisabled(); }
-            SmGui::LeftLabel("Samplerate");
+            SmGui::LeftLabel("采样率");
             SmGui::FillWidth();
             if (SmGui::Combo("##spyserver_source_sr", &_this->srId, _this->sampleRatesTxt.c_str())) {
                 _this->sampleRate = _this->sampleRates[_this->srId];
@@ -216,7 +216,7 @@ private:
             }
             if (_this->running) { SmGui::EndDisabled(); }
 
-            SmGui::LeftLabel("Sample bit depth");
+            SmGui::LeftLabel("采样位深");
             SmGui::FillWidth();
             if (SmGui::Combo("##spyserver_source_type", &_this->iqType, streamFormatStr)) {
                 int srvBits = streamFormatsBitCount[_this->iqType];
@@ -236,16 +236,16 @@ private:
                 }
             }
 
-            SmGui::Text("Status:");
+            SmGui::Text("状态：");
             SmGui::SameLine();
-            SmGui::TextColoredF(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected (%s)", deviceTypesStr[_this->client->devInfo.DeviceType]);
+            SmGui::TextColoredF(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "已连接（%s）", deviceTypesStr[_this->client->devInfo.DeviceType]);
         }
         else {
-            SmGui::Text("Status:");
+            SmGui::Text("状态：");
             SmGui::SameLine();
-            SmGui::Text(connecting ? "Connecting..." : "Not connected");
+            SmGui::Text(connecting ? "正在连接…" : "未连接");
             if (!connecting && !_this->connector.lastError().empty()) {
-                SmGui::TextColoredF(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "Connection failed: %s", _this->connector.lastError().c_str());
+                SmGui::TextColoredF(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "连接失败：%s", _this->connector.lastError().c_str());
             }
         }
     }

@@ -8,7 +8,7 @@
 
 class FileSelect {
 public:
-    FileSelect(std::string defaultPath, std::vector<std::string> filter = { "All Files", "*" });
+    FileSelect(std::string defaultPath, std::vector<std::string> filter = { "所有文件", "*" });
     bool render(std::string id);
     void setPath(std::string path, bool markChanged = false);
     bool pathIsValid();

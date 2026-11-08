@@ -234,12 +234,12 @@ private:
             }
             */
 
-            SmGui::Text("Status:");
+            SmGui::Text("状态：");
             SmGui::SameLine();
             if (_this->client && _this->client->isOpen())
-                SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
+                SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "已连接");
             else
-                SmGui::Text("Not connected");
+                SmGui::Text("未连接");
             /*
         }
         else {

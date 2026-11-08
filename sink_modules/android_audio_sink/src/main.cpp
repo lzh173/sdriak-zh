@@ -84,7 +84,7 @@ public:
     void menuHandler() override {
         float menuWidth = ImGui::GetContentRegionAvail().x;
 
-        ImGui::Checkbox(("Debug##_audio_sink_dbg_" + _streamName).c_str(), &showDebug);
+        ImGui::Checkbox(("调试##_audio_sink_dbg_" + _streamName).c_str(), &showDebug);
 
         if (showDebug) {
             std::lock_guard<std::mutex> lck(stateMtx);
@@ -92,87 +92,87 @@ public:
                 oboe::AudioStream* s = audioStream.get();
 
 #if ANDROID_AUDIO_SINK_USE_CALLBACK
-                ImGui::TextColored(ImVec4(0.4f, 1, 0.4f, 1), "Mode: Callback + FIFO");
+                ImGui::TextColored(ImVec4(0.4f, 1, 0.4f, 1), "模式：回调 + FIFO");
 #else
-                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1, 1), "Mode: Blocking write");
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1, 1), "模式：阻塞写入");
 #endif
 
                 const char* api = audioApiName(s->getAudioApi());
                 const char* apiReason = (preferredAudioApi() == oboe::AudioApi::OpenSLES)
-                    ? "forced (API <= 25)" : "auto-selected";
-                ImGui::TextUnformatted("Backend:");
+                    ? "强制指定（API <= 25）" : "自动选择";
+                ImGui::TextUnformatted("后端：");
                 ImGui::SameLine();
                 ImGui::TextColored(ImVec4(1, 1, 0, 1), "%s (%s)", api, apiReason);
 
-                ImGui::Text("State: %s", oboe::convertToText(s->getState()));
-                ImGui::Text("Device API level: %d", android_get_device_api_level());
+                ImGui::Text("状态：%s", oboe::convertToText(s->getState()));
+                ImGui::Text("设备 API 级别：%d", android_get_device_api_level());
 
                 ImGui::Separator();
-                ImGui::Text("Sample rate: %d Hz", s->getSampleRate());
-                ImGui::Text("Channel count: %d", s->getChannelCount());
-                ImGui::Text("Format: %s", oboe::convertToText(s->getFormat()));
-                ImGui::Text("Sharing: %s", oboe::convertToText(s->getSharingMode()));
-                ImGui::Text("Perf mode: %s", oboe::convertToText(s->getPerformanceMode()));
+                ImGui::Text("采样率：%d Hz", s->getSampleRate());
+                ImGui::Text("声道数：%d", s->getChannelCount());
+                ImGui::Text("格式：%s", oboe::convertToText(s->getFormat()));
+                ImGui::Text("共享模式：%s", oboe::convertToText(s->getSharingMode()));
+                ImGui::Text("性能模式：%s", oboe::convertToText(s->getPerformanceMode()));
 
                 ImGui::Separator();
-                ImGui::Text("Frames/burst: %d", s->getFramesPerBurst());
-                ImGui::Text("Buffer size: %d frames", s->getBufferSizeInFrames());
-                ImGui::Text("Buffer capacity: %d frames", s->getBufferCapacityInFrames());
+                ImGui::Text("帧/突发：%d", s->getFramesPerBurst());
+                ImGui::Text("缓冲大小：%d 帧", s->getBufferSizeInFrames());
+                ImGui::Text("缓冲容量：%d 帧", s->getBufferCapacityInFrames());
 
                 const int32_t burst = s->getFramesPerBurst();
                 const int32_t sr = s->getSampleRate();
                 if (burst > 0 && sr > 0) {
                     double burstMs = 1000.0 * burst / sr;
-                    ImGui::Text("Burst latency: %.2f ms", burstMs);
+                    ImGui::Text("突发延迟：%.2f ms", burstMs);
                 }
 
                 const int32_t bufSz = s->getBufferSizeInFrames();
                 if (bufSz > 0 && sr > 0) {
                     double bufMs = 1000.0 * bufSz / sr;
-                    ImGui::Text("Buffer latency: %.2f ms", bufMs);
+                    ImGui::Text("缓冲延迟：%.2f ms", bufMs);
                 }
 
                 auto result = s->calculateLatencyMillis();
                 if (result) {
-                    ImGui::Text("Total latency: %.2f ms", result.value());
+                    ImGui::Text("总延迟：%.2f ms", result.value());
                 }
                 else {
-                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "Total latency: N/A");
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "总延迟：N/A");
                 }
 
                 if (auto xRunResult = s->getXRunCount(); xRunResult)
-                    ImGui::Text("XRun count: %d", xRunResult.value());
+                    ImGui::Text("XRun 次数：%d", xRunResult.value());
                 else
-                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "XRun count: N/A");
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "XRun 次数：N/A");
                 ImGui::Separator();
-                ImGui::Text("Device ID: %d", s->getDeviceId());
+                ImGui::Text("设备 ID：%d", s->getDeviceId());
                 const int prefId = backend::getPreferredAudioOutputDeviceId();
                 if (prefId > 0) {
                     bool match = (s->getDeviceId() == prefId);
-                    ImGui::Text("Preferred ID: %d %s", prefId,
-                                match ? "(active)" : "(NOT routed!)");
+                    ImGui::Text("首选 ID：%d %s", prefId,
+                                match ? "（活动）" : "（未路由！）");
                     if (!match && s->getAudioApi() == oboe::AudioApi::OpenSLES) {
                         ImGui::TextColored(ImVec4(1, 0.4f, 0.4f, 1),
-                            "OpenSL ES ignores setDeviceId()");
+                            "OpenSL ES 会忽略 setDeviceId()");
                     }
                 }
                 else
-                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "Preferred ID: none");
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "首选 ID：无");
 
 #if ANDROID_AUDIO_SINK_USE_CALLBACK
                 ImGui::Separator();
-                ImGui::Text("Frames/callback: %d", s->getFramesPerCallback());
+                ImGui::Text("帧/回调：%d", s->getFramesPerCallback());
                 const size_t ri = fifoReadIndex.load(std::memory_order_relaxed);
                 const size_t wi = fifoWriteIndex.load(std::memory_order_relaxed);
                 const size_t used = fifoReadable(ri, wi);
                 const size_t cap = fifoCapacity > 0 ? fifoCapacity - 1 : 0;
                 float fillPct = cap > 0 ? 100.0f * used / cap : 0;
-                ImGui::Text("FIFO: %zu / %zu (%.0f%%)", used, cap, fillPct);
+                ImGui::Text("FIFO：%zu / %zu（%.0f%%）", used, cap, fillPct);
                 ImGui::ProgressBar(fillPct / 100.0f, ImVec2(menuWidth, 0), "");
 #endif
             }
             else {
-                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "No active stream");
+                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "无活动音频流");
             }
         }
     }
@@ -536,7 +536,7 @@ private:
         case oboe::AudioApi::OpenSLES:
             return "OpenSL ES";
         default:
-            return "Oboe default";
+            return "Oboe 默认";
         }
     }
 

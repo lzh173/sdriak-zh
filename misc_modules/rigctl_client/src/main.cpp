@@ -119,7 +119,7 @@ private:
         }
         if (_this->running) { style::endDisabled(); }
 
-        ImGui::LeftLabel("IF Frequency");
+        ImGui::LeftLabel("中频频率");
         ImGui::FillWidth();
         if (ImGui::InputDouble(CONCAT("##_rigctl_if_freq_", _this->name), &_this->ifFreq, 100.0, 100000.0, "%.0f")) {
             if (_this->running) {
@@ -128,23 +128,23 @@ private:
             config.edit().section(_this->name).set("ifFreq", _this->ifFreq);
         }
 
-        if (_this->running && ImGui::ActionButton(CONCAT("Stop##_rigctl_cli_stop_", _this->name))) {
+        if (_this->running && ImGui::ActionButton(CONCAT("停止##_rigctl_cli_stop_", _this->name))) {
             _this->stop();
         }
-        else if (!_this->running && ImGui::ActionButton(CONCAT("Start##_rigctl_cli_stop_", _this->name))) {
+        else if (!_this->running && ImGui::ActionButton(CONCAT("开始##_rigctl_cli_stop_", _this->name))) {
             _this->start();
         }
 
-        ImGui::TextUnformatted("Status:");
+        ImGui::TextUnformatted("状态：");
         ImGui::SameLine();
         if (_this->client && _this->client->isOpen() && _this->running) {
-            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Connected");
+            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "已连接");
         }
         else if (_this->client && _this->running) {
-            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Disconnected");
+            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "未连接");
         }
         else {
-            ImGui::TextUnformatted("Idle");
+            ImGui::TextUnformatted("空闲");
         }
     }
 

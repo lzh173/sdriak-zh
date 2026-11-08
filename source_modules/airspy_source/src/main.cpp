@@ -405,7 +405,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_airspy_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_airspy_refr_", _this->name))) {
 #ifdef __ANDROID__
             _this->refreshAndroidSelection();
 #else
@@ -421,7 +421,7 @@ private:
         SmGui::BeginGroup();
         SmGui::Columns(3, CONCAT("AirspyGainModeColumns##_", _this->name), false);
         SmGui::ForceSync();
-        if (SmGui::RadioButton(CONCAT("Sensitive##_airspy_gm_", _this->name), _this->gainMode == 0)) {
+        if (SmGui::RadioButton(CONCAT("灵敏##_airspy_gm_", _this->name), _this->gainMode == 0)) {
             _this->gainMode = 0;
             if (_this->running) {
                 airspy_set_lna_agc(_this->openDev, 0);
@@ -432,7 +432,7 @@ private:
         }
         SmGui::NextColumn();
         SmGui::ForceSync();
-        if (SmGui::RadioButton(CONCAT("Linear##_airspy_gm_", _this->name), _this->gainMode == 1)) {
+        if (SmGui::RadioButton(CONCAT("线性##_airspy_gm_", _this->name), _this->gainMode == 1)) {
             _this->gainMode = 1;
             if (_this->running) {
                 airspy_set_lna_agc(_this->openDev, 0);
@@ -443,7 +443,7 @@ private:
         }
         SmGui::NextColumn();
         SmGui::ForceSync();
-        if (SmGui::RadioButton(CONCAT("Free##_airspy_gm_", _this->name), _this->gainMode == 2)) {
+        if (SmGui::RadioButton(CONCAT("自由##_airspy_gm_", _this->name), _this->gainMode == 2)) {
             _this->gainMode = 2;
             if (_this->running) {
                 if (_this->lnaAgc) {
@@ -470,7 +470,7 @@ private:
         // Gain menus
 
         if (_this->gainMode == 0) {
-            SmGui::LeftLabel("Gain");
+            SmGui::LeftLabel("增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_airspy_sens_gain_", _this->name), &_this->sensitiveGain, 0, 21)) {
                 if (_this->running) {
@@ -480,7 +480,7 @@ private:
             }
         }
         else if (_this->gainMode == 1) {
-            SmGui::LeftLabel("Gain");
+            SmGui::LeftLabel("增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_airspy_lin_gain_", _this->name), &_this->linearGain, 0, 21)) {
                 if (_this->running) {
@@ -492,7 +492,7 @@ private:
         else if (_this->gainMode == 2) {
             // TODO: Switch to a table for alignment
             if (_this->lnaAgc) { SmGui::BeginDisabled(); }
-            SmGui::LeftLabel("LNA Gain");
+            SmGui::LeftLabel("低噪放增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_airspy_lna_gain_", _this->name), &_this->lnaGain, 0, 15)) {
                 if (_this->running) {
@@ -503,7 +503,7 @@ private:
             if (_this->lnaAgc) { SmGui::EndDisabled(); }
 
             if (_this->mixerAgc) { SmGui::BeginDisabled(); }
-            SmGui::LeftLabel("Mixer Gain");
+            SmGui::LeftLabel("混频器增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_airspy_mix_gain_", _this->name), &_this->mixerGain, 0, 15)) {
                 if (_this->running) {
@@ -513,7 +513,7 @@ private:
             }
             if (_this->mixerAgc) { SmGui::EndDisabled(); }
 
-            SmGui::LeftLabel("VGA Gain");
+            SmGui::LeftLabel("VGA 增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_airspy_vga_gain_", _this->name), &_this->vgaGain, 0, 15)) {
                 if (_this->running) {
@@ -524,7 +524,7 @@ private:
 
             // AGC Control
             SmGui::ForceSync();
-            if (SmGui::Checkbox(CONCAT("LNA AGC##_airspy_", _this->name), &_this->lnaAgc)) {
+            if (SmGui::Checkbox(CONCAT("低噪放 AGC##_airspy_", _this->name), &_this->lnaAgc)) {
                 if (_this->running) {
                     if (_this->lnaAgc) {
                         airspy_set_lna_agc(_this->openDev, 1);
@@ -537,7 +537,7 @@ private:
                 saveDeviceSetting(_this->selectedSerStr, "lnaAgc", _this->lnaAgc);
             }
             SmGui::ForceSync();
-            if (SmGui::Checkbox(CONCAT("Mixer AGC##_airspy_", _this->name), &_this->mixerAgc)) {
+            if (SmGui::Checkbox(CONCAT("混频器 AGC##_airspy_", _this->name), &_this->mixerAgc)) {
                 if (_this->running) {
                     if (_this->mixerAgc) {
                         airspy_set_mixer_agc(_this->openDev, 1);
@@ -552,7 +552,7 @@ private:
         }
 
         // Bias T
-        if (SmGui::Checkbox(CONCAT("Bias T##_airspy_", _this->name), &_this->biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##_airspy_", _this->name), &_this->biasT)) {
             if (_this->running) {
                 airspy_set_rf_bias(_this->openDev, _this->biasT);
             }

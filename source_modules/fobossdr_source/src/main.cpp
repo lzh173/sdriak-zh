@@ -185,8 +185,8 @@ private:
 
         // Define clock sources
         clockSources.clear();
-        clockSources.define("internal", "Internal", 0);
-        clockSources.define("external", "External", 1);
+        clockSources.define("internal", "内部", 0);
+        clockSources.define("external", "外部", 1);
 
         // Close the device
         fobos_rx_close(dev);
@@ -200,7 +200,7 @@ private:
         srId = samplerates.valueId(sampleRate);
         port = PORT_RF;
         portId = ports.valueId(port);
-        clkSrcId = clockSources.nameId("Internal");
+        clkSrcId = clockSources.nameId("内部");
         lnaGain = 0;
         vgaGain = 0;
 
@@ -379,13 +379,13 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_fobossdr_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_fobossdr_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->selectedSerial);
             core::setInputSampleRate(_this->sampleRate);
         }
 
-        SmGui::LeftLabel("Antenna Port");
+        SmGui::LeftLabel("天线端口");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_fobossdr_port_", _this->name), &_this->portId, _this->ports.txt)) {
             if (!_this->selectedSerial.empty()) {
@@ -395,7 +395,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Clock Source");
+        SmGui::LeftLabel("时钟源");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_fobossdr_clk_", _this->name), &_this->clkSrcId, _this->clockSources.txt)) {
             if (_this->running) {
@@ -407,7 +407,7 @@ private:
         }
 
         if (_this->port == PORT_RF) {
-            SmGui::LeftLabel("LNA Gain");
+            SmGui::LeftLabel("低噪放增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_fobossdr_lna_gain_", _this->name), &_this->lnaGain, FOBOS_LNA_GAIN_MIN, FOBOS_LNA_GAIN_MAX)) {
                 if (_this->running) {
@@ -418,7 +418,7 @@ private:
                 }
             }
 
-            SmGui::LeftLabel("VGA Gain");
+            SmGui::LeftLabel("VGA 增益");
             SmGui::FillWidth();
             if (SmGui::SliderInt(CONCAT("##_fobossdr_vga_gain_", _this->name), &_this->vgaGain, FOBOS_VGA_GAIN_MIN, FOBOS_VGA_GAIN_MAX)) {
                 if (_this->running) {

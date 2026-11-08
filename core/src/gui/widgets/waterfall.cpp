@@ -616,10 +616,10 @@ namespace ImGui {
                     if (ImGui::GetIO().KeyCtrl) {
                         ImGui::Separator();
                         printAndScale(_vfo->generalOffset + centerFreq, buf);
-                        ImGui::Text("Frequency: %sHz", buf);
+                        ImGui::Text("频率：%sHz", buf);
                         printAndScale(_vfo->bandwidth, buf);
-                        ImGui::Text("Bandwidth: %sHz", buf);
-                        ImGui::Text("Bandwidth Locked: %s", _vfo->bandwidthLocked ? "Yes" : "No");
+                        ImGui::Text("带宽：%sHz", buf);
+                        ImGui::Text("带宽已锁定：%s", _vfo->bandwidthLocked ? "是" : "否");
 
                         // Hold buf_mtx while reading rawFFTs: this runs on the UI
                         // thread, and without the lock the FFT worker (getFFTBuffer/
@@ -632,12 +632,12 @@ namespace ImGui {
                             infoValid = calculateVFOSignalInfo(waterfallVisible ? &rawFFTs[currentFFTLine * rawFFTSize] : rawFFTs, _vfo, strength, snr);
                         }
                         if (infoValid) {
-                            ImGui::Text("Strength: %0.1fdBFS", strength);
-                            ImGui::Text("SNR: %0.1fdB", snr);
+                            ImGui::Text("强度：%0.1fdBFS", strength);
+                            ImGui::Text("SNR：%0.1fdB", snr);
                         }
                         else {
-                            ImGui::TextUnformatted("Strength: ---.-dBFS");
-                            ImGui::TextUnformatted("SNR: ---.-dB");
+                            ImGui::TextUnformatted("强度：---.-dBFS");
+                            ImGui::TextUnformatted("SNR：---.-dB");
                         }
                     }
 

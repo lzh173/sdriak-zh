@@ -139,8 +139,8 @@ private:
 
         // Define RX ports
         rxPorts.clear();
-        rxPorts.define("external", "External", ExternalPort);
-        rxPorts.define("internal", "Internal", InternalPort);
+        rxPorts.define("external", "外部", ExternalPort);
+        rxPorts.define("internal", "内部", InternalPort);
         rxPorts.define("ant", "ANT", ANT_Port);
         rxPorts.define("tr", "T/R", TR_Port);
         rxPorts.define("swr", "SWR", SWR_Port);
@@ -148,20 +148,20 @@ private:
 
         // Define gain strategies
         gainStategies.clear();
-        gainStategies.define("lowNoise", "Low Noise", LowNoisePreferred);
-        gainStategies.define("highLinearity", "High Linearity", HighLinearityPreferred);
+        gainStategies.define("lowNoise", "低噪声", LowNoisePreferred);
+        gainStategies.define("highLinearity", "高线性", HighLinearityPreferred);
 
         // Define preamplifier modes
         preampModes.clear();
-        preampModes.define("auto", "Auto", AutoOn);
-        preampModes.define("off", "Off", ForcedOff);
+        preampModes.define("auto", "自动", AutoOn);
+        preampModes.define("off", "关闭", ForcedOff);
 
         // Define LO modes
         loModes.clear();
-        loModes.define("auto", "Auto", LOOpt_Auto);
-        loModes.define("speed", "Speed", LOOpt_Speed);
-        loModes.define("spurs", "Spurs", LOOpt_Spur);
-        loModes.define("phaseNoise", "Phase Noise", LOOpt_PhaseNoise);
+        loModes.define("auto", "自动", LOOpt_Auto);
+        loModes.define("speed", "速度", LOOpt_Speed);
+        loModes.define("spurs", "杂散", LOOpt_Spur);
+        loModes.define("phaseNoise", "相噪", LOOpt_PhaseNoise);
 
         // Close the device
         Device_Close(&dev);
@@ -321,7 +321,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_harogic_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_harogic_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->selectedSerial);
             core::setInputSampleRate(_this->sampleRate);
@@ -329,7 +329,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("RX Port");
+        SmGui::LeftLabel("接收端口");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_harogic_port_", _this->name), &_this->portId, _this->rxPorts.txt)) {
             if (_this->running) {
@@ -339,7 +339,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("LO Mode");
+        SmGui::LeftLabel("本振模式");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_lo_mode_", _this->name), &_this->loModeId, _this->loModes.txt)) {
             if (_this->running) {
@@ -349,7 +349,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("Gain Mode");
+        SmGui::LeftLabel("增益模式");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_harogic_gain_mode_", _this->name), &_this->gainStratId, _this->gainStategies.txt)) {
             if (_this->running) {
@@ -359,7 +359,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("Preamp Mode");
+        SmGui::LeftLabel("前置放大模式");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_harogic_preamp_mode_", _this->name), &_this->preampModeId, _this->preampModes.txt)) {
             if (_this->running) {
@@ -369,7 +369,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("Reference");
+        SmGui::LeftLabel("参考");
         SmGui::FillWidth();
         if (SmGui::SliderInt(CONCAT("##_harogic_ref_", _this->name), &_this->refLvl, _this->minRef, _this->maxRef)) {
             if (_this->running) {
@@ -379,7 +379,7 @@ private:
             // TODO: Save
         }
 
-        if (SmGui::Checkbox(CONCAT("IF AGC##_harogic_if_agc_", _this->name), &_this->ifAgc)) {
+        if (SmGui::Checkbox(CONCAT("中频 AGC##_harogic_if_agc_", _this->name), &_this->ifAgc)) {
             if (_this->running) {
                 _this->profile.EnableIFAGC = _this->ifAgc;
                 _this->applyProfile();

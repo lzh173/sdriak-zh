@@ -81,8 +81,8 @@ private:
 
         if (!_this->enabled) { style::beginDisabled(); }
 
-        ImGui::Text("Bearing: %f°", _this->bearing);
-        ImGui::Text("Quality: %0.1f%%", _this->quality);
+        ImGui::Text("方位：%f°", _this->bearing);
+        ImGui::Text("质量：%0.1f%%", _this->quality);
 
         if (!_this->enabled) { style::endDisabled(); }
     }

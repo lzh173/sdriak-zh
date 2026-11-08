@@ -121,7 +121,7 @@ private:
 
         if (!_this->enabled) { style::beginDisabled(); }
 
-        ImGui::LeftLabel("Protocol");
+        ImGui::LeftLabel("协议");
         ImGui::FillWidth();
         if (ImGui::Combo(("##pager_decoder_proto_" + _this->name).c_str(), &_this->protoId, _this->protocols.txt)) {
             _this->selectProtocol(_this->protocols.value(_this->protoId));
@@ -129,8 +129,8 @@ private:
 
         if (_this->decoder) { _this->decoder->showMenu(); }
 
-        ImGui::Button(("Record##pager_decoder_show_" + _this->name).c_str(), ImVec2(menuWidth, 0));
-        ImGui::Button(("Show Messages##pager_decoder_show_" + _this->name).c_str(), ImVec2(menuWidth, 0));
+        ImGui::Button(("录制##pager_decoder_show_" + _this->name).c_str(), ImVec2(menuWidth, 0));
+        ImGui::Button(("显示消息##pager_decoder_show_" + _this->name).c_str(), ImVec2(menuWidth, 0));
 
         if (!_this->enabled) { style::endDisabled(); }
     }
