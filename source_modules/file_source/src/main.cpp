@@ -269,6 +269,7 @@ private:
         if (_this->running) { return; }
         if (!isPlayable(_this->reader)) { return; }
         _this->positionFrames.store(_this->reader->getSamplePosition());
+        _this->seekRequest.store(UINT64_MAX);
         _this->running = true;
         _this->workerThread = std::thread(worker, _this);
         flog::info("FileSourceModule '{0}': Start!", _this->name);
