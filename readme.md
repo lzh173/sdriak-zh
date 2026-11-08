@@ -8,6 +8,9 @@ SDRIAK is a cross-platform, open source SDR application for Windows, Linux, macO
 * [Google Play](https://play.google.com/store/apps/details?id=org.ok1iak.sdrpp)
 * [Changelog](changelog.md) ([full history](changelog-full.md))
 * [Upstream bugs fixed and features implemented](doc/upstream-bugs-fixed.md)
+* [简体中文界面（zh-CN）/ Simplified Chinese UI](doc/zh-cn.md)
+
+> 本分支（`sdriak-zh`）的界面已汉化为简体中文，说明见 [doc/zh-cn.md](doc/zh-cn.md)。
 
 ## Features
 
