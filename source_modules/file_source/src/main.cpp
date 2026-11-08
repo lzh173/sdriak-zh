@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <atomic>
 
 #define CONCAT(a, b) ((std::string(a) + b).c_str())
 
@@ -267,6 +268,7 @@ private:
         FileSourceModule* _this = (FileSourceModule*)ctx;
         if (_this->running) { return; }
         if (!isPlayable(_this->reader)) { return; }
+        _this->positionFrames.store(_this->reader->getSamplePosition());
         _this->running = true;
         _this->workerThread = std::thread(worker, _this);
         flog::info("FileSourceModule '{0}': Start!", _this->name);
@@ -281,6 +283,7 @@ private:
         _this->stream.clearWriteStop();
         _this->running = false;
         _this->reader->rewind();
+        _this->positionFrames.store(0);
         flog::info("FileSourceModule '{0}': Stop!", _this->name);
     }
 
@@ -308,15 +311,19 @@ private:
         // Playback position / seek bar, shown as soon as a file is loaded. It
         // also works while the source is stopped: seeking then just moves the
         // point where the next Start begins (Stop rewinds to 0).
-        if (_this->reader != NULL) {
-            const uint64_t totalSamples = _this->reader->getSampleCount();
-            const uint32_t rate = _this->reader->getSampleRate();
-            if (totalSamples > 0 && rate > 0) {
-                ImGui::Spacing();
-                const uint64_t position = _this->reader->getSamplePosition();
-                uint64_t seekTarget = position;
-                if (drawPlaybackBar(position, totalSamples, rate, &seekTarget)) {
+        if (_this->reader != NULL && _this->totalSamples > 0 && _this->fileSampleRate > 0) {
+            ImGui::Spacing();
+            const uint64_t position = _this->running ? _this->positionFrames.load()
+                                                     : _this->reader->getSamplePosition();
+            uint64_t seekTarget = position;
+            if (drawPlaybackBar(position, _this->totalSamples, _this->fileSampleRate, &seekTarget)) {
+                if (_this->running) {
+                    // The worker performs the seek before its next read.
+                    _this->seekRequest.store(seekTarget);
+                }
+                else {
                     _this->reader->seek(seekTarget);
+                    _this->positionFrames.store(seekTarget);
                 }
             }
         }
@@ -352,6 +359,10 @@ private:
                 throw std::runtime_error("Invalid channel layout");
             }
             sampleRate = reader->getSampleRate();
+            totalSamples = reader->getSampleCount();
+            fileSampleRate = reader->getSampleRate();
+            positionFrames.store(0);
+            seekRequest.store(UINT64_MAX);
             centerFreq = getFrequency(std::filesystem::path(path).filename().string());
             if (applyTuning) {
                 core::setInputSampleRate(sampleRate);
@@ -362,6 +373,10 @@ private:
         }
         catch (const std::exception& e) {
             flog::error("Error: {}", e.what());
+            totalSamples = 0;
+            fileSampleRate = 0;
+            positionFrames.store(0);
+            seekRequest.store(UINT64_MAX);
             if (reader != NULL) {
                 reader->close();
                 delete reader;
@@ -409,7 +424,17 @@ private:
         bool direct = (conv == convF32 && channels == 2 && blockAlign == sizeof(dsp::complex_t));
         uint8_t* inBuf = direct ? NULL : new uint8_t[(size_t)blockSize * blockAlign];
 
+        // The UI thread never touches the reader while this loop runs; it reads
+        // positionFrames and posts seek requests through the two atomics below.
+        _this->positionFrames.store(reader->getSamplePosition());
+
         while (true) {
+            uint64_t requested = _this->seekRequest.exchange(UINT64_MAX);
+            if (requested != UINT64_MAX) {
+                reader->seek(requested);
+                _this->positionFrames.store(reader->getSamplePosition());
+            }
+
             // swap() exchanges writeBuf/readBuf, so re-fetch it every block
             void* readDst = direct ? (void*)_this->stream.writeBuf : (void*)inBuf;
             size_t read = reader->readSamples(readDst, (size_t)blockSize * blockAlign);
@@ -431,6 +456,7 @@ private:
                     src += blockAlign;
                 }
             }
+            _this->positionFrames.store(reader->getSamplePosition());
             if (!_this->stream.swap(frames)) { break; }
         }
 
@@ -460,6 +486,14 @@ private:
     bool enabled = true;
     float sampleRate = 1000000;
     std::thread workerThread;
+
+    // Playback position and UI->worker seek hand-off. Only the worker thread
+    // touches the reader while a file is playing (the UI thread instead reads
+    // positionFrames), which keeps the two threads off each other's file I/O.
+    std::atomic<uint64_t> positionFrames = 0;
+    std::atomic<uint64_t> seekRequest = UINT64_MAX;
+    uint64_t totalSamples = 0;
+    uint32_t fileSampleRate = 0;
 
     double centerFreq = 100000000;
 
