@@ -3,6 +3,7 @@
 #include <imgui/imgui.h>
 #include <gui/style.h>
 #include <gui/icons.h>
+#include <gui/widgets/menu_names.h>
 
 #include <core.h>
 
@@ -360,13 +361,15 @@ void SinkManager::showMenu() {
 
     std::string provStr = "";
     for (auto const& name : providerNames) {
-        provStr += name;
+        // Display-only translation; the provider name itself is the config value.
+        provStr += menuDisplayName(name);
         provStr += '\0';
     }
 
     for (auto const& [name, stream] : streams) {
-        ImGui::SetCursorPosX((menuWidth / 2.0f) - (ImGui::CalcTextSize(name.c_str()).x / 2.0f));
-        ImGui::Text("%s", name.c_str());
+        const std::string displayName = menuDisplayName(name);
+        ImGui::SetCursorPosX((menuWidth / 2.0f) - (ImGui::CalcTextSize(displayName.c_str()).x / 2.0f));
+        ImGui::Text("%s", displayName.c_str());
 
         ImGui::SetNextItemWidth(menuWidth);
         if (ImGui::Combo(CONCAT("##_sdrpp_sink_select_", name), &stream->providerId, provStr.c_str())) {
