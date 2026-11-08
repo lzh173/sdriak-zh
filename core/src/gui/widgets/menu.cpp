@@ -1,4 +1,5 @@
 #include <gui/widgets/menu.h>
+#include <gui/widgets/menu_names.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <gui/style.h>
@@ -58,7 +59,7 @@ bool Menu::draw(bool updateStates) {
         }
         if (opt.name == draggedMenuName) {
             ImGui::BeginTooltip();
-            ImGui::Text("%s", draggedMenuName.c_str());
+            ImGui::Text("%s", menuDisplayName(draggedMenuName).c_str());
             ImGui::EndTooltip();
             continue;
         }
@@ -70,7 +71,7 @@ bool Menu::draw(bool updateStates) {
             ImVec2 posMax = ImVec2(posMin.x + menuWidth, posMin.y + ImGui::GetFrameHeight());
             style::beginDisabled();
             ImRect orignalRect = window->WorkRect;
-            ImGui::CollapsingHeader((draggedMenuName + "##sdrpp_main_menu_dragging").c_str());
+            ImGui::CollapsingHeader((menuDisplayName(draggedMenuName) + "##sdrpp_main_menu_dragging").c_str());
             if (items[draggedOpt.name].inst != NULL) {
                 window->WorkRect = orignalRect;
                 ImVec2 pos = ImGui::GetCursorPos();
@@ -117,7 +118,7 @@ bool Menu::draw(bool updateStates) {
 
         // Draw menu header and menu content. There is a lot of boilerplate because the checkbox has to be drawn before the menu, TODO: fix
         if (updateStates) { ImGui::SetNextItemOpen(opt.open); }
-        if (ImGui::CollapsingHeader((opt.name + "##sdrpp_main_menu").c_str())) {
+        if (ImGui::CollapsingHeader((menuDisplayName(opt.name) + "##sdrpp_main_menu").c_str())) {
             if (item.inst != NULL) {
                 window->WorkRect = orginalRect;
                 ImVec2 pos = ImGui::GetCursorPos();
@@ -198,7 +199,7 @@ bool Menu::draw(bool updateStates) {
         ImVec2 posMax = ImVec2(posMin.x + menuWidth, posMin.y + ImGui::GetFrameHeight());
         style::beginDisabled();
         ImRect orignalRect = window->WorkRect;
-        ImGui::CollapsingHeader((draggedMenuName + "##sdrpp_main_menu_dragging").c_str());
+        ImGui::CollapsingHeader((menuDisplayName(draggedMenuName) + "##sdrpp_main_menu_dragging").c_str());
         if (items[draggedOpt.name].inst != NULL) {
             window->WorkRect = orignalRect;
             ImVec2 pos = ImGui::GetCursorPos();

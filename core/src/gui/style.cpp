@@ -3,6 +3,7 @@
 #include <imgui_internal.h>
 #include <config.h>
 #include <utils/flog.h>
+#include <gui/cjk_glyphs.h>
 #include <filesystem>
 #include <cmath>
 #include <cstring>
@@ -104,6 +105,33 @@ namespace style {
         ImFontConfig labelCfg;
         labelCfg.OversampleH = 2;
         baseFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(16.0f * uiScale), NULL, baseRanges.Data);
+
+        // The zh-CN UI text is Chinese, so a CJK face has to be merged into the
+        // base font; Roboto-Medium has no Han glyphs and would draw tofu.  The
+        // range comes from the actual UI strings (see _zhwork/gen_font.py), so
+        // the atlas only pays for characters that are used.  On desktop the
+        // 2500 common characters are added too, which keeps user-entered names
+        // (bookmarks, station lists, ...) readable; on Android the smaller
+        // UI-only set keeps the atlas inside the phone's memory budget.
+        const std::string cjkFontPath = resDir + "/fonts/NotoSansSC-Regular-subset.ttf";
+        if (std::filesystem::is_regular_file(cjkFontPath)) {
+            ImFontConfig cjkCfg;
+            cjkCfg.MergeMode = true;
+            cjkCfg.OversampleH = 1;
+            cjkCfg.OversampleV = 1;
+            cjkCfg.PixelSnapH = true;
+#ifdef __ANDROID__
+            const ImWchar* cjkRanges = cjkUiRanges;
+#else
+            const ImWchar* cjkRanges = cjkCommonRanges;
+#endif
+            if (!fonts->AddFontFromFileTTF(cjkFontPath.c_str(), roundf(16.0f * uiScale), &cjkCfg, cjkRanges)) {
+                flog::error("Could not load CJK font: {0}", cjkFontPath);
+            }
+        }
+        else {
+            flog::warn("CJK font not found, Chinese text will not render: {0}", cjkFontPath);
+        }
         labelFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(22.0f * uiScale), &labelCfg, labelRange);
         bigFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(45.0f * uiScale), NULL, bigRange);
         hugeFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(128.0f * uiScale), NULL, hugeRanges.Data);
