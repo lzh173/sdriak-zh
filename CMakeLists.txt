@@ -171,6 +171,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+# The zh-CN UI strings are UTF-8 literals in the sources.  MSVC otherwise
+# decodes them with the build machine's ANSI code page (CP1252 on the CI
+# runners), which turns every Chinese character into mojibake; /utf-8 makes
+# both the source and the execution charset UTF-8.  GCC/Clang (including the
+# NDK and Apple clang) already default to UTF-8.
+if (MSVC)
+    add_compile_options(/utf-8)
+endif ()
+
 # Set a default install prefix
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
