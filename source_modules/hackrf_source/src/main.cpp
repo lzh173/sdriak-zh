@@ -408,7 +408,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_hackrf_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_hackrf_refr_", _this->name))) {
 #ifdef __ANDROID__
             _this->refreshAndroidSelection();
 #else
@@ -420,7 +420,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Bandwidth");
+        SmGui::LeftLabel("带宽");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_hackrf_bw_sel_", _this->name), &_this->bwId, bandwidthsTxt)) {
             if (_this->running) {
@@ -429,7 +429,7 @@ private:
             config.edit().section("devices", _this->selectedSerial).set("bandwidth", _this->bwId);
         }
 
-        SmGui::LeftLabel("LNA Gain");
+        SmGui::LeftLabel("低噪放增益");
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_hackrf_lna_", _this->name), &_this->lna, 0, 40, 8, SmGui::FMT_STR_FLOAT_DB_NO_DECIMAL)) {
             if (_this->running) {
@@ -438,7 +438,7 @@ private:
             config.edit().section("devices", _this->selectedSerial).set("lnaGain", (int)_this->lna);
         }
 
-        SmGui::LeftLabel("VGA Gain");
+        SmGui::LeftLabel("VGA 增益");
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_hackrf_vga_", _this->name), &_this->vga, 0, 62, 2, SmGui::FMT_STR_FLOAT_DB_NO_DECIMAL)) {
             if (_this->running) {
@@ -447,14 +447,14 @@ private:
             config.edit().section("devices", _this->selectedSerial).set("vgaGain", (int)_this->vga);
         }
 
-        if (SmGui::Checkbox(CONCAT("Bias-T##_hackrf_bt_", _this->name), &_this->biasT)) {
+        if (SmGui::Checkbox(CONCAT("偏置供电##_hackrf_bt_", _this->name), &_this->biasT)) {
             if (_this->running) {
                 _this->settingApplied("antenna power", hackrf_set_antenna_enable(_this->openDev, _this->biasT), true);
             }
             config.edit().section("devices", _this->selectedSerial).set("biasT", _this->biasT);
         }
 
-        if (SmGui::Checkbox(CONCAT("Amp Enabled##_hackrf_amp_", _this->name), &_this->amp)) {
+        if (SmGui::Checkbox(CONCAT("放大器启用##_hackrf_amp_", _this->name), &_this->amp)) {
             if (_this->running) {
                 _this->settingApplied("RF amplifier", hackrf_set_amp_enable(_this->openDev, _this->amp), true);
             }

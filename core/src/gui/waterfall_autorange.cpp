@@ -123,7 +123,7 @@ void WaterfallAutoRange::drawButton(float side, const ImVec4& tint) {
     // finger lifts and the tooltip would sit over the waterfall until the
     // next touch elsewhere. Touch users get the haptic tick below instead.
     if (hovered) {
-        ImGui::SetTooltip("Click: auto-fit range once\nHold: %s continuous auto-range", stickyEnabled ? "disable" : "enable");
+        ImGui::SetTooltip("单击：自动适配范围一次\n长按：%s持续自动调节范围", stickyEnabled ? "禁用" : "启用");
     }
 #endif
 

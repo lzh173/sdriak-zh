@@ -38,8 +38,8 @@ public:
         t.addAction(tuneVFO);
         t.addAction(recStart);
 
-        tasks["Test"] = t;
-        tasks["Another test"] = t;
+        tasks["测试"] = t;
+        tasks["另一个测试"] = t;
     }
 
     ~DemoModule() {
@@ -67,7 +67,7 @@ private:
         // If editing, show menu
         if (!_this->editedTask.empty()) {
             gui::mainWindow.lockWaterfallControls = true;
-            std::string id = "Edit Task##scheduler_edit_task_" + _this->name;
+            std::string id = "编辑任务##scheduler_edit_task_" + _this->name;
             if (_this->editDialog.begin(id.c_str(), ImGuiWindowFlags_NoResize)) {
                 bool valid = false;
                 bool open = _this->tasks[_this->editedTask].showEditMenu(_this->editedName, valid);
@@ -95,8 +95,8 @@ private:
         }
 
         if (ImGui::BeginTable(("freq_manager_bkm_table" + _this->name).c_str(), 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY, ImVec2(0, 200.0f * style::uiScale))) {
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Countdown");
+            ImGui::TableSetupColumn("名称");
+            ImGui::TableSetupColumn("倒计时");
             ImGui::TableSetupScrollFreeze(2, 1);
             ImGui::TableHeadersRow();
             for (auto& [name, bm] : _this->tasks) {
@@ -119,7 +119,7 @@ private:
                 }
 
                 ImGui::TableSetColumnIndex(1);
-                ImGui::TextUnformatted("todo");
+                ImGui::TextUnformatted("待办");
             }
             ImGui::EndTable();
         }

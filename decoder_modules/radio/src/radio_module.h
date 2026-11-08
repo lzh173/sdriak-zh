@@ -45,20 +45,20 @@ public:
         this->name = name;
 
         // Initialize option lists
-        deempModes.define("None", DEEMP_MODE_NONE);
+        deempModes.define("None", "无", DEEMP_MODE_NONE);
         deempModes.define("22us", DEEMP_MODE_22US);
         deempModes.define("50us", DEEMP_MODE_50US);
         deempModes.define("75us", DEEMP_MODE_75US);
 
         ifnrPresets.define("NOAA APT", IFNR_PRESET_NOAA_APT);
-        ifnrPresets.define("Voice", IFNR_PRESET_VOICE);
-        ifnrPresets.define("Narrow Band", IFNR_PRESET_NARROW_BAND);
+        ifnrPresets.define("Voice", "语音", IFNR_PRESET_VOICE);
+        ifnrPresets.define("Narrow Band", "窄带", IFNR_PRESET_NARROW_BAND);
 
-        squelchModes.define("off", "Off", SQUELCH_MODE_OFF);
-        squelchModes.define("power", "Power", SQUELCH_MODE_POWER);
+        squelchModes.define("off", "关闭", SQUELCH_MODE_OFF);
+        squelchModes.define("power", "功率", SQUELCH_MODE_POWER);
         //squelchModes.define("snr", "SNR", SQUELCH_MODE_SNR);
-        squelchModes.define("ctcss_mute", "CTCSS (Mute)", SQUELCH_MODE_CTCSS_MUTE);
-        squelchModes.define("ctcss_decode", "CTCSS (Decode Only)", SQUELCH_MODE_CTCSS_DECODE);
+        squelchModes.define("ctcss_mute", "CTCSS（静音）", SQUELCH_MODE_CTCSS_MUTE);
+        squelchModes.define("ctcss_decode", "CTCSS（仅解码）", SQUELCH_MODE_CTCSS_DECODE);
         //squelchModes.define("dcs_mute", "DCS (Mute)", SQUELCH_MODE_DCS_MUTE);
         //squelchModes.define("dcs_decode", "DCS (Decode Only)", SQUELCH_MODE_DCS_DECODE);
 
@@ -68,7 +68,7 @@ public:
             sprintf(buf, "%.1fHz", tone);
             ctcssTones.define((int)round(tone) * 10, buf, (dsp::noise_reduction::CTCSSTone)i);
         }
-        ctcssTones.define(-1, "Any", dsp::noise_reduction::CTCSS_TONE_ANY);
+        ctcssTones.define(-1, "任意", dsp::noise_reduction::CTCSS_TONE_ANY);
 
         // Initialize the config if it doesn't exist
         {
@@ -240,7 +240,7 @@ private:
         ImGui::EndGroup();
 
         if (!_this->bandwidthLocked) {
-            ImGui::LeftLabel("Bandwidth");
+            ImGui::LeftLabel("带宽");
             bool changed = false;
             if (_this->selectedDemodID == RADIO_DEMOD_CW || _this->selectedDemodID == RADIO_DEMOD_CWR) {
                 static constexpr std::array<int, 5> cwBandwidthPresets = { 100, 200, 250, 400, 500 };
@@ -259,7 +259,7 @@ private:
         }
 
         // VFO snap interval
-        ImGui::LeftLabel("Snap Interval");
+        ImGui::LeftLabel("吸附间隔");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt(("##_radio_snap_" + _this->name).c_str(), &_this->snapInterval, 1, 100)) {
             if (_this->snapInterval < 1) { _this->snapInterval = 1; }
@@ -269,7 +269,7 @@ private:
 
         // Deemphasis mode
         if (_this->deempAllowed) {
-            ImGui::LeftLabel("De-emphasis");
+            ImGui::LeftLabel("去加重");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::Combo(("##_radio_wfm_deemp_" + _this->name).c_str(), &_this->deempId, _this->deempModes.txt)) {
                 _this->setDeemphasisMode(_this->deempModes[_this->deempId]);
@@ -278,14 +278,14 @@ private:
 
         // Squelch
         if (_this->squelchAllowed) {
-            ImGui::LeftLabel("Squelch Mode");
+            ImGui::LeftLabel("静噪模式");
             ImGui::FillWidth();
             if (ImGui::Combo(("##_radio_sqelch_mode_" + _this->name).c_str(), &_this->squelchModeId, _this->squelchModes.txt)) {
                 _this->setSquelchMode(_this->squelchModes[_this->squelchModeId]);
             }
             switch (_this->squelchModes[_this->squelchModeId]) {
             case SQUELCH_MODE_POWER:
-                ImGui::LeftLabel("Squelch Level");
+                ImGui::LeftLabel("静噪电平");
                 ImGui::FillWidth();
                 if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->squelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
                     _this->setSquelchLevel(_this->squelchLevel);
@@ -294,7 +294,7 @@ private:
 
             case SQUELCH_MODE_CTCSS_MUTE:
                 if (_this->squelchModes[_this->squelchModeId] == SQUELCH_MODE_CTCSS_MUTE) {
-                    ImGui::LeftLabel("CTCSS Tone");
+                    ImGui::LeftLabel("CTCSS 音调");
                     ImGui::FillWidth();
                     if (ImGui::Combo(("##_radio_ctcss_tone_" + _this->name).c_str(), &_this->ctcssToneId, _this->ctcssTones.txt)) {
                         _this->setCTCSSTone(_this->ctcssTones[_this->ctcssToneId]);
@@ -309,7 +309,7 @@ private:
             // network thread mid-frame, and reading the guard twice would leave
             // the beginDisabled/endDisabled pair unbalanced (issue #1437).
             bool nbEnabled = _this->nbEnabled.load(std::memory_order_relaxed);
-            if (ImGui::Checkbox(("Noise blanker (W.I.P.)##_radio_nb_ena_" + _this->name).c_str(), &nbEnabled)) {
+            if (ImGui::Checkbox(("噪声消隐（开发中）##_radio_nb_ena_" + _this->name).c_str(), &nbEnabled)) {
                 _this->setNBEnabled(nbEnabled);
             }
             bool nbDisabled = !nbEnabled && _this->enabled;
@@ -327,7 +327,7 @@ private:
             // Snapshot once (see nbEnabled above): rigctl set_mode can flip this
             // mid-frame, which would unbalance the disabled block (issue #1437).
             bool fmIFNREnabled = _this->FMIFNREnabled.load(std::memory_order_relaxed);
-            if (ImGui::Checkbox(("IF Noise Reduction##_radio_fmifnr_ena_" + _this->name).c_str(), &fmIFNREnabled)) {
+            if (ImGui::Checkbox(("中频降噪##_radio_fmifnr_ena_" + _this->name).c_str(), &fmIFNREnabled)) {
                 _this->setFMIFNREnabled(fmIFNREnabled);
             }
             if (_this->selectedDemodID == RADIO_DEMOD_NFM) {
@@ -344,7 +344,7 @@ private:
 
         // High pass
         if (_this->highPassAllowed) {
-            if (ImGui::Checkbox(("High Pass##_radio_hpf_" + _this->name).c_str(), &_this->highPass)) {
+            if (ImGui::Checkbox(("高通##_radio_hpf_" + _this->name).c_str(), &_this->highPass)) {
                 _this->setHighPass(_this->highPass);
             }
         }
@@ -355,7 +355,7 @@ private:
         // Display the squelch diagnostics
         switch (_this->squelchModes[_this->squelchModeId]) {
         case SQUELCH_MODE_CTCSS_MUTE:
-            ImGui::TextUnformatted("Received Tone:");
+            ImGui::TextUnformatted("接收音调：");
             ImGui::SameLine();
             {
                 auto ctone = _this->ctcss.getCurrentTone();
@@ -369,13 +369,13 @@ private:
                     }
                 }
                 else {
-                    ImGui::TextUnformatted("None");
+                    ImGui::TextUnformatted("无");
                 }
             }
             break;
 
         case SQUELCH_MODE_CTCSS_DECODE:
-            ImGui::TextUnformatted("Received Tone:");
+            ImGui::TextUnformatted("接收音调：");
             ImGui::SameLine();
             {
                 auto ctone = _this->ctcss.getCurrentTone();
@@ -383,7 +383,7 @@ private:
                     ImGui::TextColored(ImVec4(0, 1, 0, 1), "%.1fHz", dsp::noise_reduction::CTCSS_TONES[_this->ctcss.getCurrentTone()]);
                 }
                 else {
-                    ImGui::TextUnformatted("None");
+                    ImGui::TextUnformatted("无");
                 }
             }
             break;

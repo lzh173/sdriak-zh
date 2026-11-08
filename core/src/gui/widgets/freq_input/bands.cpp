@@ -30,23 +30,23 @@ namespace freq_input {
 
         std::string_view serviceDisplayName(BandService service) {
             switch (service) {
-                case BandService::Amateur:        return "Amateur";
-                case BandService::Broadcast:      return "Broadcast";
-                case BandService::Aviation:       return "Aviation";
-                case BandService::Maritime:       return "Marine";
-                case BandService::PersonalRadio:  return "Personal";
+                case BandService::Amateur:        return "业余";
+                case BandService::Broadcast:      return "广播";
+                case BandService::Aviation:       return "航空";
+                case BandService::Maritime:       return "海事";
+                case BandService::PersonalRadio:  return "个人";
                 case BandService::Ism:            return "ISM";
-                case BandService::Satellite:      return "Satellite";
-                case BandService::Navigation:     return "Navigation";
-                case BandService::TimeStandard:   return "Time";
-                case BandService::Cellular:       return "Cellular";
+                case BandService::Satellite:      return "卫星";
+                case BandService::Navigation:     return "导航";
+                case BandService::TimeStandard:   return "授时";
+                case BandService::Cellular:       return "蜂窝";
                 case BandService::Rlan:           return "Wi-Fi";
-                case BandService::Meteorological: return "Weather";
-                case BandService::LandMobile:     return "Land mobile";
-                case BandService::Other:          return "Other";
+                case BandService::Meteorological: return "气象";
+                case BandService::LandMobile:     return "陆地移动";
+                case BandService::Other:          return "其他";
                 case BandService::Count:          break;
             }
-            return "Other";
+            return "其他";
         }
 
         struct LabelLines {
@@ -549,7 +549,7 @@ namespace freq_input {
             bool& scrollActiveIntoView) {
             BandGridEvent event;
             if (page.choices.empty()) {
-                ImGui::TextDisabled("No bands in the tuning range");
+                ImGui::TextDisabled("调谐范围内无频段");
                 return event;
             }
 
@@ -750,7 +750,7 @@ namespace freq_input {
                         drawCenteredLabel(drawList, style::baseFont, style::dp(13.0f), ImVec2(rowMin.x + rowSize.x * 0.89f, centerY), rowSize.x * 0.18f, color, radioModeName(registers[index]->mode));
                     }
                     else {
-                        drawCenteredLabel(drawList, style::baseFont, style::dp(14.0f), ImVec2(rowMin.x + rowSize.x * 0.50f, centerY), rowSize.x * 0.55f, dim, "Empty");
+                        drawCenteredLabel(drawList, style::baseFont, style::dp(14.0f), ImVec2(rowMin.x + rowSize.x * 0.50f, centerY), rowSize.x * 0.55f, dim, "空");
                     }
                     drawList->PopClipRect();
                     ImGui::EndDisabled();
@@ -804,7 +804,7 @@ namespace freq_input {
         // toggle controls visibility, not the picker's data source.
         const bandplan::BandPlan_t* plan = gui::waterfall.bandplan;
         if (!plan) {
-            ImGui::TextDisabled("No band plan loaded");
+            ImGui::TextDisabled("未加载频段规划");
             return out;
         }
 

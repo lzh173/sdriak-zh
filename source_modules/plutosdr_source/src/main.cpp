@@ -44,16 +44,16 @@ public:
         samplerates.define(61440000, getBandwdithScaled(61440000.0), 61440000.0);
 
         // Define valid bandwidths
-        bandwidths.define(0, "Auto", 0);
+        bandwidths.define(0, "自动", 0);
         for (int bw = 1000000.0; bw <= 52000000; bw += 500000) {
             bandwidths.define(bw, getBandwdithScaled(bw), bw);
         }
 
         // Define gain modes
-        gainModes.define("manual", "Manual", "manual");
-        gainModes.define("fast_attack", "Fast Attack", "fast_attack");
-        gainModes.define("slow_attack", "Slow Attack", "slow_attack");
-        gainModes.define("hybrid", "Hybrid", "hybrid");
+        gainModes.define("manual", "手动", "manual");
+        gainModes.define("fast_attack", "快起控", "fast_attack");
+        gainModes.define("slow_attack", "慢起控", "slow_attack");
+        gainModes.define("hybrid", "混合", "hybrid");
 
         // Define RF inputs (second input on Pluto+, ANTSDR, LibreSDR RevC)
         rfInputs.define("rx1", "RX 1", "rx1");
@@ -373,14 +373,14 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_pluto_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_pluto_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->devDesc);
             core::setInputSampleRate(_this->samplerate);
         }
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Bandwidth");
+        SmGui::LeftLabel("带宽");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_pluto_bw_", _this->name), &_this->bwId, _this->bandwidths.txt)) {
             _this->bandwidth = _this->bandwidths.value(_this->bwId);
@@ -392,7 +392,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("Gain Mode");
+        SmGui::LeftLabel("增益模式");
         SmGui::FillWidth();
         SmGui::ForceSync();
         if (SmGui::Combo(CONCAT("##_pluto_gainmode_select_", _this->name), &_this->gmId, _this->gainModes.txt)) {
@@ -404,7 +404,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("Gain");
+        SmGui::LeftLabel("增益");
         if (_this->gmId) { SmGui::BeginDisabled(); }
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_pluto_gain__", _this->name), &_this->gain, -1.0f, 73.0f, 1.0f, SmGui::FMT_STR_FLOAT_DB_NO_DECIMAL)) {
@@ -419,7 +419,7 @@ private:
 
         // RF input selection (only effective on hardware with a second RX input)
         if (_this->running) { SmGui::BeginDisabled(); }
-        SmGui::LeftLabel("RF Input");
+        SmGui::LeftLabel("射频输入");
         SmGui::FillWidth();
         SmGui::ForceSync();
         if (SmGui::Combo(CONCAT("##_pluto_rfinput_", _this->name), &_this->rfId, _this->rfInputs.txt)) {
@@ -432,16 +432,16 @@ private:
         // Stream health indicators
         if (_this->running) {
             if (_this->underflow) {
-                SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Buffer: underflow");
+                SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "缓冲：欠载");
             }
             else {
-                SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Buffer: nominal");
+                SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "缓冲：正常");
             }
             if (_this->overload) {
-                SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Gain: overdrive");
+                SmGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "增益：过载");
             }
             else {
-                SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Gain: OK");
+                SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "增益：正常");
             }
         }
     }

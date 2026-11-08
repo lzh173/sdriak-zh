@@ -187,7 +187,7 @@ private:
         txtBwList = "";
         bandwidthList.clear();
         bandwidthList.push_back(-1);
-        txtBwList += "Auto";
+        txtBwList += "自动";
         txtBwList += '\0';
 
         for (auto bwr : bandwidthRange) {
@@ -360,7 +360,7 @@ private:
         if (_this->devId < 0) {
             SmGui::FillWidth();
             SmGui::ForceSync();
-            if (SmGui::Button(CONCAT("Refresh##_dev_select_", _this->name))) {
+            if (SmGui::Button(CONCAT("刷新##_dev_select_", _this->name))) {
                 _this->refresh();
                 // Read into a local first: as an argument the access would
                 // still be held while selectDevice() takes one of its own.
@@ -388,7 +388,7 @@ private:
 
         SmGui::SameLine();
         SmGui::FillWidth();
-        if (SmGui::Button(CONCAT("Refresh##_dev_select_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_dev_select_", _this->name))) {
             _this->refresh();
             std::string devName = config.read().value("device", std::string());
             _this->selectDevice(devName);
@@ -397,7 +397,7 @@ private:
         if (_this->running) { SmGui::EndDisabled(); }
 
         if (_this->antennaList.size() > 1) {
-            SmGui::LeftLabel("Antenna");
+            SmGui::LeftLabel("天线");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_antenna_select_", _this->name), &_this->uiAntennaId, _this->txtAntennaList.c_str())) {
                 if (_this->running)
@@ -433,7 +433,7 @@ private:
 
         int i = 0;
         for (auto gain : _this->gainList) {
-            SmGui::LeftLabelF("%s gain", gain.c_str());
+            SmGui::LeftLabelF("%s 增益", gain.c_str());
             // ImGui::SetCursorPosX(gainNameLen);
             // ImGui::SetNextItemWidth(menuWidth - gainNameLen);
             float step = _this->gainRanges[i].step();
@@ -454,7 +454,7 @@ private:
             i++;
         }
         if (_this->bandwidthList.size() > 2) {
-            SmGui::LeftLabel("Bandwidth");
+            SmGui::LeftLabel("带宽");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_bw_select_", _this->name), &_this->uiBandwidthId, _this->txtBwList.c_str())) {
                 if (_this->running) {

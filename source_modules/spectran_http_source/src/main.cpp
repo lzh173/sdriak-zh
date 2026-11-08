@@ -136,21 +136,21 @@ private:
 
         if (_this->running) { SmGui::BeginDisabled(); }
         SmGui::FillWidth();
-        if (!connected && SmGui::Button("Connect##spectran_http_source")) {
+        if (!connected && SmGui::Button("连接##spectran_http_source")) {
             _this->tryConnect();
         }
-        else if (connected && SmGui::Button("Disconnect##spectran_http_source")) {
+        else if (connected && SmGui::Button("断开##spectran_http_source")) {
             _this->disconnect();
         }
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::Text("Status:");
+        SmGui::Text("状态：");
         SmGui::SameLine();
         if (connected) {
-            SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
+            SmGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "已连接");
         }
         else {
-            SmGui::Text("Not connected");
+            SmGui::Text("未连接");
         }
     }
 

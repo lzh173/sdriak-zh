@@ -508,13 +508,13 @@ namespace rds {
                 return THREE_LETTER_CALLS[pi];
             }
             else {
-                return "Not Assigned";
+                return "未分配";
             }
         }
         else if (pi >= 0x1000 && pi <= 0x994F) {
             // Normal encoding
             if ((pi & 0xFF) == 0 || ((pi >> 8) & 0xF) == 0) {
-                return "Not Assigned";
+                return "未分配";
             }
             else {
                 return base26ToCall(pi);
@@ -526,11 +526,11 @@ namespace rds {
                 return NAT_LOC_LINKED_STATIONS[_pi];
             }
             else {
-                return "Not Assigned";
+                return "未分配";
             }
         }
         else {
-            return "Not Assigned";
+            return "未分配";
         }
     }
 

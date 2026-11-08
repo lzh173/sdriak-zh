@@ -140,7 +140,7 @@ private:
             }
         }
 
-        if (ImGui::Checkbox(CONCAT("Broken modulation##meteor_rec", _this->name), &_this->brokenModulation)) {
+        if (ImGui::Checkbox(CONCAT("异常调制##meteor_rec", _this->name), &_this->brokenModulation)) {
             _this->demod.setBrokenModulation(_this->brokenModulation);
             config.edit().section(_this->name).set("brokenModulation", _this->brokenModulation);
         }
@@ -153,16 +153,16 @@ private:
         if (!_this->folderSelect.pathIsValid() && _this->enabled) { style::beginDisabled(); }
 
         if (_this->recording) {
-            if (ImGui::Button(CONCAT("Stop##meteor_rec_", _this->name), ImVec2(menuWidth, 0))) {
+            if (ImGui::Button(CONCAT("停止##meteor_rec_", _this->name), ImVec2(menuWidth, 0))) {
                 _this->stopRecording();
             }
-            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Recording %.2fMB", (float)_this->dataWritten / 1000000.0f);
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "录制中 %.2fMB", (float)_this->dataWritten / 1000000.0f);
         }
         else {
-            if (ImGui::Button(CONCAT("Record##meteor_rec_", _this->name), ImVec2(menuWidth, 0))) {
+            if (ImGui::Button(CONCAT("录制##meteor_rec_", _this->name), ImVec2(menuWidth, 0))) {
                 _this->startRecording();
             }
-            ImGui::TextUnformatted("Idle --.--MB");
+            ImGui::TextUnformatted("空闲 --.--MB");
         }
 
         if (!_this->folderSelect.pathIsValid() && _this->enabled) { style::endDisabled(); }

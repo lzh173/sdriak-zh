@@ -131,7 +131,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 	if (!_this->enabled) style::beginDisabled();
 
 	/* Type combobox {{{ */
-	ImGui::LeftLabel("Type");
+	ImGui::LeftLabel("类型");
 	ImGui::SetNextItemWidth(width - ImGui::GetCursorPosX());
 	if (ImGui::BeginCombo(CONCAT("##_radiosonde_type_", _this->name), std::get<0>(_this->supportedTypes[_this->selectedType]))) {
 		for (int i=0; i<IM_ARRAYSIZE(_this->supportedTypes); i++) {
@@ -152,7 +152,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 	ImGui::SetNextItemWidth(width);
 	if (ImGui::BeginTable(CONCAT("##radiosonde_data_", _this->name), 2, ImGuiTableFlags_SizingFixedFit)) {
 		ImGui::TableNextColumn();
-		ImGui::Text("Serial no.");
+		ImGui::Text("序列号");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%s", _this->lastData.serial.c_str());
@@ -160,7 +160,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Frame no.");
+		ImGui::Text("帧号");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%d", _this->lastData.seq);
@@ -168,7 +168,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Onboard time");
+		ImGui::Text("机载时间");
 		if (_this->enabled) {
 			if (strftime(time, sizeof(time), "%a %b %d %Y %H:%M:%S", gmtime(&_this->lastData.time))) {
 				ImGui::TableNextColumn();
@@ -182,7 +182,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Latitude");
+		ImGui::Text("纬度");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%8.5f%c", fabs(_this->lastData.lat), (_this->lastData.lat >= 0 ? 'N' : 'S'));
@@ -190,7 +190,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Longitude");
+		ImGui::Text("经度");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%8.5f%c", fabs(_this->lastData.lon), (_this->lastData.lon >= 0 ? 'E' : 'W'));
@@ -198,7 +198,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Altitude");
+		ImGui::Text("高度");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%.1fm", _this->lastData.alt);
@@ -206,7 +206,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Speed");
+		ImGui::Text("速度");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%.1fm/s", _this->lastData.spd);
@@ -214,7 +214,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Heading");
+		ImGui::Text("航向");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%.0f°", _this->lastData.hdg);
@@ -222,7 +222,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Climb");
+		ImGui::Text("爬升率");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%.1fm/s", _this->lastData.climb);
@@ -234,59 +234,59 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Temperature");
+		ImGui::Text("温度");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			if (!_this->lastData.calibrated) ImGui::PushStyleColor(ImGuiCol_Text, UNCAL_COLOR);
 			ImGui::Text("%.1f°C", _this->lastData.temp);
 			if (!_this->lastData.calibrated) ImGui::PopStyleColor();
 			if (!_this->lastData.calibrated && ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("Calibration data not yet complete (%.0f%%).", _this->lastData.calib_percent);
+				ImGui::SetTooltip("校准数据尚未完整（%.0f%%）。", _this->lastData.calib_percent);
 			}
 		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Humidity");
+		ImGui::Text("湿度");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			if (!_this->lastData.calibrated) ImGui::PushStyleColor(ImGuiCol_Text, UNCAL_COLOR);
 			ImGui::Text("%.1f%%", _this->lastData.rh);
 			if (!_this->lastData.calibrated) ImGui::PopStyleColor();
 			if (!_this->lastData.calibrated && ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("Calibration data not yet complete (%.0f%%).", _this->lastData.calib_percent);
+				ImGui::SetTooltip("校准数据尚未完整（%.0f%%）。", _this->lastData.calib_percent);
 			}
 		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Dew point");
+		ImGui::Text("露点");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			if (!_this->lastData.calibrated) ImGui::PushStyleColor(ImGuiCol_Text, UNCAL_COLOR);
 			ImGui::Text("%.1f°C", _this->lastData.dewpt);
 			if (!_this->lastData.calibrated) ImGui::PopStyleColor();
 			if (!_this->lastData.calibrated && ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("Calibration data not yet complete (%.0f%%).", _this->lastData.calib_percent);
+				ImGui::SetTooltip("校准数据尚未完整（%.0f%%）。", _this->lastData.calib_percent);
 			}
 		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Pressure");
+		ImGui::Text("气压");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			if (!_this->lastData.calibrated) ImGui::PushStyleColor(ImGuiCol_Text, UNCAL_COLOR);
 			ImGui::Text("%.1fhPa", _this->lastData.pressure);
 			if (!_this->lastData.calibrated) ImGui::PopStyleColor();
 			if (!_this->lastData.calibrated && ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("Calibration data not yet complete (%.0f%%).", _this->lastData.calib_percent);
+				ImGui::SetTooltip("校准数据尚未完整（%.0f%%）。", _this->lastData.calib_percent);
 			}
 		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::Text("Aux. data");
+		ImGui::Text("辅助数据");
 		if (_this->enabled) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%s", _this->lastData.auxData.c_str());
@@ -296,7 +296,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 	}
 	/* }}} */
 	/* GPX output file {{{ */
-	gpxStatusChanged = ImGui::Checkbox(CONCAT("GPX track##_gpx_track_", _this->name), &_this->gpxOutput);
+	gpxStatusChanged = ImGui::Checkbox(CONCAT("GPX 轨迹##_gpx_track_", _this->name), &_this->gpxOutput);
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(width - ImGui::GetCursorPosX());
 	gpxStatusChanged |= ImGui::InputText(CONCAT("##_gpx_fname_", _this->name), _this->gpxFilename, sizeof(gpxFilename)-1,
@@ -304,7 +304,7 @@ RadiosondeDecoderModule::menuHandler(void *ctx)
 	if (gpxStatusChanged) onGPXOutputChanged(ctx);
 	/* }}} */
 	/* Log output file {{{ */
-	ptuStatusChanged = ImGui::Checkbox(CONCAT("Log data##_ptu_log_", _this->name), &_this->ptuOutput);
+	ptuStatusChanged = ImGui::Checkbox(CONCAT("记录数据##_ptu_log_", _this->name), &_this->ptuOutput);
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(width - ImGui::GetCursorPosX());
 	ptuStatusChanged |= ImGui::InputText(CONCAT("##_ptu_fname_", _this->name), _this->ptuFilename, sizeof(ptuFilename)-1,

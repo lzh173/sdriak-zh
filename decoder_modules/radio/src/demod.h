@@ -41,7 +41,7 @@ enum SquelchMode {
 namespace demod {
     template <std::size_t PresetCount>
     static inline void drawHzPresetPopup(float currentValue, float minValue, float maxValue, const std::array<int, PresetCount>& presets, float* selectedValue) {
-        ImGui::Text("Current: %.0f Hz", currentValue);
+        ImGui::Text("当前：%.0f Hz", currentValue);
         ImGui::Separator();
         for (int presetValue : presets) {
             float preset = (float)presetValue;
@@ -248,13 +248,13 @@ namespace demod {
             }
             if (enabled) { ImGui::EndDisabled(); }
             else { ImGui::BeginDisabled(); }
-            ImGui::LeftLabel("AGC Attack");
+            ImGui::LeftLabel("AGC 起控时间");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::SliderFloat((id + "_agc_attack_" + owner->name).c_str(), &attack, 1.0f, 200.0f)) {
                 demod.setAGCAttack(attack / ifSamplerate);
                 owner->saveConf("agcAttack", attack);
             }
-            ImGui::LeftLabel("AGC Decay");
+            ImGui::LeftLabel("AGC 释放时间");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::SliderFloat((id + "_agc_decay_" + owner->name).c_str(), &decay, 1.0f, 20.0f)) {
                 demod.setAGCDecay(decay / ifSamplerate);

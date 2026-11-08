@@ -30,8 +30,8 @@ namespace demod {
             _config = config;
 
             // Define RDS regions
-            rdsRegions.define("eu", "Europe", RDS_REGION_EUROPE);
-            rdsRegions.define("na", "North America", RDS_REGION_NORTH_AMERICA);
+            rdsRegions.define("eu", "欧洲", RDS_REGION_EUROPE);
+            rdsRegions.define("na", "北美", RDS_REGION_NORTH_AMERICA);
 
             // Register FFT draw handler
             fftRedrawHandler.handler = fftRedraw;
@@ -89,25 +89,25 @@ namespace demod {
         }
 
         void showMenu() {
-            if (ImGui::Checkbox(("Low Pass##_radio_wfm_lowpass_" + name).c_str(), &_lowPass)) {
+            if (ImGui::Checkbox(("低通##_radio_wfm_lowpass_" + name).c_str(), &_lowPass)) {
                 demod.setLowPass(_lowPass);
                 saveConf("lowPass", _lowPass);
             }
-            if (ImGui::Checkbox(("Stereo##_radio_wfm_stereo_" + name).c_str(), &_stereo)) {
+            if (ImGui::Checkbox(("立体声##_radio_wfm_stereo_" + name).c_str(), &_stereo)) {
                 setStereo(_stereo);
                 saveConf("stereo", _stereo);
             }
-            if (ImGui::Checkbox(("Decode RDS##_radio_wfm_rds_" + name).c_str(), &_rds)) {
+            if (ImGui::Checkbox(("解码 RDS##_radio_wfm_rds_" + name).c_str(), &_rds)) {
                 demod.setRDSOut(_rds);
                 saveConf("rds", _rds);
             }
 
             // TODO: This might break when the entire radio module is disabled
             if (!_rds) { ImGui::BeginDisabled(); }
-            if (ImGui::Checkbox(("RDS Incremental Update##_radio_wfm_rds_inc_" + name).c_str(), &_rdsIncremental)) {
+            if (ImGui::Checkbox(("RDS 增量更新##_radio_wfm_rds_inc_" + name).c_str(), &_rdsIncremental)) {
                 saveConf("rdsIncremental", _rdsIncremental);
             }
-            if (ImGui::Checkbox(("Advanced RDS Info##_radio_wfm_rds_info_" + name).c_str(), &_rdsInfo)) {
+            if (ImGui::Checkbox(("高级 RDS 信息##_radio_wfm_rds_info_" + name).c_str(), &_rdsInfo)) {
                 setAdvancedRds(_rdsInfo);
                 saveConf("rdsInfo", _rdsInfo);
             }
@@ -126,7 +126,7 @@ namespace demod {
                 if (rdsDecode.piCodeValid()) {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("PI Code");
+                    ImGui::TextUnformatted("PI 码");
                     ImGui::TableSetColumnIndex(1);
                     if (rdsRegion == RDS_REGION_NORTH_AMERICA) {
                         ImGui::Text("0x%04X (%s)", rdsDecode.getPICode(), rdsDecode.getCallsign().c_str());
@@ -137,26 +137,26 @@ namespace demod {
                     
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Country Code");
+                    ImGui::TextUnformatted("国家代码");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("%d", rdsDecode.getCountryCode());
 
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Program Coverage");
+                    ImGui::TextUnformatted("覆盖范围");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("%s (%d)", rds::AREA_COVERAGE_TO_STR[rdsDecode.getProgramCoverage()], rdsDecode.getProgramCoverage());
 
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Reference Number");
+                    ImGui::TextUnformatted("参考号");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("%d", rdsDecode.getProgramRefNumber());
                 }
                 else {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("PI Code");
+                    ImGui::TextUnformatted("PI 码");
                     ImGui::TableSetColumnIndex(1);
                     if (rdsRegion == RDS_REGION_NORTH_AMERICA) {
                         ImGui::TextUnformatted("0x---- (----)");
@@ -167,19 +167,19 @@ namespace demod {
                     
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Country Code");
+                    ImGui::TextUnformatted("国家代码");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::TextUnformatted("--");  // TODO: String
 
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Program Coverage");
+                    ImGui::TextUnformatted("覆盖范围");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::TextUnformatted("------- (--)");
 
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Reference Number");
+                    ImGui::TextUnformatted("参考号");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::TextUnformatted("--");
                 }
@@ -187,7 +187,7 @@ namespace demod {
                 if (rdsDecode.programTypeValid()) {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Program Type");
+                    ImGui::TextUnformatted("节目类型");
                     ImGui::TableSetColumnIndex(1);
                     if (rdsRegion == RDS_REGION_NORTH_AMERICA) {
                         ImGui::Text("%s (%d)", rds::PROGRAM_TYPE_US_TO_STR[rdsDecode.getProgramType()], rdsDecode.getProgramType());
@@ -199,7 +199,7 @@ namespace demod {
                 else {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Program Type");
+                    ImGui::TextUnformatted("节目类型");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::TextUnformatted("------- (--)");  // TODO: String
                 }
@@ -207,14 +207,14 @@ namespace demod {
                 if (rdsDecode.musicValid()) {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Music");
+                    ImGui::TextUnformatted("音乐");
                     ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%s", rdsDecode.getMusic() ? "Yes":"No");
+                    ImGui::Text("%s", rdsDecode.getMusic() ? "是":"否");
                 }
                 else {
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Music");
+                    ImGui::TextUnformatted("音乐");
                     ImGui::TableSetColumnIndex(1);
                     ImGui::TextUnformatted("---");
                 }

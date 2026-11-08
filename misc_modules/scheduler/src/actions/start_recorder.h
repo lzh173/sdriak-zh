@@ -20,7 +20,7 @@ namespace sched_action {
 
         void loadFromConfig(json config) {
             if (config.contains("recorder")) { recorderName = config["recorder"]; }
-            name = "Start \"" + recorderName + "\"";
+            name = "启动 \"" + recorderName + "\"";
         }
 
         json saveToConfig() {
@@ -37,7 +37,7 @@ namespace sched_action {
     private:
         std::string recorderName;
 
-        std::string name = "Start \"\"";
+        std::string name = "启动 \"\"";
     };
 
     Action StartRecorder() {

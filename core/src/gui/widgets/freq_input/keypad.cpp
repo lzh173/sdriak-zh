@@ -66,15 +66,15 @@ namespace freq_input {
 
         // The echo, at its widest: both the raw and the clamped value.
         h += ctx.limited
-            ? lineH("= " + groupHz(ctx.rangeHi()) + " Hz -> " + groupHz(ctx.rangeHi()) + " Hz")
+            ? lineH("= " + groupHz(ctx.rangeHi()) + " Hz → " + groupHz(ctx.rangeHi()) + " Hz")
             : lineH("= " + groupHz(999999999999ull) + " Hz");
         lines++;
 
         if (ctx.limited) {
             h += std::max(
-                lineH("Below source range: minimum is " + groupHz(ctx.rangeLo()) + " Hz"),
-                lineH("Above source range: maximum is " + groupHz(ctx.rangeHi()) + " Hz"));
-            h += lineH("Range: " + groupHz(ctx.rangeLo()) + " - " + groupHz(ctx.rangeHi()) + " Hz");
+                lineH("低于信号源范围：最小 " + groupHz(ctx.rangeLo()) + " Hz"),
+                lineH("高于信号源范围：最大 " + groupHz(ctx.rangeHi()) + " Hz"));
+            h += lineH("范围：" + groupHz(ctx.rangeLo()) + " - " + groupHz(ctx.rangeHi()) + " Hz");
             lines += 2;
         }
         return h + (float)(lines - 1) * sp;
@@ -182,26 +182,26 @@ namespace freq_input {
         }
 
         if (entry.empty()) {
-            ImGui::TextDisabled("Enter frequency in MHz");
+            ImGui::TextDisabled("输入频率（MHz）");
         }
         else {
             if (outOfRange) { ImGui::PushStyleColor(ImGuiCol_Text, errorCol); }
             if (ctx.limited && targetHz != (uint64_t)rawHz) {
-                ImGui::Text("= %s Hz -> %s Hz", groupHz((uint64_t)rawHz).c_str(), groupHz(targetHz).c_str());
+                ImGui::Text("= %s Hz → %s Hz", groupHz((uint64_t)rawHz).c_str(), groupHz(targetHz).c_str());
             }
             else {
                 ImGui::Text("= %s Hz", groupHz(targetHz).c_str());
             }
             if (outOfRange) { ImGui::PopStyleColor(); }
             if (belowRange) {
-                ImGui::TextColored(errorCol, "Below source range: minimum is %s Hz", groupHz(rangeLo).c_str());
+                ImGui::TextColored(errorCol, "低于信号源范围：最小 %s Hz", groupHz(rangeLo).c_str());
             }
             else if (aboveRange) {
-                ImGui::TextColored(errorCol, "Above source range: maximum is %s Hz", groupHz(rangeHi).c_str());
+                ImGui::TextColored(errorCol, "高于信号源范围：最大 %s Hz", groupHz(rangeHi).c_str());
             }
         }
         if (ctx.limited) {
-            ImGui::TextDisabled("Range: %s - %s Hz", groupHz(rangeLo).c_str(), groupHz(rangeHi).c_str());
+            ImGui::TextDisabled("范围：%s - %s Hz", groupHz(rangeLo).c_str(), groupHz(rangeHi).c_str());
         }
 
         ImGui::PopTextWrapPos();
@@ -272,7 +272,7 @@ namespace freq_input {
         ImGui::SetCursorPos(cellPos(0, 3));
         if (ImGui::Button("CE", ImVec2(m.funcWidth, m.keySize.y))) { entry.clear(); }
         ImGui::SetCursorPos(cellPos(1, 3));
-        if (ImGui::Button("Cancel##sdrpp_freq_input", ImVec2(m.funcWidth, m.keySize.y))) { out.close = true; }
+        if (ImGui::Button("取消##sdrpp_freq_input", ImVec2(m.funcWidth, m.keySize.y))) { out.close = true; }
         ImGui::SetCursorPos(cellPos(2, 3));
         if (ImGui::Button("ENT##sdrpp_freq_input", ImVec2(m.funcWidth, 2.0f * m.keySize.y + sp.y))) {
             commit(ctx, out);

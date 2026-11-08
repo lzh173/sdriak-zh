@@ -39,18 +39,18 @@ public:
         strcpy(tunValStr, "--");
 
         // Define the clock sources
-        clockSources.define("internal", "Internal", DLCR_CLOCK_INTERNAL);
-        clockSources.define("external", "External", DLCR_CLOCK_EXTERNAL);
+        clockSources.define("internal", "内部", DLCR_CLOCK_INTERNAL);
+        clockSources.define("external", "外部", DLCR_CLOCK_EXTERNAL);
 
         // Define the channels
-        channels.define("chan1", "Channel 1", 0);
-        channels.define("chan2", "Channel 2", 1);
-        channels.define("chan3", "Channel 3", 2);
-        channels.define("chan4", "Channel 4", 3);
-        channels.define("chan5", "Channel 5", 4);
-        channels.define("chan6", "Channel 6", 5);
-        channels.define("chan7", "Channel 7", 6);
-        channels.define("chan8", "Channel 8", 7);
+        channels.define("chan1", "信道 1", 0);
+        channels.define("chan2", "信道 2", 1);
+        channels.define("chan3", "信道 3", 2);
+        channels.define("chan4", "信道 4", 3);
+        channels.define("chan5", "信道 5", 4);
+        channels.define("chan6", "信道 6", 5);
+        channels.define("chan7", "信道 7", 6);
+        channels.define("chan8", "信道 8", 7);
 
         // Hardcode the samplerate
         sampleRate = 12.5e6;
@@ -217,7 +217,7 @@ private:
 
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_dlcr_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_dlcr_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->selectedSerial);
             core::setInputSampleRate(_this->sampleRate);
@@ -225,7 +225,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Clock Source");
+        SmGui::LeftLabel("时钟源");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_dlcr_clock_", _this->name), &_this->clockSourceId, _this->clockSources.txt)) {
             if (_this->running) {
@@ -234,11 +234,11 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("Channel");
+        SmGui::LeftLabel("信道");
         SmGui::FillWidth();
         SmGui::Combo(CONCAT("##_dlcr_chan_", _this->name), &_this->channelId, _this->channels.txt);
 
-        SmGui::LeftLabel("LNA Gain");
+        SmGui::LeftLabel("低噪放增益");
         SmGui::FillWidth();
         if (SmGui::SliderInt(CONCAT("##_dlcr_lna_gain_", _this->name), &_this->lnaGain, 0, 14)) {
             if (_this->running) {
@@ -247,7 +247,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("Mixer Gain");
+        SmGui::LeftLabel("混频器增益");
         SmGui::FillWidth();
         if (SmGui::SliderInt(CONCAT("##_dlcr_mixer_gain_", _this->name), &_this->mixerGain, 0, 15)) {
             if (_this->running) {
@@ -256,7 +256,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("VGA Gain");
+        SmGui::LeftLabel("VGA 增益");
         SmGui::FillWidth();
         if (SmGui::SliderInt(CONCAT("##_dlcr_vga_gain_", _this->name), &_this->vgaGain, 0, 15)) {
             if (_this->running) {
@@ -266,19 +266,19 @@ private:
         }
 
 #ifdef DRAGONLABS_SOURCE_ENABLE_DEBUG
-        SmGui::Checkbox(CONCAT("Debug##_dlcr_debug_", _this->name), &_this->debug);
+        SmGui::Checkbox(CONCAT("调试##_dlcr_debug_", _this->name), &_this->debug);
 
         if (_this->debug) {
             ImGui::Separator();
 
-            SmGui::LeftLabel("Clockgen Reg");
+            SmGui::LeftLabel("时钟寄存器");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_clk_reg_", _this->name), _this->clkRegStr, 256);
-            SmGui::LeftLabel("Clockgen Value");
+            SmGui::LeftLabel("时钟值");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_clk_val_", _this->name), _this->clkValStr, 256);
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Read##_dlcr_clk_rd_", _this->name))) {
+            if (SmGui::Button(CONCAT("读取##_dlcr_clk_rd_", _this->name))) {
                 if (_this->running) {
                     uint8_t val;
                     dlcr_si5351c_read_reg(_this->openDev, std::stoi(_this->clkRegStr, NULL, 16), &val);
@@ -286,7 +286,7 @@ private:
                 }
             }
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Write##_dlcr_clk_wr_", _this->name))) {
+            if (SmGui::Button(CONCAT("写入##_dlcr_clk_wr_", _this->name))) {
                 if (_this->running) {
                     dlcr_si5351c_write_reg(_this->openDev, std::stoi(_this->clkRegStr, NULL, 16), std::stoi(_this->clkValStr, NULL, 16));
                 }
@@ -294,14 +294,14 @@ private:
 
             ImGui::Separator();
 
-            SmGui::LeftLabel("Synth Reg");
+            SmGui::LeftLabel("本振寄存器");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_syn_reg_", _this->name), _this->synRegStr, 256);
-            SmGui::LeftLabel("Synth Value");
+            SmGui::LeftLabel("本振值");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_syn_val_", _this->name), _this->synValStr, 256);
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Read##_dlcr_syn_rd_", _this->name))) {
+            if (SmGui::Button(CONCAT("读取##_dlcr_syn_rd_", _this->name))) {
                 if (_this->running) {
                     uint16_t val;
                     dlcr_lmx2572_read_reg(_this->openDev, std::stoi(_this->synRegStr, NULL, 16), &val);
@@ -309,7 +309,7 @@ private:
                 }
             }
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Write##_dlcr_syn_wr_", _this->name))) {
+            if (SmGui::Button(CONCAT("写入##_dlcr_syn_wr_", _this->name))) {
                 if (_this->running) {
                     dlcr_lmx2572_write_reg(_this->openDev, std::stoi(_this->synRegStr, NULL, 16), std::stoi(_this->synValStr, NULL, 16));
                 }
@@ -317,14 +317,14 @@ private:
 
             ImGui::Separator();
 
-            SmGui::LeftLabel("ADC Reg");
+            SmGui::LeftLabel("ADC 寄存器");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_adc_reg_", _this->name), _this->adcRegStr, 256);
-            SmGui::LeftLabel("ADC Value");
+            SmGui::LeftLabel("ADC 值");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_adc_val_", _this->name), _this->adcValStr, 256);
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Read##_dlcr_adc_rd_", _this->name))) {
+            if (SmGui::Button(CONCAT("读取##_dlcr_adc_rd_", _this->name))) {
                 if (_this->running) {
                     uint8_t val;
                     dlcr_mcp37211_read_reg(_this->openDev, std::stoi(_this->adcRegStr, NULL, 16), &val);
@@ -332,7 +332,7 @@ private:
                 }
             }
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Write##_dlcr_adc_wr_", _this->name))) {
+            if (SmGui::Button(CONCAT("写入##_dlcr_adc_wr_", _this->name))) {
                 if (_this->running) {
                     dlcr_mcp37211_write_reg(_this->openDev, std::stoi(_this->adcRegStr, NULL, 16), std::stoi(_this->adcValStr, NULL, 16));
                 }
@@ -340,14 +340,14 @@ private:
 
             ImGui::Separator();
 
-            SmGui::LeftLabel("Tuner Reg");
+            SmGui::LeftLabel("调谐器寄存器");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_tun_reg_", _this->name), _this->tunRegStr, 256);
-            SmGui::LeftLabel("Tuner Value");
+            SmGui::LeftLabel("调谐器值");
             SmGui::FillWidth();
             SmGui::InputText(CONCAT("##_dlcr_tun_val_", _this->name), _this->tunValStr, 256);
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Read##_dlcr_tun_rd_", _this->name))) {
+            if (SmGui::Button(CONCAT("读取##_dlcr_tun_rd_", _this->name))) {
                 if (_this->running) {
                     uint8_t val[8];
                     dlcr_r860_read_reg(_this->openDev, DLCR_TUNER_ALL, std::stoi(_this->tunRegStr, NULL, 16), val);
@@ -358,7 +358,7 @@ private:
                 }
             }
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Write##_dlcr_tun_wr_", _this->name))) {
+            if (SmGui::Button(CONCAT("写入##_dlcr_tun_wr_", _this->name))) {
                 if (_this->running) {
                     dlcr_r860_write_reg(_this->openDev, DLCR_TUNER_ALL, std::stoi(_this->tunRegStr, NULL, 16), std::stoi(_this->tunValStr, NULL, 16));
                 }
@@ -366,17 +366,17 @@ private:
 
             ImGui::Separator();
 
-            SmGui::LeftLabel("Synth Freq");
+            SmGui::LeftLabel("本振频率");
             SmGui::FillWidth();
             ImGui::InputDouble("##_dlcr_synth_freq", &_this->synthFreq);
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Tune##_dlcr_synth_freq", _this->name))) {
+            if (SmGui::Button(CONCAT("调谐##_dlcr_synth_freq", _this->name))) {
                 if (_this->running) {
                     lmx2572_tune(_this->openDev, _this->synthFreq);
                 }
             }
             SmGui::FillWidth();
-            if (SmGui::Button(CONCAT("Shutdown##_dlcr_synth_freq", _this->name))) {
+            if (SmGui::Button(CONCAT("关机##_dlcr_synth_freq", _this->name))) {
                 if (_this->running) {
                     lmx2572_shutdown(_this->openDev);
                 }
@@ -384,7 +384,7 @@ private:
 
             ImGui::Separator();
 
-            SmGui::Checkbox("Calibrate##_dlcr_cal", &_this->docal);
+            SmGui::Checkbox("校准##_dlcr_cal", &_this->docal);
 
             ImGui::Separator();
         }

@@ -110,7 +110,7 @@ namespace vfo_color_menu {
         ImGui::TableNextRow();
 
         ImGui::TableSetColumnIndex(0);
-        if (ImGui::Button("Auto Color##vfo_color", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+        if (ImGui::Button("自动配色##vfo_color", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
             float delta = 1.0f / (float)gui::waterfall.vfos.size();
             float hue = 0;
             std::vector<std::pair<std::string, std::string>> updates;
@@ -129,7 +129,7 @@ namespace vfo_color_menu {
         }
 
         ImGui::TableSetColumnIndex(1);
-        if (ImGui::Button("Clear All##vfo_color", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+        if (ImGui::Button("全部清除##vfo_color", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
             std::vector<std::pair<std::string, std::string>> updates;
             updates.reserve(gui::waterfall.vfos.size());
             for (auto& [name, vfo] : gui::waterfall.vfos) {

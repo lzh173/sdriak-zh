@@ -55,7 +55,7 @@ namespace {
 }
 
 void MainWindow::init() {
-    LoadingScreen::show("Initializing UI");
+    LoadingScreen::show("正在初始化界面");
     gui::waterfall.init();
     gui::waterfall.setRawFFTSize(fftSize);
 
@@ -128,7 +128,7 @@ void MainWindow::init() {
             }
             if (!file.is_regular_file()) { continue; }
             flog::info("Loading {0}", path);
-            LoadingScreen::show("Loading " + file.path().filename().string());
+            LoadingScreen::show("正在加载 " + file.path().filename().string());
             core::moduleManager.loadModule(path);
         }
     }
@@ -153,7 +153,7 @@ void MainWindow::init() {
 #ifndef __ANDROID__
         std::string apath = core::resolveConfigPath(path);
         flog::info("Loading {0}", apath);
-        LoadingScreen::show("Loading " + std::filesystem::path(path).filename().string());
+        LoadingScreen::show("正在加载 " + std::filesystem::path(path).filename().string());
         core::moduleManager.loadModule(apath);
 #else
         core::moduleManager.loadModule(path);
@@ -165,18 +165,18 @@ void MainWindow::init() {
         std::string mod = _module["module"];
         bool enabled = _module["enabled"];
         flog::info("Initializing {0} ({1})", name, mod);
-        LoadingScreen::show("Initializing " + name + " (" + mod + ")");
+        LoadingScreen::show("正在初始化 " + name + " (" + mod + ")");
         core::moduleManager.createInstance(name, mod);
         if (!enabled) { core::moduleManager.disableInstance(name); }
     }
 
     // Load color maps
-    LoadingScreen::show("Loading color maps");
+    LoadingScreen::show("正在加载色图");
     flog::info("Loading color maps");
     if (std::filesystem::is_directory(resourcesDir + "/colormaps")) {
         for (const auto& file : std::filesystem::directory_iterator(resourcesDir + "/colormaps")) {
             std::string path = file.path().generic_string();
-            LoadingScreen::show("Loading " + file.path().filename().string());
+            LoadingScreen::show("正在加载 " + file.path().filename().string());
             flog::info("Loading {0}", path);
             if (file.path().extension().generic_string() != ".json") {
                 continue;
@@ -213,7 +213,7 @@ void MainWindow::init() {
     // Fix gain not updated on startup, soapysdr
 
     // Update UI settings
-    LoadingScreen::show("Loading configuration");
+    LoadingScreen::show("正在加载配置");
     // Read every field first and let go of the lock: applying them tunes the
     // source and steps the module manager, which reach for the config themselves.
     double frequency = 0.0;
@@ -773,29 +773,29 @@ void MainWindow::draw() {
         }
 
 #ifdef SDRPP_ENABLE_DEBUG_MENU
-        if (ImGui::CollapsingHeader("Debug")) {
-            ImGui::Text("Frame time: %.3f ms/frame", ImGui::GetIO().DeltaTime * 1000.0f);
-            ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
-            ImGui::Text("Center Frequency: %.0f Hz", gui::waterfall.getCenterFrequency());
-            ImGui::Text("Source name: %s", sourceName.c_str());
-            ImGui::Checkbox("Show demo window", &demoWindow);
-            ImGui::Text("ImGui version: %s", ImGui::GetVersion());
+        if (ImGui::CollapsingHeader("调试")) {
+            ImGui::Text("帧耗时：%.3f ms/帧", ImGui::GetIO().DeltaTime * 1000.0f);
+            ImGui::Text("帧率：%.1f FPS", ImGui::GetIO().Framerate);
+            ImGui::Text("中心频率：%.0f Hz", gui::waterfall.getCenterFrequency());
+            ImGui::Text("信号源名称：%s", sourceName.c_str());
+            ImGui::Checkbox("显示演示窗口", &demoWindow);
+            ImGui::Text("ImGui 版本：%s", ImGui::GetVersion());
 
             // ImGui::Checkbox("Bypass buffering", &sigpath::iqFrontEnd.inputBuffer.bypass);
 
             // ImGui::Text("Buffering: %d", (sigpath::iqFrontEnd.inputBuffer.writeCur - sigpath::iqFrontEnd.inputBuffer.readCur + 32) % 32);
 
-            if (ImGui::Button("Test Bug")) {
+            if (ImGui::Button("测试 Bug")) {
                 flog::error("Will this make the software crash?");
             }
 
-            if (ImGui::Button("Testing something")) {
+            if (ImGui::Button("测试功能")) {
                 gui::menu.order[0].open = true;
                 firstMenuRender = true;
             }
 
-            ImGui::Checkbox("WF Single Click", &gui::waterfall.VFOMoveSingleClick);
-            ImGui::Checkbox("Lock Menu Order", &gui::menu.locked);
+            ImGui::Checkbox("瀑布图单击", &gui::waterfall.VFOMoveSingleClick);
+            ImGui::Checkbox("锁定菜单顺序", &gui::menu.locked);
 
             ImGui::Spacing();
         }
@@ -925,18 +925,18 @@ void MainWindow::draw() {
     // and cancels it.
     if (exitDialogRequest) {
         exitDialogRequest = false;
-        ImGui::OpenPopup("Exit##sdrpp_exit_confirm");
+        ImGui::OpenPopup("退出##sdrpp_exit_confirm");
     }
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("Exit##sdrpp_exit_confirm", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::TextUnformatted(playing ? "Stop the radio and exit the application?" : "Exit the application?");
+    if (ImGui::BeginPopupModal("退出##sdrpp_exit_confirm", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextUnformatted(playing ? "要停止无线电并退出程序吗？" : "要退出程序吗？");
         ImGui::Spacing();
         ImVec2 exitBtnSize(style::dp(120.0f), 0.0f);
-        if (ImGui::Button("Cancel##sdrpp_exit_cancel", exitBtnSize)) {
+        if (ImGui::Button("取消##sdrpp_exit_cancel", exitBtnSize)) {
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Exit##sdrpp_exit_ok", exitBtnSize)) {
+        if (ImGui::Button("退出##sdrpp_exit_ok", exitBtnSize)) {
             setPlayState(false);
             backend::finishAppAndRemoveTask();
             ImGui::CloseCurrentPopup();
@@ -1038,8 +1038,8 @@ void MainWindow::drawWaterfallControls(ImGui::WaterfallVFO* vfo, const ImVec4& t
     // Sliders only: a wider track deserves a grab you can see (see sliderW).
     ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, style::dp(style::touchStyle ? 18.0f : 10.0f));
 
-    centerFor(ImGui::CalcTextSize("Zoom").x);
-    ImGui::TextUnformatted("Zoom");
+    centerFor(ImGui::CalcTextSize("缩放").x);
+    ImGui::TextUnformatted("缩放");
     centerFor(sliderW);
     bool zoomSliderChanged = ImGui::VSliderFloat("##_7_", wfSliderSize, &bw, 1.0, 0.0, "");
     // Applies to the last submitted item: keeps wheel events over the slider
@@ -1065,8 +1065,8 @@ void MainWindow::drawWaterfallControls(ImGui::WaterfallVFO* vfo, const ImVec4& t
     // live: the user owns contrast even while sticky auto-range tracks Ref.
     // Dragging it pivots on Ref (the floor), extending the top.
     float wfRange = fftMax - fftMin;
-    centerFor(ImGui::CalcTextSize("Range").x);
-    ImGui::TextUnformatted("Range");
+    centerFor(ImGui::CalcTextSize("范围").x);
+    ImGui::TextUnformatted("范围");
     centerFor(sliderW);
     bool rangeSliderChanged = ImGui::VSliderFloat("##_8_", wfSliderSize, &wfRange, WaterfallAutoRange::RANGE_MIN, WaterfallAutoRange::RANGE_MAX, "");
     ImGui::SetItemUsingMouseWheel();
@@ -1086,8 +1086,8 @@ void MainWindow::drawWaterfallControls(ImGui::WaterfallVFO* vfo, const ImVec4& t
     if (showRef) {
         float wfRef = fftMin;
         ImGui::BeginDisabled(autoRange.sticky());
-        centerFor(ImGui::CalcTextSize("Ref").x);
-        ImGui::TextUnformatted("Ref");
+        centerFor(ImGui::CalcTextSize("参考").x);
+        ImGui::TextUnformatted("参考");
         centerFor(sliderW);
         bool refSliderChanged = ImGui::VSliderFloat("##_9_", wfSliderSize, &wfRef, WaterfallAutoRange::REF_MIN, WaterfallAutoRange::REF_MAX, "");
         ImGui::SetItemUsingMouseWheel();

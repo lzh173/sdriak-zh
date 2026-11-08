@@ -40,7 +40,7 @@ enum {
     _BOOKMARK_DISP_MODE_COUNT
 };
 
-const char* bookmarkDisplayModesTxt = "Off\0Top\0Bottom\0";
+const char* bookmarkDisplayModesTxt = "关闭\0顶部\0底部\0";
 const char* bookmarkRowsTxt = "1\0""2\0""3\0""4\0""5\0""6\0""7\0""8\0""9\0""10\0";
 
 class FrequencyManagerModule : public ModuleManager::Instance {
@@ -169,13 +169,13 @@ private:
         editDialog.request();
 
         // Find a unique default name
-        if (bookmarks.find("New Bookmark") == bookmarks.end()) {
-            editedBookmarkName = "New Bookmark";
+        if (bookmarks.find("新书签") == bookmarks.end()) {
+            editedBookmarkName = "新书签";
         }
         else {
             char buf[64];
             for (int i = 1; i < 1000; i++) {
-                sprintf(buf, "New Bookmark (%d)", i);
+                sprintf(buf, "新书签（%d）", i);
                 if (bookmarks.find(buf) == bookmarks.end()) { break; }
             }
             editedBookmarkName = buf;
@@ -228,7 +228,7 @@ private:
     void bookmarkEditDialog() {
         gui::mainWindow.lockWaterfallControls = true;
 
-        std::string id = "Edit##freq_manager_edit_popup_" + name;
+        std::string id = "编辑##freq_manager_edit_popup_" + name;
         if (editDialog.begin(id.c_str(), ImGuiWindowFlags_NoResize)) {
             char nameBuf[1024];
             snprintf(nameBuf, sizeof(nameBuf), "%s", editedBookmarkName.c_str());
@@ -244,7 +244,7 @@ private:
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Name");
+            ImGui::LeftLabel("名称");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             if (ImGui::InputText(("##freq_manager_edit_name" + name).c_str(), nameBuf, sizeof(nameBuf) - 1)) {
@@ -253,28 +253,28 @@ private:
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("List");
+            ImGui::LeftLabel("列表");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             ImGui::Combo(("##freq_manager_edit_list" + name).c_str(), &editedBookmarkListId, listNamesTxt.c_str());
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Frequency");
+            ImGui::LeftLabel("频率");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             ImGui::InputDouble(("##freq_manager_edit_freq" + name).c_str(), &editedBookmark.frequency);
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Bandwidth");
+            ImGui::LeftLabel("带宽");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             ImGui::InputDouble(("##freq_manager_edit_bw" + name).c_str(), &editedBookmark.bandwidth);
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Mode");
+            ImGui::LeftLabel("模式");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             // BeginCombo rather than Combo: the preview is a separate parameter
@@ -285,7 +285,7 @@ private:
             // is one-way.
             {
                 bool modeNotSet = !radioModeValid(editedBookmark.mode);
-                const char* preview = modeNotSet ? "(not set)" : RADIO_IFACE_MODE_NAMES[editedBookmark.mode];
+                const char* preview = modeNotSet ? "（未设置）" : RADIO_IFACE_MODE_NAMES[editedBookmark.mode];
                 if (modeNotSet) { ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled)); }
                 bool modeOpen = ImGui::BeginCombo(("##freq_manager_edit_mode" + name).c_str(), preview);
                 if (modeNotSet) { ImGui::PopStyleColor(); }
@@ -301,7 +301,7 @@ private:
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Start Time");
+            ImGui::LeftLabel("开始时间");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             ImGui::InputScalarN(
@@ -312,7 +312,7 @@ private:
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("End Time");
+            ImGui::LeftLabel("结束时间");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             ImGui::InputScalarN(
@@ -323,27 +323,27 @@ private:
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Days");
+            ImGui::LeftLabel("星期");
             ImGui::TableSetColumnIndex(1);
 
             ImGui::BeginGroup();
             ImGui::Columns(4, "FreqManagerBookmarkDays", false);
-            ImGui::Checkbox("Su", &editedBookmark.days[0]);
-            ImGui::Checkbox("Th", &editedBookmark.days[4]);
+            ImGui::Checkbox("日", &editedBookmark.days[0]);
+            ImGui::Checkbox("四", &editedBookmark.days[4]);
             ImGui::NextColumn();
-            ImGui::Checkbox("Mo", &editedBookmark.days[1]);
-            ImGui::Checkbox("Fr", &editedBookmark.days[5]);
+            ImGui::Checkbox("一", &editedBookmark.days[1]);
+            ImGui::Checkbox("五", &editedBookmark.days[5]);
             ImGui::NextColumn();
-            ImGui::Checkbox("Tu", &editedBookmark.days[2]);
-            ImGui::Checkbox("Sa", &editedBookmark.days[6]);
+            ImGui::Checkbox("二", &editedBookmark.days[2]);
+            ImGui::Checkbox("六", &editedBookmark.days[6]);
             ImGui::NextColumn();
-            ImGui::Checkbox("We", &editedBookmark.days[3]);
+            ImGui::Checkbox("三", &editedBookmark.days[3]);
             ImGui::Columns(1, "FreqManagerEndBookmarkDays", false);
             ImGui::EndGroup();
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Geo Info");
+            ImGui::LeftLabel("地理信息");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             if (ImGui::InputText(("##freq_manager_edit_geoinfo" + name).c_str(), geoinfoBuf, sizeof(geoinfoBuf) - 1)) {
@@ -352,7 +352,7 @@ private:
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::LeftLabel("Notes");
+            ImGui::LeftLabel("备注");
             ImGui::TableSetColumnIndex(1);
             ImGui::SetNextItemWidth(editWinSize);
             if (ImGui::InputTextMultiline(("##freq_manager_edit_notes" + name).c_str(), notesBuf, sizeof(notesBuf) - 1)) {
@@ -375,7 +375,7 @@ private:
             }
 
             bool applyDisabled = (strlen(nameBuf) == 0) || nameExists || !timeValid(editedBookmark.startTime) || !timeValid(editedBookmark.endTime);
-            if (editDialog.applyButton("Apply", applyDisabled, notesFieldActive)) {
+            if (editDialog.applyButton("应用", applyDisabled, notesFieldActive)) {
                 saveBookmarkEdit(targetListName);
                 editDialog.close();
             }
@@ -392,25 +392,25 @@ private:
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
 
-        std::string id = "New##freq_manager_new_popup_" + name;
+        std::string id = "新建##freq_manager_new_popup_" + name;
         if (listDialog.begin(id.c_str(), ImGuiWindowFlags_NoResize)) {
             char nameBuf[1024];
             snprintf(nameBuf, sizeof(nameBuf), "%s", editedListName.c_str());
 
-            ImGui::LeftLabel("Name");
+            ImGui::LeftLabel("名称");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::InputText(("##freq_manager_edit_name" + name).c_str(), nameBuf, sizeof(nameBuf) - 1)) {
                 editedListName = nameBuf;
             }
 
-            ImGui::LeftLabel("Color");
+            ImGui::LeftLabel("颜色");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             ImGui::ColorEdit3(("##freq_manager_list_color_" + name).c_str(), (float*)&editedListColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
             bool nameChanged = (listDialogMode != ListDialogMode::Rename) || (editedListName != firstEditedListName);
             bool alreadyExists = nameChanged && (std::find(listNames.begin(), listNames.end(), editedListName) != listNames.end());
 
-            if (listDialog.applyButton("Apply", (strlen(nameBuf) == 0) || alreadyExists)) {
+            if (listDialog.applyButton("应用", (strlen(nameBuf) == 0) || alreadyExists)) {
                 {
                     auto configAccess = config.edit();
                     ConfigManager::EditSection lists = configAccess.section("lists");
@@ -447,7 +447,7 @@ private:
     void selectListsDialog() {
         gui::mainWindow.lockWaterfallControls = true;
 
-        std::string id = "Select lists##freq_manager_sel_popup_" + name;
+        std::string id = "选择列表##freq_manager_sel_popup_" + name;
         if (selectDialog.begin(id.c_str(), ImGuiWindowFlags_NoResize)) {
             // Copied out so the checkboxes below can write without the lock held.
             json lists;
@@ -466,7 +466,7 @@ private:
             }
 
             // Checkbox changes apply immediately, so Escape and Ok both just dismiss
-            if (selectDialog.applyButton("Ok") || selectDialog.cancelRequested()) {
+            if (selectDialog.applyButton("确定") || selectDialog.cancelRequested()) {
                 selectDialog.close();
             }
             selectDialog.end();
@@ -575,7 +575,7 @@ private:
         ImGuiStyle& imStyle = ImGui::GetStyle();
         float sqBtnSize = ImGui::GetFrameHeight();
 
-        float btnSize = ImGui::CalcTextSize("Rename").x + (imStyle.FramePadding.x * 2.0f);
+        float btnSize = ImGui::CalcTextSize("重命名").x + (imStyle.FramePadding.x * 2.0f);
         ImGui::SetNextItemWidth(menuWidth - btnSize - (2.0f * sqBtnSize) - (3.0f * imStyle.ItemSpacing.x));
         if (ImGui::Combo(("##freq_manager_list_sel" + _this->name).c_str(), &_this->selectedListId, _this->listNamesTxt.c_str())) {
             _this->loadByName(_this->listNames[_this->selectedListId]);
@@ -583,7 +583,7 @@ private:
         }
         ImGui::SameLine();
         if (_this->listNames.size() == 0) { style::beginDisabled(); }
-        if (ImGui::Button(("Rename##_freq_mgr_ren_lst_" + _this->name).c_str(), ImVec2(btnSize, 0))) {
+        if (ImGui::Button(("重命名##_freq_mgr_ren_lst_" + _this->name).c_str(), ImVec2(btnSize, 0))) {
             _this->firstEditedListName = _this->listNames[_this->selectedListId];
             _this->editedListName = _this->firstEditedListName;
             _this->editedListColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
@@ -601,13 +601,13 @@ private:
         ImGui::SameLine();
         if (ImGui::Button(("+##_freq_mgr_add_lst_" + _this->name).c_str(), ImVec2(sqBtnSize, 0))) {
             // Find new unique default name
-            if (std::find(_this->listNames.begin(), _this->listNames.end(), "New List") == _this->listNames.end()) {
-                _this->editedListName = "New List";
+            if (std::find(_this->listNames.begin(), _this->listNames.end(), "新列表") == _this->listNames.end()) {
+                _this->editedListName = "新列表";
             }
             else {
                 char buf[64];
                 for (int i = 1; i < 1000; i++) {
-                    sprintf(buf, "New List (%d)", i);
+                    sprintf(buf, "新列表（%d）", i);
                     if (std::find(_this->listNames.begin(), _this->listNames.end(), buf) == _this->listNames.end()) { break; }
                 }
                 _this->editedListName = buf;
@@ -625,7 +625,7 @@ private:
 
         // List delete confirmation
         if (ImGui::GenericDialog(("freq_manager_del_list_confirm" + _this->name).c_str(), _this->deleteListOpen, GENERIC_DIALOG_BUTTONS_YES_NO, [_this]() {
-                ImGui::Text("Deleting list named \"%s\". Are you sure?", _this->selectedListName.c_str());
+                ImGui::Text("确定删除名为“%s”的列表吗？", _this->selectedListName.c_str());
             }) == GENERIC_DIALOG_BUTTON_YES) {
             {
                 config.edit().section("lists").erase(_this->selectedListName);
@@ -648,7 +648,7 @@ private:
         ImGui::TableNextRow();
 
         ImGui::TableSetColumnIndex(0);
-        if (ImGui::Button(("Add##_freq_mgr_add_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+        if (ImGui::Button(("添加##_freq_mgr_add_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
             // If there's no VFO selected, just save the center freq
             double bw;
             int mode;
@@ -661,13 +661,13 @@ private:
 
         ImGui::TableSetColumnIndex(1);
         if (selectedNames.size() == 0 && _this->selectedListName != "") { style::beginDisabled(); }
-        if (ImGui::Button(("Remove##_freq_mgr_rem_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+        if (ImGui::Button(("移除##_freq_mgr_rem_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
             _this->deleteBookmarksOpen = true;
         }
         if (selectedNames.size() == 0 && _this->selectedListName != "") { style::endDisabled(); }
         ImGui::TableSetColumnIndex(2);
         if (selectedNames.size() != 1 && _this->selectedListName != "") { style::beginDisabled(); }
-        if (ImGui::Button(("Edit##_freq_mgr_edt_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+        if (ImGui::Button(("编辑##_freq_mgr_edt_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
             _this->bookmarkDialogMode = BookmarkDialogMode::Edit;
             _this->editDialog.request();
             _this->editedBookmark = _this->bookmarks[selectedNames[0]];
@@ -681,7 +681,7 @@ private:
 
         // Bookmark delete confirm dialog
         if (ImGui::GenericDialog(("freq_manager_del_bkm_confirm" + _this->name).c_str(), _this->deleteBookmarksOpen, GENERIC_DIALOG_BUTTONS_YES_NO, [_this]() {
-                ImGui::TextUnformatted("Deleting selected bookmarks. Are you sure?");
+                ImGui::TextUnformatted("确定删除所选书签吗？");
             }) == GENERIC_DIALOG_BUTTON_YES) {
             for (auto& _name : selectedNames) { _this->bookmarks.erase(_name); }
             _this->saveByName(_this->selectedListName);
@@ -689,8 +689,8 @@ private:
 
         // Bookmark list
         if (ImGui::BeginTable(("freq_manager_bkm_table" + _this->name).c_str(), 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable | ImGuiTableFlags_Sortable, ImVec2(0, 200.0f * style::uiScale))) {
-            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort, 0.0f, 0);
-            ImGui::TableSetupColumn("Bookmark", ImGuiTableColumnFlags_DefaultSort, 0.0f, 1);
+            ImGui::TableSetupColumn("名称", ImGuiTableColumnFlags_DefaultSort, 0.0f, 0);
+            ImGui::TableSetupColumn("书签", ImGuiTableColumnFlags_DefaultSort, 0.0f, 1);
             ImGui::TableSetupScrollFreeze(2, 1);
             ImGui::TableHeadersRow();
 
@@ -752,7 +752,7 @@ private:
 
 
         if (selectedNames.size() != 1 && _this->selectedListName != "") { style::beginDisabled(); }
-        if (ImGui::ActionButton(("Apply##_freq_mgr_apply_" + _this->name).c_str())) {
+        if (ImGui::ActionButton(("应用##_freq_mgr_apply_" + _this->name).c_str())) {
             FrequencyBookmark& bm = _this->bookmarks[selectedNames[0]];
             applyBookmark(bm, gui::waterfall.selectedVFO);
             bm.selected = false;
@@ -764,14 +764,14 @@ private:
         ImGui::TableNextRow();
 
         ImGui::TableSetColumnIndex(0);
-        if (ImGui::Button(("Import##_freq_mgr_imp_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)) && !_this->importOpen) {
+        if (ImGui::Button(("导入##_freq_mgr_imp_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)) && !_this->importOpen) {
             _this->importOpen = true;
-            _this->importDialog = new pfd::open_file("Import bookmarks", "", { "JSON Files (*.json)", "*.json", "All Files", "*" }, pfd::opt::multiselect);
+            _this->importDialog = new pfd::open_file("导入书签", "", { "JSON 文件（*.json）", "*.json", "所有文件", "*" }, pfd::opt::multiselect);
         }
 
         ImGui::TableSetColumnIndex(1);
         if (selectedNames.size() == 0 && _this->selectedListName != "") { style::beginDisabled(); }
-        if (ImGui::Button(("Export##_freq_mgr_exp_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)) && !_this->exportOpen) {
+        if (ImGui::Button(("导出##_freq_mgr_exp_" + _this->name).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)) && !_this->exportOpen) {
             _this->exportedBookmarks = json::object();
             {
                 auto configAccess = config.read();
@@ -781,36 +781,36 @@ private:
                 }
             }
             _this->exportOpen = true;
-            _this->exportDialog = new pfd::save_file("Export bookmarks", "", { "JSON Files (*.json)", "*.json", "All Files", "*" });
+            _this->exportDialog = new pfd::save_file("导出书签", "", { "JSON 文件（*.json）", "*.json", "所有文件", "*" });
         }
         if (selectedNames.size() == 0 && _this->selectedListName != "") { style::endDisabled(); }
         ImGui::EndTable();
 
-        if (ImGui::ActionButton(("Select displayed lists##_freq_mgr_exp_" + _this->name).c_str())) {
+        if (ImGui::ActionButton(("选择显示的列表##_freq_mgr_exp_" + _this->name).c_str())) {
             _this->selectDialog.request();
         }
 
-        ImGui::LeftLabel("Bookmark display mode");
+        ImGui::LeftLabel("书签显示方式");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo(("##_freq_mgr_dms_" + _this->name).c_str(), &_this->bookmarkDisplayMode, bookmarkDisplayModesTxt)) {
             config.edit().set("bookmarkDisplayMode", _this->bookmarkDisplayMode);
         }
 
-        ImGui::LeftLabel("Rows of bookmarks");
+        ImGui::LeftLabel("书签行数");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo(("##_freq_mgr_rob_" + _this->name).c_str(), &_this->bookmarkRows, bookmarkRowsTxt)) {
             config.edit().set("bookmarkRows", _this->bookmarkRows);
         }
 
-        if (ImGui::Checkbox(("Rectangles##_freq_mgr_rect_" + _this->name).c_str(), &_this->bookmarkRectangle)) {
+        if (ImGui::Checkbox(("矩形##_freq_mgr_rect_" + _this->name).c_str(), &_this->bookmarkRectangle)) {
             config.edit().set("bookmarkRectangle", _this->bookmarkRectangle);
         }
         ImGui::SameLine();
-        if (ImGui::Checkbox(("Centered##_freq_mgr_cen_" + _this->name).c_str(), &_this->bookmarkCentered)) {
+        if (ImGui::Checkbox(("居中##_freq_mgr_cen_" + _this->name).c_str(), &_this->bookmarkCentered)) {
             config.edit().set("bookmarkCentered", _this->bookmarkCentered);
         }
 
-        if (ImGui::Checkbox(("Avoid clutter on last row##_freq_mgr_noClut_" + _this->name).c_str(), &_this->bookmarkNoClutter)) {
+        if (ImGui::Checkbox(("末行避免重叠##_freq_mgr_noClut_" + _this->name).c_str(), &_this->bookmarkNoClutter)) {
             config.edit().set("bookmarkNoClutter", _this->bookmarkNoClutter);
         }
 
@@ -1029,12 +1029,12 @@ private:
         ImGui::BeginTooltip();
         ImGui::TextUnformatted(hoveredBookmarkName.c_str());
         ImGui::Separator();
-        ImGui::Text("List: %s", hoveredBookmark.listName.c_str());
-        ImGui::Text("Frequency: %s", utils::formatFreq(hoveredBookmark.bookmark.frequency).c_str());
-        ImGui::Text("Bandwidth: %s", utils::formatFreq(hoveredBookmark.bookmark.bandwidth).c_str());
-        ImGui::Text("Mode: %s", radioModeName(hoveredBookmark.bookmark.mode));
+        ImGui::Text("列表：%s", hoveredBookmark.listName.c_str());
+        ImGui::Text("频率：%s", utils::formatFreq(hoveredBookmark.bookmark.frequency).c_str());
+        ImGui::Text("带宽：%s", utils::formatFreq(hoveredBookmark.bookmark.bandwidth).c_str());
+        ImGui::Text("模式：%s", radioModeName(hoveredBookmark.bookmark.mode));
         if (hoveredBookmark.bookmark.startTime != 0 || hoveredBookmark.bookmark.endTime != 0) {
-            ImGui::Text("Time: %04d - %04d UTC", hoveredBookmark.bookmark.startTime, hoveredBookmark.bookmark.endTime);
+            ImGui::Text("时间：%04d - %04d UTC", hoveredBookmark.bookmark.startTime, hoveredBookmark.bookmark.endTime);
         }
         bool allDays = true;
         for (int i = 0; i < 7; i++) { allDays &= hoveredBookmark.bookmark.days[i]; }
@@ -1045,13 +1045,13 @@ private:
             for (int i = 0; i < 7; i++) {
                 bookmarkDays[i] = hoveredBookmark.bookmark.days[i] ? dayLetters[i] : '-';
             }
-            ImGui::Text("Days: %s", bookmarkDays);
+            ImGui::Text("星期：%s", bookmarkDays);
         }
         if (!hoveredBookmark.bookmark.geoinfo.empty()) {
-            ImGui::Text("Geo info: %s", hoveredBookmark.bookmark.geoinfo.c_str());
+            ImGui::Text("地理信息：%s", hoveredBookmark.bookmark.geoinfo.c_str());
         }
         if (!hoveredBookmark.bookmark.notes.empty()) {
-            ImGui::Text("Notes: %s", hoveredBookmark.bookmark.notes.c_str());
+            ImGui::Text("备注：%s", hoveredBookmark.bookmark.notes.c_str());
         }
         ImGui::EndTooltip();
     }

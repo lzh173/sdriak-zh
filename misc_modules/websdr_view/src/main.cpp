@@ -211,9 +211,9 @@ public:
 //                ImGui::TextUnformatted(loc.c_str());
                 if (peaks.empty()) {
                     ImGui::TextUnformatted(("KiwiSDR: " + url).c_str());
-                    ImGui::TextUnformatted("Auto STOP in 15 sec");
+                    ImGui::TextUnformatted("15 秒后自动停止");
                 }
-                if (ImGui::Button("Start all")) {
+                if (ImGui::Button("全部启动")) {
                     for (auto &r: mod->receivers) {
                         r->start();
                     }
@@ -223,7 +223,7 @@ public:
                     ImGui::SameLine();
                     float maxValue = *std::max_element(peaks.begin(), peaks.end());
                     float minValue = *std::min_element(peaks.begin(), peaks.end());
-                    ImGui::Text("SNR: %.2f dB", maxValue - minValue);
+                    ImGui::Text("SNR：%.2f dB", maxValue - minValue);
                     DrawChart(peaks, avail.x, avail.y);
                 }
             } else {
@@ -320,17 +320,17 @@ public:
 private:
     void menuHandler() {
         auto removeIndex = -1;
-        ImGui::LeftLabel("Seconds to receive:");
+        ImGui::LeftLabel("接收时长（秒）：");
         ImGui::FillWidth();
         if (ImGui::SliderInt("##_websdr_duration_", &receiveDuration, 15, 45)) {
             config.edit().set("duration", receiveDuration);
 
         }
-        ImGui::LeftLabel("Enabled");
+        ImGui::LeftLabel("启用");
         if (ImGui::Checkbox("##_websdr_visible_", &visible)) {
             config.edit().set("visible", visible);
         }
-        if (ImGui::Button("Add new...")) {
+        if (ImGui::Button("添加…")) {
             selector.openPopup();
         }
         for (int ri=0; ri< receivers.size(); ri++) {
@@ -338,7 +338,7 @@ private:
             ImGui::BeginDisabled(recvr->started);
             // Receiver locations are arbitrary-length strings; keep the button
             // inside the menu column and let the label clip instead.
-            if (ImGui::ActionButton(("delete: "+recvr->loc).c_str())) {
+            if (ImGui::ActionButton(("删除："+recvr->loc).c_str())) {
                 removeIndex = ri;
             }
             ImGui::EndDisabled();

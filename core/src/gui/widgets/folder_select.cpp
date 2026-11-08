@@ -64,7 +64,7 @@ bool FolderSelect::pathIsValid() {
 }
 
 void FolderSelect::worker() {
-    auto fold = pfd::select_folder("Select Folder", pathValid ? std::filesystem::path(expandString(path)).parent_path().string() : "");
+    auto fold = pfd::select_folder("选择文件夹", pathValid ? std::filesystem::path(expandString(path)).parent_path().string() : "");
     std::string res = fold.result();
 
     if (res != "") {

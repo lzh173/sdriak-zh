@@ -53,17 +53,17 @@ namespace freq_input::band_groups {
     // The standard profile preserves the existing picker. The narrow profile
     // folds Air and Marine into Util when six usable segments do not fit.
     inline constexpr Group standardProfile[] = {
-        { "ham", "Ham", BandServiceSet::single(BandService::Amateur) },
-        { "broadcast", "Bcast", BandServiceSet::single(BandService::Broadcast) },
-        { "air", "Air", BandServiceSet::single(BandService::Aviation) },
-        { "marine", "Marine", BandServiceSet::single(BandService::Maritime) },
-        { "utility", "Util", withoutPrimaryServices() }
+        { "ham", "业余", BandServiceSet::single(BandService::Amateur) },
+        { "broadcast", "广播", BandServiceSet::single(BandService::Broadcast) },
+        { "air", "航空", BandServiceSet::single(BandService::Aviation) },
+        { "marine", "海事", BandServiceSet::single(BandService::Maritime) },
+        { "utility", "其他", withoutPrimaryServices() }
     };
 
     inline constexpr Group narrowProfile[] = {
-        { "ham", "Ham", BandServiceSet::single(BandService::Amateur) },
-        { "broadcast", "Bcast", BandServiceSet::single(BandService::Broadcast) },
-        { "utility", "Util", withoutHamAndBroadcast() }
+        { "ham", "业余", BandServiceSet::single(BandService::Amateur) },
+        { "broadcast", "广播", BandServiceSet::single(BandService::Broadcast) },
+        { "utility", "其他", withoutHamAndBroadcast() }
     };
 
     template <std::size_t N>
@@ -81,7 +81,7 @@ namespace freq_input::band_groups {
             }
         }
         assert(covered == BandServiceSet::all());
-        layout.groups.push_back({ "all", "All", BandServiceSet::all() });
+        layout.groups.push_back({ "all", "全部", BandServiceSet::all() });
         return layout;
     }
 

@@ -60,7 +60,7 @@ public:
 
         // Define protocols
         // protocols.define("TCP (Server)", PROTOCOL_TCP_SERVER);
-        protocols.define("TCP (Client)", PROTOCOL_TCP_CLIENT);
+        protocols.define("TCP (Client)", "TCP（客户端）", PROTOCOL_TCP_CLIENT);
         protocols.define("UDP", PROTOCOL_UDP);
 
         // Define sample types
@@ -216,7 +216,7 @@ private:
         }
 
         // Mode protocol selector
-        SmGui::LeftLabel("Protocol");
+        SmGui::LeftLabel("协议");
         SmGui::FillWidth();
         if (SmGui::Combo(("##network_source_proto_" + _this->name).c_str(), &_this->protoId, _this->protocols.txt)) {
             _this->proto = _this->protocols.value(_this->protoId);
@@ -224,7 +224,7 @@ private:
         }
 
         // Sample type selector
-        SmGui::LeftLabel("Sample type");
+        SmGui::LeftLabel("采样类型");
         SmGui::FillWidth();
         if (SmGui::Combo(("##network_source_samp_" + _this->name).c_str(), &_this->sampTypeId, _this->sampleTypes.txt)) {
             _this->sampType = _this->sampleTypes.value(_this->sampTypeId);
@@ -232,7 +232,7 @@ private:
         }
 
         // Samplerate selector
-        SmGui::LeftLabel("Samplerate");
+        SmGui::LeftLabel("采样率");
         SmGui::FillWidth();
         if (SmGui::InputInt(("##network_source_sr_" + _this->name).c_str(), &_this->tempSamplerate)) {
             // Prevent silly values from silly users
@@ -249,7 +249,7 @@ private:
         if (!applyEn) { SmGui::EndDisabled(); }
 
         if (_this->tempSamplerate != _this->samplerate) {
-            SmGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Warning: Samplerate not applied yet");
+            SmGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "警告：采样率尚未应用");
         }
 
         if (_this->running) { SmGui::EndDisabled(); }

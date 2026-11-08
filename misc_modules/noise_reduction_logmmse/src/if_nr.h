@@ -121,7 +121,7 @@ namespace dsp {
                 prevPercentUsage = percentUsage;
                 percentUsage = (usedSinceLastReport * 100) / timeSinceLastReport;
                 if (prevPercentUsage >= 95 && percentUsage >= 95 && !disableCpuDeactivation) {
-                    stopReason = "Slow CPU. Reduce sample rate.";
+                    stopReason = "CPU 过慢，请降低采样率。";
                 }
             }
             return 1;

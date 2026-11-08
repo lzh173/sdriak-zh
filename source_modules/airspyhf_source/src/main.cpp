@@ -363,7 +363,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_airspyhf_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_airspyhf_refr_", _this->name))) {
 #ifdef __ANDROID__
             _this->refreshAndroidSelection();
 #else
@@ -376,7 +376,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("AGC Mode");
+        SmGui::LeftLabel("AGC 模式");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_airspyhf_agc_", _this->name), &_this->agcMode, AGG_MODES_STR)) {
             if (_this->running) {
@@ -390,7 +390,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("Attenuation");
+        SmGui::LeftLabel("衰减");
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_airspyhf_attn_", _this->name), &_this->atten, 0, 48, 6, SmGui::FMT_STR_FLOAT_DB_NO_DECIMAL)) {
             if (_this->running) {
@@ -401,7 +401,7 @@ private:
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("HF LNA##_airspyhf_lna_", _this->name), &_this->hfLNA)) {
+        if (SmGui::Checkbox(CONCAT("HF 低噪放##_airspyhf_lna_", _this->name), &_this->hfLNA)) {
             if (_this->running) {
                 airspyhf_set_hf_lna(_this->openDev, _this->hfLNA);
             }

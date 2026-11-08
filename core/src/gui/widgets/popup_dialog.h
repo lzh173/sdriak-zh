@@ -35,7 +35,7 @@ public:
     // Draws the button; returns true on click or Escape while the popup is
     // focused. An Escape that ends an in-progress field edit does not cancel
     // the dialog; only a later press does.
-    bool cancelButton(const char* label = "Cancel");
+    bool cancelButton(const char* label = "取消");
 
     // Key-only variants of the above, for dialogs whose buttons don't map
     // one-to-one onto apply/cancel. Valid between begin() and end().

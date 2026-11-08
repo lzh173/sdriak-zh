@@ -43,19 +43,19 @@ public:
             return;
         }
 
-        compList.define("Auto", L"auto");
-        compList.define("Raw", L"raw");
-        compList.define("Compressed", L"compressed");
+        compList.define("Auto", "自动", L"auto");
+        compList.define("Raw", "原始", L"raw");
+        compList.define("Compressed", "压缩", L"compressed");
 
-        agcModeList.define("Off", L"manual");
-        agcModeList.define("Peak", L"peak");
-        agcModeList.define("Power", L"power");
+        agcModeList.define("Off", "关闭", L"manual");
+        agcModeList.define("Peak", "峰值", L"peak");
+        agcModeList.define("Power", "功率", L"power");
 
-        clockList.define("Consumer", L"Consumer");
-        clockList.define("Internal", L"Oscillator");
+        clockList.define("Consumer", "消费级", L"Consumer");
+        clockList.define("Internal", "内部", L"Oscillator");
         clockList.define("GPSDO", L"GPS");
         clockList.define("PPS", L"PPS");
-        clockList.define("10MHz Ref", L"10MHz");
+        clockList.define("10MHz Ref", "10MHz 参考", L"10MHz");
 
         samplerate.effective = 1000000.0;
 
@@ -346,7 +346,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_spectran_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_spectran_refr_", _this->name))) {
             _this->refresh();
             _this->selectSerial(_this->selectedSerial);
             core::setInputSampleRate(_this->samplerate.effective);
@@ -354,7 +354,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("USB Compression");
+        SmGui::LeftLabel("USB 压缩");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_spectran_comp_", _this->name), &_this->compId, _this->compList.txt)) {
             if (_this->running) {
@@ -364,7 +364,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("AGC Mode");
+        SmGui::LeftLabel("AGC 模式");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_spectran_agc_", _this->name), &_this->agcModeId, _this->agcModeList.txt)) {
             if (_this->running) {
@@ -375,7 +375,7 @@ private:
         }
         
         if (_this->agcModeId) { SmGui::BeginDisabled(); }
-        SmGui::LeftLabel("Ref Level");
+        SmGui::LeftLabel("参考电平");
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_spectran_ref_", _this->name), &_this->refLevel, _this->minRef, _this->maxRef, _this->refStep, SmGui::FMT_STR_FLOAT_DB_ONE_DECIMAL)) {
             if (_this->running) {
@@ -386,13 +386,13 @@ private:
         }
         if (_this->agcModeId) { SmGui::EndDisabled(); }
 
-        if (SmGui::Checkbox(CONCAT("Amp##_spectran_amp_", _this->name), &_this->amp)) {
+        if (SmGui::Checkbox(CONCAT("放大器##_spectran_amp_", _this->name), &_this->amp)) {
             if (_this->running) {
                 _this->updateAmps();
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("Preamp##_spectran_preamp_", _this->name), &_this->preAmp)) {
+        if (SmGui::Checkbox(CONCAT("前置放大##_spectran_preamp_", _this->name), &_this->preAmp)) {
             if (_this->running) {
                 _this->updateAmps();
             }
@@ -489,7 +489,7 @@ private:
 
     const wchar_t* decimationsTxt[10] = {
         L"1 / 512", L"1 / 256", L"1 / 128", L"1 / 64", L"1 / 32",
-        L"1 / 16", L"1 / 8", L"1 / 4", L"1 / 2", L"Full"
+        L"1 / 16", L"1 / 8", L"1 / 4", L"1 / 2", L"全带宽"
     };
 
     std::string name;

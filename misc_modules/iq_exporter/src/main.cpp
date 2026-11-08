@@ -47,7 +47,7 @@ public:
         this->name = name;
 
         // Define operating modes
-        modes.define("Baseband", MODE_BASEBAND);
+        modes.define("Baseband", "基带", MODE_BASEBAND);
         modes.define("VFO", MODE_VFO);
 
         // Define VFO samplerates
@@ -65,8 +65,8 @@ public:
         }
 
         // Define protocols
-        protocols.define("TCP (Server)", PROTOCOL_TCP_SERVER);
-        protocols.define("TCP (Client)", PROTOCOL_TCP_CLIENT);
+        protocols.define("TCP (Server)", "TCP（服务器）", PROTOCOL_TCP_SERVER);
+        protocols.define("TCP (Client)", "TCP（客户端）", PROTOCOL_TCP_CLIENT);
         protocols.define("UDP", PROTOCOL_UDP);
 
         // Define sample types
@@ -266,7 +266,7 @@ private:
 
         // Error message box
         ImGui::GenericDialog("##iq_exporter_err_", _this->showError, GENERIC_DIALOG_BUTTONS_OK, [=](){
-            ImGui::Text("Error: %s", _this->errorStr.c_str());
+            ImGui::Text("错误：%s", _this->errorStr.c_str());
         });
         
         if (!_this->enabled) { ImGui::BeginDisabled(); }
@@ -274,7 +274,7 @@ private:
         if (_this->running) { ImGui::BeginDisabled(); }
 
         // Mode selector
-        ImGui::LeftLabel("Mode");
+        ImGui::LeftLabel("模式");
         ImGui::FillWidth();
         if (ImGui::Combo(("##iq_exporter_mode_" + _this->name).c_str(), &_this->modeId, _this->modes.txt)) {
             _this->setMode(_this->modes.value(_this->modeId));
@@ -283,7 +283,7 @@ private:
 
         // In VFO mode, show samplerate selector
         if (_this->mode == MODE_VFO) {
-            ImGui::LeftLabel("Samplerate");
+            ImGui::LeftLabel("采样率");
             ImGui::FillWidth();
             if (ImGui::Combo(("##iq_exporter_sr_" + _this->name).c_str(), &_this->srId, _this->samplerates.txt)) {
                 _this->samplerate = _this->samplerates.value(_this->srId);
@@ -296,7 +296,7 @@ private:
         }
 
         // Mode protocol selector
-        ImGui::LeftLabel("Protocol");
+        ImGui::LeftLabel("协议");
         ImGui::FillWidth();
         if (ImGui::Combo(("##iq_exporter_proto_" + _this->name).c_str(), &_this->protoId, _this->protocols.txt)) {
             _this->proto = _this->protocols.value(_this->protoId);
@@ -304,7 +304,7 @@ private:
         }
 
         // Sample type selector
-        ImGui::LeftLabel("Sample type");
+        ImGui::LeftLabel("采样类型");
         ImGui::FillWidth();
         if (ImGui::Combo(("##iq_exporter_samp_" + _this->name).c_str(), &_this->sampTypeId, _this->sampleTypes.txt)) {
             _this->sampType = _this->sampleTypes.value(_this->sampTypeId);
@@ -313,7 +313,7 @@ private:
         }
 
         // Packet size selector
-        ImGui::LeftLabel("Packet size");
+        ImGui::LeftLabel("数据包大小");
         ImGui::FillWidth();
         if (ImGui::Combo(("##iq_exporter_pkt_sz_" + _this->name).c_str(), &_this->packetSizeId, _this->packetSizes.txt)) {
             _this->packetSize = _this->packetSizes.value(_this->packetSizeId);
@@ -336,13 +336,13 @@ private:
 
         // Start/Stop buttons
         if (_this->running || (!_this->enabled && _this->wasRunning)) {
-            if (ImGui::Button(("Stop##iq_exporter_stop_" + _this->name).c_str(), ImVec2(menuWidth, 0))) {
+            if (ImGui::Button(("停止##iq_exporter_stop_" + _this->name).c_str(), ImVec2(menuWidth, 0))) {
                 _this->stop();
                 config.edit().section(_this->name).set("running", false);
             }
         }
         else {
-            if (ImGui::Button(("Start##iq_exporter_start_" + _this->name).c_str(), ImVec2(menuWidth, 0))) {
+            if (ImGui::Button(("开始##iq_exporter_start_" + _this->name).c_str(), ImVec2(menuWidth, 0))) {
                 _this->start();
                 config.edit().section(_this->name).set("running", true);
             }
@@ -356,22 +356,22 @@ private:
         }
 
         // Status text
-        ImGui::TextUnformatted("Status:");
+        ImGui::TextUnformatted("状态：");
         ImGui::SameLine();
         if (sockOpen) {
-            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), (_this->proto == PROTOCOL_TCP_SERVER || _this->proto == PROTOCOL_TCP_CLIENT) ? "Connected" : "Sending");
+            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), (_this->proto == PROTOCOL_TCP_SERVER || _this->proto == PROTOCOL_TCP_CLIENT) ? "已连接" : "发送中");
         }
         else if (_this->listener && _this->listener->listening()) {
-            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "Listening");
+            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), "监听中");
         }
         else if (!_this->enabled) {
-            ImGui::TextUnformatted("Disabled");
+            ImGui::TextUnformatted("已禁用");
         }
         else {
             // If we're idle and still supposed to be running, the server has closed the connection (TODO: kinda jank...)
             if (_this->running) { _this->stop(); }
 
-            ImGui::TextUnformatted("Idle");
+            ImGui::TextUnformatted("空闲");
         }
 
         if (!_this->enabled) { ImGui::EndDisabled(); }

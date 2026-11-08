@@ -30,13 +30,13 @@ public:
     }
 
     bool showEditMenu(char* name, bool& valid) {
-        ImGui::LeftLabel("Name");
+        ImGui::LeftLabel("名称");
         ImGui::InputText("##scheduler_task_edit_name", name, 1023);
 
         if (editedAction >= 0) {
             bool valid = false;
 
-            std::string id = "Edit Action##scheduler_edit_action";
+            std::string id = "编辑动作##scheduler_edit_action";
             ImGui::OpenPopup(id.c_str());
             if (ImGui::BeginPopup(id.c_str(), ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
                 bool valid = false;
@@ -53,20 +53,20 @@ public:
         }
 
         if (ImGui::BeginTable("scheduler_task_triggers", 1, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY, ImVec2(0, 100.0f * style::uiScale))) {
-            ImGui::TableSetupColumn("Triggers");
+            ImGui::TableSetupColumn("触发器");
             ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableHeadersRow();
 
             // Fill rows here
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted("Every day at 00:00:00");
+            ImGui::TextUnformatted("每天 00:00:00");
 
             ImGui::EndTable();
         }
 
         if (ImGui::BeginTable("scheduler_task_actions", 1, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY, ImVec2(0, 100.0f * style::uiScale))) {
-            ImGui::TableSetupColumn("Actions");
+            ImGui::TableSetupColumn("动作");
             ImGui::TableSetupScrollFreeze(1, 1);
             ImGui::TableHeadersRow();
 
@@ -99,12 +99,12 @@ public:
             ImGui::EndTable();
         }
 
-        if (ImGui::Button("Apply")) {
+        if (ImGui::Button("应用")) {
             valid = true;
             return false;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel")) {
+        if (ImGui::Button("取消")) {
             valid = false;
             return false;
         }

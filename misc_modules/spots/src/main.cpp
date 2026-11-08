@@ -151,9 +151,9 @@ public:
         }
 
         addSource("hamqth", "HamQTH ClusterDX", hamqthSettings, std::make_unique<HamQTHProvider>());
-        addSource("pota", "POTA.app spots", potaSettings, std::make_unique<POTAProvider>());
-        addSource("sota", "SOTAwatch spots", sotaSettings, std::make_unique<SOTAProvider>());
-        addSource("wwff", "WWFF spots", wwffSettings, std::make_unique<WWFFProvider>());
+        addSource("pota", "POTA.app 热点", potaSettings, std::make_unique<POTAProvider>());
+        addSource("sota", "SOTAwatch 热点", sotaSettings, std::make_unique<SOTAProvider>());
+        addSource("wwff", "WWFF 热点", wwffSettings, std::make_unique<WWFFProvider>());
 
         if (autoStart) { start(); }
     }
@@ -196,12 +196,12 @@ private:
         SpotsModule* _this = (SpotsModule*)ctx;
         float menuWidth = ImGui::GetContentRegionAvail().x;
 
-        std::string autoStartId = "Listen on startup##_spots_auto_lst_" + _this->name;
+        std::string autoStartId = "启动时监听##_spots_auto_lst_" + _this->name;
         if (ImGui::Checkbox(autoStartId.c_str(), &_this->autoStart)) {
             config.edit().section(_this->name).set("autoStart", _this->autoStart);
         }
 
-        ImGui::LeftLabel("Spot Lifetime (min)");
+        ImGui::LeftLabel("热点存活时间（分钟）");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::SliderInt(("##_spots_spotlifetime_" + _this->name).c_str(), &_this->spotLifetime, 1, _this->maxSpotLifetime)) {
             config.edit().section(_this->name).set("spotLifetime", _this->spotLifetime);
@@ -213,8 +213,8 @@ private:
         float checkboxSize = ImGui::GetFrameHeight();
 
         if (ImGui::BeginTable("Spots Source Table", 3)) {
-            ImGui::TableSetupColumn("Source");
-            ImGui::TableSetupColumn("Color");
+            ImGui::TableSetupColumn("来源");
+            ImGui::TableSetupColumn("颜色");
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, checkboxSize + cellpad.x);
             ImGui::TableSetupScrollFreeze(3, 1);
             ImGui::TableHeadersRow();
@@ -260,8 +260,8 @@ private:
         }
 
         //start/stop server
-        std::string stopId = "Stop##_spots_stop_" + _this->name;
-        std::string startId = "Start##_spots_stop_" + _this->name;
+        std::string stopId = "停止##_spots_stop_" + _this->name;
+        std::string startId = "开始##_spots_stop_" + _this->name;
         if (_this->running && ImGui::ActionButton(stopId.c_str())) {
             _this->stop();
         }
@@ -269,13 +269,13 @@ private:
             _this->start();
         }
 
-        ImGui::TextUnformatted("Status:");
+        ImGui::TextUnformatted("状态：");
         ImGui::SameLine();
 
         if(_this->running) {
-            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "Running");
+            ImGui::TextColored(ImVec4(0.0, 1.0, 0.0, 1.0), "运行中");
         } else {
-            ImGui::TextUnformatted("Idle");
+            ImGui::TextUnformatted("空闲");
         }
     }
 
@@ -418,12 +418,12 @@ private:
         ImGui::BeginTooltip();
         ImGui::TextUnformatted(hoveredLabel.spot.label.c_str());
         ImGui::Separator();
-        ImGui::Text("Frequency: %s", utils::formatFreq(hoveredLabel.spot.frequency).c_str());
-        ImGui::Text("Location: %s", hoveredLabel.spot.location.c_str());
-        ImGui::Text("Spotter: %s", hoveredLabel.spot.spotter.c_str());
-        std::string lastSpotted = format_duration(std::chrono::system_clock::now() - hoveredLabel.spot.spotTime) + " ago";
-        ImGui::Text("Last spotted: %s", lastSpotted.c_str());
-        ImGui::Text("Comment: %s", hoveredLabel.spot.comment.c_str());
+        ImGui::Text("频率：%s", utils::formatFreq(hoveredLabel.spot.frequency).c_str());
+        ImGui::Text("位置：%s", hoveredLabel.spot.location.c_str());
+        ImGui::Text("发现者：%s", hoveredLabel.spot.spotter.c_str());
+        std::string lastSpotted = format_duration(std::chrono::system_clock::now() - hoveredLabel.spot.spotTime) + " 前";
+        ImGui::Text("最后发现：%s", lastSpotted.c_str());
+        ImGui::Text("备注：%s", hoveredLabel.spot.comment.c_str());
         ImGui::EndTooltip();
     }
 

@@ -10,7 +10,7 @@
 namespace androidmenu {
 
     // Must match SleepTimerManager.Mode ordinals: DISABLED=0, KEEP_ALIVE=1, DIM_SCREEN=2, DIM_AND_BLANK=3
-    static const char* SLEEP_MODE_ITEMS = "Disabled\0Keep Alive\0Dim Screen\0Dim and Blank\0";
+    static const char* SLEEP_MODE_ITEMS = "禁用\0保持前台运行\0屏幕变暗\0变暗并熄屏\0";
     static const int   SLEEP_MODE_COUNT = 4;
 
     bool restartOnResume = true;  // restart SDR when app returns to foreground
@@ -42,13 +42,13 @@ namespace androidmenu {
 
     void draw(void* ctx) {
         // ── Background behaviour ──────────────────────────────────────────────────
-        if (ImGui::Checkbox("Restart Radio on Resume##android_restart_resume", &restartOnResume)) {
+        if (ImGui::Checkbox("恢复时重启电台##android_restart_resume", &restartOnResume)) {
             backend::setRestartOnResume(restartOnResume);
             core::configManager.edit().set("restartOnResume", restartOnResume);
         }
 
         // ── Keep-alive mode ───────────────────────────────────────────────────────
-        ImGui::LeftLabelFill("Keep Alive");
+        ImGui::LeftLabelFill("保持前台运行");
         if (ImGui::Combo("##android_sleep_mode", &sleepMode, SLEEP_MODE_ITEMS)) {
             sleepMode = std::clamp(sleepMode, 0, SLEEP_MODE_COUNT - 1);
             applyConfig();
@@ -59,7 +59,7 @@ namespace androidmenu {
         if (sleepMode >= 2) {
             bool changed = false;
 
-            ImGui::LeftLabelFill("Dim screen after (min)");
+            ImGui::LeftLabelFill("屏幕变暗时间（分钟）");
             if (ImGui::InputInt("##android_dim_min", &screenDimMin, 1, 5)) {
                 screenDimMin  = std::max(1, screenDimMin);
                 screenDarkMin = std::max(screenDimMin + 1, screenDarkMin);
@@ -68,7 +68,7 @@ namespace androidmenu {
 
             // ── Blank threshold (DIM_AND_BLANK=3 only) ───────────────────────────
             if (sleepMode >= 3) {
-                ImGui::LeftLabelFill("Screen off after (min)");
+                ImGui::LeftLabelFill("关闭屏幕时间（分钟）");
                 if (ImGui::InputInt("##android_dark_min", &screenDarkMin, 1, 5)) {
                     screenDarkMin = std::max(screenDimMin + 1, screenDarkMin);
                     changed = true;

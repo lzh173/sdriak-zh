@@ -35,7 +35,7 @@ namespace thememenu {
     }
 
     void draw(void* ctx) {
-        ImGui::LeftLabelFill("Theme");
+        ImGui::LeftLabelFill("主题");
         if (ImGui::Combo("##theme_select_combo", &themeId, themeNamesTxt.c_str())) {
             // Through applyScaledStyle: applyTheme() alone resets rounding/sizes
             // that the scaled style and touch overlay set.

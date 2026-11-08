@@ -334,7 +334,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_airspyhf_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_airspyhf_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->selectedSerial);
             core::setInputSampleRate(_this->sampleRate);
@@ -342,7 +342,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Attenuation");
+        SmGui::LeftLabel("衰减");
         SmGui::FillWidth();
         if (SmGui::SliderFloatWithSteps(CONCAT("##_airspyhf_atten_", _this->name), &_this->atten, 0, 30, 10, SmGui::FMT_STR_FLOAT_DB_NO_DECIMAL)) {
             if (_this->running) {
@@ -353,7 +353,7 @@ private:
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("Preamp##_airspyhf_preamp_", _this->name), &_this->preamp)) {
+        if (SmGui::Checkbox(CONCAT("前置放大##_airspyhf_preamp_", _this->name), &_this->preamp)) {
             if (_this->running) {
                 perseus_set_adc(_this->openDev, _this->dithering, _this->preamp);
             }
@@ -362,7 +362,7 @@ private:
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("Dithering##_airspyhf_dither_", _this->name), &_this->dithering)) {
+        if (SmGui::Checkbox(CONCAT("抖动##_airspyhf_dither_", _this->name), &_this->dithering)) {
             if (_this->running) {
                 perseus_set_adc(_this->openDev, _this->dithering, _this->preamp);
             }
@@ -371,7 +371,7 @@ private:
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("Preselector##_airspyhf_presel_", _this->name), &_this->preselector)) {
+        if (SmGui::Checkbox(CONCAT("预选器##_airspyhf_presel_", _this->name), &_this->preselector)) {
             if (_this->running) {
                 perseus_set_ddc_center_freq(_this->openDev, _this->freq, _this->preselector);
             }

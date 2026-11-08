@@ -6,10 +6,10 @@
 #include <gui/gui.h>
 #include <gui/widgets/popup_dialog.h>
 
-#define GENERIC_DIALOG_BUTTONS_OK           "Ok\0"
-#define GENERIC_DIALOG_BUTTONS_YES_NO       "Yes\0No\0"
-#define GENERIC_DIALOG_BUTTONS_APPLY_CANCEL "Apply\0Cancel\0"
-#define GENERIC_DIALOG_BUTTONS_OK_CANCEL    "Ok\0Cancel\0"
+#define GENERIC_DIALOG_BUTTONS_OK           "确定\0"
+#define GENERIC_DIALOG_BUTTONS_YES_NO       "是\0否\0"
+#define GENERIC_DIALOG_BUTTONS_APPLY_CANCEL "应用\0取消\0"
+#define GENERIC_DIALOG_BUTTONS_OK_CANCEL    "确定\0取消\0"
 
 #define GENERIC_DIALOG_BUTTON_OK    0
 #define GENERIC_DIALOG_BUTTON_YES   0

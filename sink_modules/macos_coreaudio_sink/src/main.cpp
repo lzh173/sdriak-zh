@@ -131,7 +131,7 @@ public:
         float menuWidth = ImGui::GetContentRegionAvail().x;
 
         if (devices.empty()) {
-            ImGui::TextUnformatted("No audio output devices");
+            ImGui::TextUnformatted("无音频输出设备");
             return;
         }
 

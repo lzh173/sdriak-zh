@@ -112,7 +112,7 @@ private:
 
         _this->decoder->drawMenu(menuWidth);
 
-        ImGui::Button("Record##testdsdfsds", ImVec2(menuWidth, 0));
+        ImGui::Button("录制##testdsdfsds", ImVec2(menuWidth, 0));
 
         if (!_this->enabled) { style::endDisabled(); }
     }

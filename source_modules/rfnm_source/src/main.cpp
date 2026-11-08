@@ -219,7 +219,7 @@ private:
 
         // Define bandwidths
         bandwidths.clear();
-        bandwidths.define(-1, "Auto", -1);
+        bandwidths.define(-1, "自动", -1);
         for (int i = 1; i <= 100; i++) {
             char buf[128];
             sprintf(buf, "%d MHz", i);
@@ -354,14 +354,14 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_rfnm_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_rfnm_refr_", _this->name))) {
             _this->refresh();
             _this->select(_this->selectedSerial);
             core::setInputSampleRate(_this->sampleRate);
         }
 
         if (_this->daughterboards.size() > 1) {
-            SmGui::LeftLabel("Daughterboard");
+            SmGui::LeftLabel("子板");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_rfnm_dgb_sel_", _this->name), &_this->dgbId, _this->daughterboards.txt)) {
                 // Open the device
@@ -378,7 +378,7 @@ private:
         }
         
         if (_this->paths.size() > 1) {
-            SmGui::LeftLabel("Antenna Path");
+            SmGui::LeftLabel("天线通路");
             SmGui::FillWidth();
             if (SmGui::Combo(CONCAT("##_rfnm_path_sel_", _this->name), &_this->pathId, _this->paths.txt)) {
                 // Open the device
@@ -396,7 +396,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Bandwidth");
+        SmGui::LeftLabel("带宽");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_rfnm_bw_sel_", _this->name), &_this->bwId, _this->bandwidths.txt)) {
             if (_this->running) {
@@ -405,7 +405,7 @@ private:
             // TODO: Save
         }
 
-        SmGui::LeftLabel("Gain");
+        SmGui::LeftLabel("增益");
         SmGui::FillWidth();
         if (SmGui::SliderInt(CONCAT("##_rfnm_gain_", _this->name), &_this->gain, _this->gainMin, _this->gainMax)) {
             if (_this->running) {
@@ -415,7 +415,7 @@ private:
             // TODO: Save
         }
 
-        if (SmGui::Checkbox(CONCAT("FM Notch##_rfnm_", _this->name), &_this->fmNotch)) {
+        if (SmGui::Checkbox(CONCAT("FM 陷波##_rfnm_", _this->name), &_this->fmNotch)) {
             if (_this->running) {
                 _this->openDev->s->rx.ch[_this->currentPath.chId].fm_notch = _this->fmNotch ? rfnm_fm_notch::RFNM_FM_NOTCH_ON : rfnm_fm_notch::RFNM_FM_NOTCH_OFF;
                 rfnm_api_failcode fail = _this->openDev->set(_this->currentPath.appliesCh);

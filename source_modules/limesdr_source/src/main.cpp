@@ -376,14 +376,14 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_limesdr_refr_", _this->name))) {
+        if (SmGui::Button(CONCAT("刷新##_limesdr_refr_", _this->name))) {
             _this->refresh();
             _this->selectByName(_this->selectedDevName);
             core::setInputSampleRate(_this->sampleRate);
         }
 
         if (_this->channelCount > 1) {
-            SmGui::LeftLabel("RX Channel");
+            SmGui::LeftLabel("接收通道");
             SmGui::FillWidth();
             if (SmGui::Combo("##limesdr_ch_sel", &_this->chanId, _this->channelNamesTxt.c_str()) && _this->selectedDevName != "") {
                 config.edit().section("devices", _this->selectedDevName).set("channel", _this->chanId);
@@ -392,7 +392,7 @@ private:
 
         if (_this->running) { SmGui::EndDisabled(); }
 
-        SmGui::LeftLabel("Antenna");
+        SmGui::LeftLabel("天线");
         SmGui::FillWidth();
         if (SmGui::Combo("##limesdr_ant_sel", &_this->antennaId, _this->antennaListTxt.c_str())) {
             if (_this->running) {
@@ -403,7 +403,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("Bandwidth");
+        SmGui::LeftLabel("带宽");
         SmGui::FillWidth();
         if (SmGui::Combo("##limesdr_bw_sel", &_this->bwId, _this->bandwidthsTxt.c_str())) {
             if (_this->running) {
@@ -414,7 +414,7 @@ private:
             }
         }
 
-        SmGui::LeftLabel("Gain");
+        SmGui::LeftLabel("增益");
         SmGui::FillWidth();
         if (SmGui::SliderInt("##limesdr_gain_sel", &_this->gain, 0, 73, SmGui::FMT_STR_INT_DB)) {
             if (_this->running) {
