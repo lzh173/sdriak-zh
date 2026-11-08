@@ -222,7 +222,17 @@ public:
         sigpath::sourceManager.unregisterSource("File");
     }
 
-    void postInit() {}
+    void postInit() {
+        // Runs once the modules are loaded and before the first frame, which is
+        // the right moment to open the saved recording: the file info and the
+        // playback bar are then ready immediately, and --autostart (which fires
+        // while the top bar is drawn) has a reader to start.
+        if (core::args["server"].b() || reader != NULL) { return; }
+        std::string path = config.read().value("path", std::string());
+        if (!path.empty() && !openFile(path, false)) {
+            flog::warn("FileSourceModule '{0}': could not load saved file '{1}'", name, path);
+        }
+    }
 
     void enable() {
         enabled = true;
