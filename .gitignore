@@ -26,3 +26,7 @@ misc_modules/modulation_monitor
 
 # Downloaded/instanced font used by scripts/zh/gen_cjk_glyphs.py
 scripts/zh/.fonts/
+
+# Python bytecode caches
+__pycache__/
+*.pyc
