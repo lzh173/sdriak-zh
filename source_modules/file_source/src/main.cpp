@@ -206,13 +206,6 @@ public:
         std::string savedPath = config.read().value("path", std::string());
         fileSelect.setPath(savedPath, true);
 
-        // Load the saved file before the first frame: the playback bar and the
-        // file info are then ready immediately, and --autostart can start the
-        // file source (it runs before the menu is first drawn).
-        if (!savedPath.empty() && !openFile(savedPath, false)) {
-            flog::warn("FileSourceModule '{0}': could not load saved file '{1}'", name, savedPath);
-        }
-
         handler.ctx = this;
         handler.selectHandler = menuSelected;
         handler.deselectHandler = menuDeselected;
