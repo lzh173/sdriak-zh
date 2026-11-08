@@ -2,6 +2,12 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
+## Unreleased
+
+### File source
+
+- The File source now shows a draggable playback position bar for WAV and FLAC IQ files: elapsed and total time are displayed in the track, and dragging the bar seeks to that point while playing.
+
 ## v1.4.0-rc - 2026-11-07
 
 This release candidate adds RTL-SDR Blog V4L support, hardens USB handling and completes the attribution and license notices of the project.

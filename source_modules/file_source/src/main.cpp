@@ -30,6 +30,7 @@
 #include <regex>
 #include <gui/tuner.h>
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <cstdio>
 #include <cstring>
@@ -117,6 +118,80 @@ static bool isPlayable(SampleReader* reader) {
         && channels >= 1
         && reader->getBlockAlign() >= channels * bytesPerChan
         && reader->getSampleCount() >= 1;
+}
+
+// "mm:ss" or "hh:mm:ss", whichever fits the file's duration. The bar and the
+// format line must agree on the width, so both sides use this one helper.
+static void formatPlaybackTime(double seconds, bool withHours, char* buf, size_t bufSize) {
+    if (!(seconds > 0.0)) { seconds = 0.0; }
+    uint64_t total = (uint64_t)std::llround(seconds);
+    if (withHours) {
+        snprintf(buf, bufSize, "%02u:%02u:%02u",
+                 (unsigned)(total / 3600), (unsigned)((total / 60) % 60), (unsigned)(total % 60));
+    }
+    else {
+        snprintf(buf, bufSize, "%02u:%02u", (unsigned)((total / 60) % 60), (unsigned)(total % 60));
+    }
+}
+
+// Media-player style playback bar: elapsed / total centred in the track, a
+// progress strip along the bottom and a playhead. A drag reports the target
+// sample through seekTarget; the WAV/FLAC readers seek at frame granularity,
+// so scrubbing takes effect on the next block the worker reads.
+static bool drawPlaybackBar(uint64_t position, uint64_t totalSamples, uint32_t sampleRate, uint64_t* seekTarget) {
+    if (totalSamples == 0 || sampleRate == 0) { return false; }
+
+    const float height = ImGui::GetFrameHeight();
+    const float width = ImGui::GetContentRegionAvail().x;
+    if (width < 1.0f) { return false; }
+
+    ImGui::InvisibleButton("##file_source_position", ImVec2(width, height));
+    const bool active = ImGui::IsItemActive();
+    const bool hovered = ImGui::IsItemHovered();
+    const ImVec2 pMin = ImGui::GetItemRectMin();
+    const ImVec2 pMax = ImGui::GetItemRectMax();
+    const float trackWidth = pMax.x - pMin.x;
+
+    double fraction = (double)position / (double)totalSamples;
+    fraction = std::clamp(fraction, 0.0, 1.0);
+    if (active && trackWidth > 0.0f) {
+        fraction = std::clamp((ImGui::GetIO().MousePos.x - pMin.x) / trackWidth, 0.0, 1.0);
+        *seekTarget = (uint64_t)(fraction * (double)totalSamples);
+    }
+
+    const bool withHours = (double)totalSamples / (double)sampleRate >= 3600.0;
+    char cur[16], dur[16], label[48];
+    formatPlaybackTime((double)(active ? *seekTarget : position) / (double)sampleRate,
+                       withHours, cur, sizeof(cur));
+    formatPlaybackTime((double)totalSamples / (double)sampleRate, withHours, dur, sizeof(dur));
+    snprintf(label, sizeof(label), "%s / %s", cur, dur);
+
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    const float rounding = ImGui::GetStyle().FrameRounding;
+    dl->AddRectFilled(pMin, pMax, ImGui::GetColorU32(ImGuiCol_FrameBg), rounding);
+
+    const float fillX = pMin.x + trackWidth * (float)fraction;
+    const ImU32 grabCol = ImGui::GetColorU32(active ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab);
+    const float stripH = std::min(height, std::max(2.0f, style::dp(3.0f)));
+    if (fraction > 0.0) {
+        dl->AddRectFilled(ImVec2(pMin.x, pMax.y - stripH), ImVec2(fillX, pMax.y),
+                          grabCol, rounding, ImDrawFlags_RoundCornersBottom);
+        dl->AddRectFilled(ImVec2(fillX - 1.0f, pMin.y + 2.0f), ImVec2(fillX + 1.0f, pMax.y - 2.0f),
+                          grabCol, 1.0f);
+    }
+    if (hovered || active) {
+        dl->AddRect(pMin, pMax, ImGui::GetColorU32(ImGuiCol_Border), rounding);
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    }
+
+    dl->PushClipRect(pMin, pMax, true);
+    const ImVec2 textSize = ImGui::CalcTextSize(label);
+    dl->AddText(ImVec2(pMin.x + (trackWidth - textSize.x) * 0.5f, pMin.y + (height - textSize.y) * 0.5f),
+                ImGui::GetColorU32(ImGuiCol_Text), label);
+    dl->PopClipRect();
+
+    if (hovered && !active) { ImGui::SetTooltip("拖动以定位播放位置"); }
+    return active;
 }
 
 class FileSourceModule : public ModuleManager::Instance {
@@ -262,6 +337,22 @@ private:
         if (!_this->formatStr.empty()) {
             ImGui::TextDisabled("%s", _this->formatStr.c_str());
         }
+
+        // Playback position / seek bar, shown as soon as a file is loaded. It
+        // also works while the source is stopped: seeking then just moves the
+        // point where the next Start begins (Stop rewinds to 0).
+        if (_this->reader != NULL) {
+            const uint64_t totalSamples = _this->reader->getSampleCount();
+            const uint32_t rate = _this->reader->getSampleRate();
+            if (totalSamples > 0 && rate > 0) {
+                ImGui::Spacing();
+                const uint64_t position = _this->reader->getSamplePosition();
+                uint64_t seekTarget = position;
+                if (drawPlaybackBar(position, totalSamples, rate, &seekTarget)) {
+                    _this->reader->seek(seekTarget);
+                }
+            }
+        }
     }
 
     void updateFormatStr() {
@@ -270,11 +361,13 @@ private:
             return;
         }
         uint32_t rate = std::max(reader->getSampleRate(), (uint32_t)1);
-        uint64_t seconds = reader->getSampleCount() / rate;
+        double durationSec = (double)reader->getSampleCount() / (double)rate;
+        char duration[16];
+        formatPlaybackTime(durationSec, durationSec >= 3600.0, duration, sizeof(duration));
         char buf[128];
-        snprintf(buf, sizeof(buf), "%s %u bit, %u ch, %.6g MS/s, %02u:%02u:%02u",
+        snprintf(buf, sizeof(buf), "%s %u bit, %u ch, %.6g MS/s, %s",
                  reader->getFormatName(), (unsigned)reader->getBitDepth(), (unsigned)reader->getChannelCount(),
-                 rate / 1e6, (unsigned)(seconds / 3600), (unsigned)((seconds / 60) % 60), (unsigned)(seconds % 60));
+                 rate / 1e6, duration);
         formatStr = buf;
     }
 
