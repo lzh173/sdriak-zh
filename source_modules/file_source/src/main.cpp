@@ -202,7 +202,15 @@ public:
 
         if (core::args["server"].b()) { return; }
 
-        fileSelect.setPath(config.read().value("path", std::string()), true);
+        std::string savedPath = config.read().value("path", std::string());
+        fileSelect.setPath(savedPath, true);
+
+        // Load the saved file before the first frame: the playback bar and the
+        // file info are then ready immediately, and --autostart can start the
+        // file source (it runs before the menu is first drawn).
+        if (!savedPath.empty() && !openFile(savedPath, false)) {
+            flog::warn("FileSourceModule '{0}': could not load saved file '{1}'", name, savedPath);
+        }
 
         handler.ctx = this;
         handler.selectHandler = menuSelected;
@@ -289,49 +297,7 @@ private:
         if (_this->running) { style::endDisabled(); }
 
         if (fileChanged && _this->fileSelect.pathIsValid()) {
-            if (_this->reader != NULL) {
-                _this->reader->close();
-                delete _this->reader;
-                _this->reader = NULL;
-            }
-            try {
-                _this->reader = openReader(_this->fileSelect.path);
-                if (_this->reader == NULL) {
-                    throw std::runtime_error("Unsupported file format (not a WAV or FLAC file)");
-                }
-                if (!_this->reader->isValid()) {
-                    throw std::runtime_error("Invalid or damaged file");
-                }
-                if (_this->reader->getSampleRate() == 0) {
-                    throw std::runtime_error("Sample rate may not be zero");
-                }
-                if (!getSampleConv(_this->reader->getFormat(), _this->reader->getBitDepth())) {
-                    throw std::runtime_error(std::string("Unsupported sample format: ") + _this->reader->getFormatName() + ", " + std::to_string(_this->reader->getBitDepth()) + " bit");
-                }
-                if (_this->reader->getSampleCount() < 1) {
-                    throw std::runtime_error("File contains no samples");
-                }
-                if (!isPlayable(_this->reader)) {
-                    throw std::runtime_error("Invalid channel layout");
-                }
-                _this->sampleRate = _this->reader->getSampleRate();
-                core::setInputSampleRate(_this->sampleRate);
-                std::string filename = std::filesystem::path(_this->fileSelect.path).filename().string();
-                _this->centerFreq = _this->getFrequency(filename);
-                tuner::tune(tuner::TUNER_MODE_IQ_ONLY, "", _this->centerFreq);
-                //gui::freqSelect.minFreq = _this->centerFreq - (_this->sampleRate/2);
-                //gui::freqSelect.maxFreq = _this->centerFreq + (_this->sampleRate/2);
-                //gui::freqSelect.limitFreq = true;
-            }
-            catch (const std::exception& e) {
-                flog::error("Error: {}", e.what());
-                if (_this->reader != NULL) {
-                    _this->reader->close();
-                    delete _this->reader;
-                    _this->reader = NULL;
-                }
-            }
-            _this->updateFormatStr();
+            _this->openFile(_this->fileSelect.path, true);
             config.edit().set("path", _this->fileSelect.path);
         }
 
@@ -353,6 +319,56 @@ private:
                     _this->reader->seek(seekTarget);
                 }
             }
+        }
+    }
+
+    // Opens (or reopens) a recording and derives the sample rate and centre
+    // frequency from it. applyTuning is false when called from the constructor,
+    // before the source is selected: menuSelected() tunes to centerFreq later.
+    bool openFile(const std::string& path, bool applyTuning) {
+        if (reader != NULL) {
+            reader->close();
+            delete reader;
+            reader = NULL;
+        }
+        try {
+            reader = openReader(path);
+            if (reader == NULL) {
+                throw std::runtime_error("Unsupported file format (not a WAV or FLAC file)");
+            }
+            if (!reader->isValid()) {
+                throw std::runtime_error("Invalid or damaged file");
+            }
+            if (reader->getSampleRate() == 0) {
+                throw std::runtime_error("Sample rate may not be zero");
+            }
+            if (!getSampleConv(reader->getFormat(), reader->getBitDepth())) {
+                throw std::runtime_error(std::string("Unsupported sample format: ") + reader->getFormatName() + ", " + std::to_string(reader->getBitDepth()) + " bit");
+            }
+            if (reader->getSampleCount() < 1) {
+                throw std::runtime_error("File contains no samples");
+            }
+            if (!isPlayable(reader)) {
+                throw std::runtime_error("Invalid channel layout");
+            }
+            sampleRate = reader->getSampleRate();
+            centerFreq = getFrequency(std::filesystem::path(path).filename().string());
+            if (applyTuning) {
+                core::setInputSampleRate(sampleRate);
+                tuner::tune(tuner::TUNER_MODE_IQ_ONLY, "", centerFreq);
+            }
+            updateFormatStr();
+            return true;
+        }
+        catch (const std::exception& e) {
+            flog::error("Error: {}", e.what());
+            if (reader != NULL) {
+                reader->close();
+                delete reader;
+                reader = NULL;
+            }
+            updateFormatStr();
+            return false;
         }
     }
 
