@@ -37,7 +37,7 @@ SDRIAK 是 SDR++ 的一个跨平台分支（Windows / Linux / macOS / Android）
 - **Windows**：`windows-x64` / `windows-arm64`，解压后运行 `sdriak.exe`，配置和录音默认保存在程序目录
 - **Linux**：`.deb` 包（Debian、Ubuntu 多个版本）或 AppImage
 - **macOS**：Intel / Apple Silicon 压缩包
-- **Android**：`android-arm-debug.apk` / `android-x86-debug.apk`，调试签名（本仓库没有配置发布签名密钥），可直接安装
+- **Android**：`android-arm.apk` / `android-x86.apk`，lzh173 发布签名，可直接安装
 
 当前版本基于 SDRIAK 1.4.0-rc。
 
