@@ -2,6 +2,7 @@
 // FLAC and 24-bit PCM writing adapted from the SDRPP fork by qrp73 (https://github.com/qrp73/SDRPP).
 #include <string>
 #include <fstream>
+#include <cstdio>
 #include <stdint.h>
 #include <mutex>
 #include "riff.h"
@@ -79,6 +80,10 @@ namespace wav {
         // dirs onto every consumer of this header while libFLAC links PRIVATE
         // into sdrpp_core.
         void* flacEnc = NULL;
+
+        // FILE* the FLAC encoder writes to (opened via _wfopen so a non-ASCII
+        // output path works); closed after FLAC__stream_encoder_finish().
+        FILE* flacFile = NULL;
 
         // Ogg-Opus muxer state (opaque OggOpusEncoder defined in wav.cpp).
         // Keeps the opus/ogg headers out of this header, same reasoning as

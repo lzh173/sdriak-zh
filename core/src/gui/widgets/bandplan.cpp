@@ -10,6 +10,7 @@
 #include <utility>
 #include <radio_interface.h>
 #include <utils/hex_color.h>
+#include <utils/file_utils.h>
 
 namespace bandplan {
     namespace {
@@ -95,7 +96,7 @@ namespace bandplan {
 
     namespace {
         void loadBandPlanFile(const std::string& path, bool updateNameText) {
-            std::ifstream file(path.c_str());
+            std::ifstream file = utils::openRead(path);
             json data;
             file >> data;
 

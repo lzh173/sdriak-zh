@@ -1,11 +1,12 @@
 #include "ptu.hpp"
+#include <utils/file_utils.h>
 
 bool
 PTUWriter::init(const char *fname)
 {
 	if (m_fd) deinit();
 
-	m_fd = fopen(fname, "wb");
+	m_fd = utils::fopenPath(fname, "wb");
 	if(!m_fd) return false;
 
 	fprintf(m_fd, "Epoch,Temperature,Relative humidity,Dew point,Pressure,Latitude,Longitude,Altitude,Speed,Heading,Climb,XDATA\n");

@@ -1,7 +1,9 @@
 #include "flac_reader.h"
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include <FLAC/stream_decoder.h>
 #include <algorithm>
+#include <cstdio>
 #include <mutex>
 #include <vector>
 #include <cstring>
@@ -32,6 +34,10 @@ namespace flac {
         // returns, so fifoRead is 0 between calls.
         std::vector<uint8_t> fifo;
         size_t fifoRead = 0;
+
+        // Opened through _wfopen (see utils/file_utils.h) so the path may
+        // contain characters outside the ANSI code page. Closed in close().
+        FILE* file = NULL;
 
         size_t fifoAvail() const { return fifo.size() - fifoRead; }
     };
@@ -112,9 +118,14 @@ namespace flac {
         }
         FLAC__stream_decoder_set_md5_checking(d->dec, false);
 
-        auto st = FLAC__stream_decoder_init_file(d->dec, path.c_str(), writeCb, metadataCb, errorCb, d);
+        d->file = utils::fopenPath(path, "rb");
+        if (!d->file) {
+            flog::error("FlacReader: could not open '{}'", path);
+            return;
+        }
+        auto st = FLAC__stream_decoder_init_FILE(d->dec, d->file, writeCb, metadataCb, errorCb, d);
         if (st != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
-            flog::error("FLAC__stream_decoder_init_file() failed: {}", FLAC__StreamDecoderInitStatusString[st]);
+            flog::error("FLAC__stream_decoder_init_FILE() failed: {}", FLAC__StreamDecoderInitStatusString[st]);
             return;
         }
 
@@ -234,6 +245,10 @@ namespace flac {
             FLAC__stream_decoder_finish(d->dec);
             FLAC__stream_decoder_delete(d->dec);
             d->dec = NULL;
+        }
+        if (d->file) {
+            fclose(d->file);
+            d->file = NULL;
         }
         d->valid = false;
         d->fifo.clear();

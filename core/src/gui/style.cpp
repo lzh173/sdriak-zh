@@ -3,6 +3,7 @@
 #include <imgui_internal.h>
 #include <config.h>
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include <gui/cjk_glyphs.h>
 #include <filesystem>
 #include <cmath>
@@ -24,6 +25,29 @@ namespace style {
     bool touchStyle = true;
 #endif
     uint64_t _scaleEpoch = 0;
+
+    // ImGui's AddFontFromFileTTF() opens the file through fopen(), whose narrow
+    // path is interpreted in the ANSI code page on Windows. That fails when the
+    // installation directory contains characters outside it (a Chinese folder
+    // name, for example), so load the bytes through std::filesystem instead.
+    static ImFont* addFontFromFile(ImFontAtlas* atlas, const std::string& path, float sizePx, const ImFontConfig* cfg, const ImWchar* ranges) {
+        std::vector<uint8_t> bytes;
+        if (!utils::readFile(path, bytes) || bytes.empty()) { return NULL; }
+        void* data = IM_ALLOC(bytes.size());
+        if (!data) { return NULL; }
+        memcpy(data, bytes.data(), bytes.size());
+        ImFontConfig config;
+        if (cfg) { config = *cfg; }
+        else {
+            const char* name = path.c_str();
+            for (const char* p = name; *p; p++) {
+                if (*p == '/' || *p == '\\') { name = p + 1; }
+            }
+            ImFormatString(config.Name, IM_ARRAYSIZE(config.Name), "%s, %.0fpx", name, sizePx);
+        }
+        config.FontDataOwnedByAtlas = true;
+        return atlas->AddFontFromMemoryTTF(data, (int)bytes.size(), sizePx, &config, ranges);
+    }
 
     void setUIScale(float scale) {
         if (std::fabs(uiScale - scale) < 0.0001f) { return; }
@@ -104,17 +128,17 @@ namespace style {
         // again as much atlas as two, which is what pays for its glyph set.
         ImFontConfig labelCfg;
         labelCfg.OversampleH = 2;
-        baseFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(16.0f * uiScale), NULL, baseRanges.Data);
+        baseFont = addFontFromFile(fonts, fontPath, roundf(16.0f * uiScale), NULL, baseRanges.Data);
 
         // The zh-CN UI text is Chinese, so a CJK face has to be merged into the
         // base font; Roboto-Medium has no Han glyphs and would draw tofu.  The
-        // range comes from the actual UI strings (see _zhwork/gen_font.py), so
-        // the atlas only pays for characters that are used.  On desktop the
+        // range comes from the actual UI strings (see scripts/zh/gen_cjk_glyphs.py),
+        // so the atlas only pays for characters that are used.  On desktop the
         // 2500 common characters are added too, which keeps user-entered names
         // (bookmarks, station lists, ...) readable; on Android the smaller
         // UI-only set keeps the atlas inside the phone's memory budget.
         const std::string cjkFontPath = resDir + "/fonts/NotoSansSC-Regular-subset.ttf";
-        if (std::filesystem::is_regular_file(cjkFontPath)) {
+        if (std::filesystem::is_regular_file(utils::toPath(cjkFontPath))) {
             ImFontConfig cjkCfg;
             cjkCfg.MergeMode = true;
             cjkCfg.OversampleH = 1;
@@ -125,16 +149,16 @@ namespace style {
 #else
             const ImWchar* cjkRanges = cjkCommonRanges;
 #endif
-            if (!fonts->AddFontFromFileTTF(cjkFontPath.c_str(), roundf(16.0f * uiScale), &cjkCfg, cjkRanges)) {
+            if (!addFontFromFile(fonts, cjkFontPath, roundf(16.0f * uiScale), &cjkCfg, cjkRanges)) {
                 flog::error("Could not load CJK font: {0}", cjkFontPath);
             }
         }
         else {
             flog::warn("CJK font not found, Chinese text will not render: {0}", cjkFontPath);
         }
-        labelFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(22.0f * uiScale), &labelCfg, labelRange);
-        bigFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(45.0f * uiScale), NULL, bigRange);
-        hugeFont = fonts->AddFontFromFileTTF(fontPath.c_str(), roundf(128.0f * uiScale), NULL, hugeRanges.Data);
+        labelFont = addFontFromFile(fonts, fontPath, roundf(22.0f * uiScale), &labelCfg, labelRange);
+        bigFont = addFontFromFile(fonts, fontPath, roundf(45.0f * uiScale), NULL, bigRange);
+        hugeFont = addFontFromFile(fonts, fontPath, roundf(128.0f * uiScale), NULL, hugeRanges.Data);
 
         // Glyph sets are not a smooth cost: the atlas is one texture whose
         // height is rounded up to a power of two, so widening a range can

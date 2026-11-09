@@ -2,6 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
+#include <utils/file_utils.h>
 #include "gpx.hpp"
 
 #define GPX_TIME_FORMAT "%Y-%m-%dT%H:%M:%SZ"
@@ -11,7 +12,7 @@ GPXWriter::init(const char *fname)
 {
 	if (m_fd) deinit();
 
-	m_fd = fopen(fname, "wb");
+	m_fd = utils::fopenPath(fname, "wb");
 	if (!m_fd) return false;
 
 	m_lat = m_lon = m_alt = m_time = 0;
