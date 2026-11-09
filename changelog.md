@@ -2,11 +2,24 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
-## Unreleased
+## v1.4.1 - 2026-11-10
+
+Simplified Chinese localization, a playback position bar for the File source, and non-ASCII path fixes.
+
+### Localization
+
+- The user interface is translated into Simplified Chinese: core windows, menus and dialogs, plus the source, sink, decoder and misc module panels.
+- A Noto Sans SC subset is bundled and merged into the base font, so no system CJK font is required. Menu titles and sink names are mapped when drawn; internal keys stay English and existing configs keep working.
 
 ### File source
 
-- The File source now shows a draggable playback position bar for WAV and FLAC IQ files: elapsed and total time are displayed in the track, and dragging the bar seeks to that point while playing.
+- A draggable playback position bar for WAV and FLAC IQ files: elapsed and total time are shown in the track, dragging seeks while playing, and dragging while stopped sets the next start point.
+
+### Fixes
+
+- Resources (fonts, icons, band plans, themes, colour maps) now load from installation directories containing non-ASCII characters. Previously such paths failed to load and crashed on the first frame on Windows.
+- The File source, WAV/FLAC readers, recorders and bookmark import/export accept non-ASCII paths.
+- Android release packages are signed with the project release key.
 
 ## v1.4.0-rc - 2026-11-07
 
