@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <string>
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include "sample_reader.h"
 
 // Reads RIFF and RF64 WAV files with any chunk layout, including
@@ -33,7 +34,7 @@
 class WavReader : public SampleReader {
 public:
     WavReader(std::string path) {
-        _file = std::ifstream(path.c_str(), std::ios::binary);
+        _file = utils::openRead(path);
         uint32_t riffId = 0;
         uint32_t riffSize = 0;
         uint32_t riffType = 0;

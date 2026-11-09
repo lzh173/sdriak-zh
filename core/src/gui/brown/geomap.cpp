@@ -26,6 +26,7 @@
 #include <fstream>
 #include <core.h>
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include <gui/widgets/simple_widgets.h>
 #include <filesystem>
 #include <utility>
@@ -154,7 +155,7 @@ namespace geomap {
     }
 
     nlohmann::json readGeoJSONFile(const std::string& filePath) {
-        std::ifstream fileStream(filePath);
+        std::ifstream fileStream = utils::openRead(filePath);
 
         if (!fileStream.is_open()) {
             flog::error("Failed to open the file {}", filePath);

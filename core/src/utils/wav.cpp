@@ -5,6 +5,7 @@
 #include <dsp/buffer/buffer.h>
 #include <dsp/stream.h>
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -224,12 +225,20 @@ namespace wav {
             // Open the output file. Fails (among others) for samplerates above
             // FLAC__MAX_SAMPLE_RATE (1048575 Hz; 655350 Hz on libFLAC < 1.4)
             // and for 32-bit samples on libFLAC < 1.4.
-            auto status = FLAC__stream_encoder_init_file(enc, path.c_str(), NULL, NULL);
-            if (status != FLAC__STREAM_ENCODER_INIT_STATUS_OK) {
-                flog::error("FLAC__stream_encoder_init_file() failed: {}", FLAC__StreamEncoderInitStatusString[status]);
+            FILE* outFile = utils::fopenPath(path, "wb");
+            if (!outFile) {
+                flog::error("Failed to open FLAC output file: {}", path);
                 FLAC__stream_encoder_delete(enc);
                 return false;
             }
+            auto status = FLAC__stream_encoder_init_FILE(enc, outFile, NULL, NULL);
+            if (status != FLAC__STREAM_ENCODER_INIT_STATUS_OK) {
+                flog::error("FLAC__stream_encoder_init_FILE() failed: {}", FLAC__StreamEncoderInitStatusString[status]);
+                fclose(outFile);
+                FLAC__stream_encoder_delete(enc);
+                return false;
+            }
+            flacFile = outFile;
 
             // Conversion buffer (the encoder takes sign-extended int32 at every depth)
             bufI32 = dsp::buffer::alloc<int32_t>(STREAM_BUFFER_SIZE * _channels);
@@ -260,7 +269,7 @@ namespace wav {
             int lookahead = 0;
             opus_encoder_ctl(enc, OPUS_GET_LOOKAHEAD(&lookahead));
 
-            FILE* f = fopen(path.c_str(), "wb");
+            FILE* f = utils::fopenPath(path, "wb");
             if (!f) {
                 flog::error("Failed to open Opus output file: {}", path);
                 opus_encoder_destroy(enc);
@@ -365,6 +374,10 @@ namespace wav {
             }
             FLAC__stream_encoder_delete(enc);
             flacEnc = NULL;
+            if (flacFile) {
+                fclose(flacFile);
+                flacFile = NULL;
+            }
         }
         else if (opusState) {
             OggOpusEncoder* e = (OggOpusEncoder*)opusState;

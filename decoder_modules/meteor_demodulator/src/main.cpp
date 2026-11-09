@@ -5,6 +5,7 @@
 #include <gui/gui.h>
 #include <signal_path/signal_path.h>
 #include <module.h>
+#include <utils/file_utils.h>
 #include <filesystem>
 #include "meteor_demod.h"
 #include <dsp/routing/splitter.h>
@@ -194,7 +195,7 @@ private:
         std::lock_guard<std::mutex> lck(recMtx);
         dataWritten = 0;
         std::string filename = genFileName(folderSelect.expandString(folderSelect.path) + "/meteor", ".s");
-        recFile = std::ofstream(filename, std::ios::binary);
+        recFile = utils::openWrite(filename);
         if (recFile.is_open()) {
             flog::info("Recording to '{0}'", filename);
             recording = true;

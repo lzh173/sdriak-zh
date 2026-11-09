@@ -5,6 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <imgui/stb_image.h>
 #include <filesystem>
+#include <utils/file_utils.h>
 #include <utils/flog.h>
 
 namespace icons {
@@ -20,8 +21,19 @@ namespace icons {
     ImTextureID CONTRAST;
 
     GLuint loadTexture(std::string path) {
-        int w, h, n;
-        stbi_uc* data = stbi_load(path.c_str(), &w, &h, &n, 0);
+        // stbi_load() takes a narrow path and would fail on an installation
+        // directory outside the ANSI code page; read the file ourselves.
+        std::vector<uint8_t> fileData;
+        if (!utils::readFile(path, fileData)) {
+            flog::error("Could not read icon: {0}", path);
+            return 0;
+        }
+        int w = 0, h = 0, n = 0;
+        stbi_uc* data = stbi_load_from_memory(fileData.data(), (int)fileData.size(), &w, &h, &n, 0);
+        if (data == NULL) {
+            flog::error("Could not decode icon: {0}", path);
+            return 0;
+        }
         GLuint texId;
         glGenTextures(1, &texId);
         glBindTexture(GL_TEXTURE_2D, texId);

@@ -3,6 +3,7 @@
 #include <imgui_internal.h>
 #include <utils/flog.h>
 #include <utils/hex_color.h>
+#include <utils/file_utils.h>
 #include <filesystem>
 #include <fstream>
 #include <utility>
@@ -51,7 +52,7 @@ bool ThemeManager::loadTheme(const std::string& path) {
 
     json data;
     try {
-        std::ifstream file(path.c_str());
+        std::ifstream file = utils::openRead(path);
         file >> data;
     }
     catch (const std::exception& e) {

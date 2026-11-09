@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include <module.h>
 #include <gui/gui.h>
 #include <gui/style.h>
@@ -1065,7 +1066,7 @@ private:
     void importBookmarks(std::string path) {
         json importedBookmarks;
         try {
-            std::ifstream fs(path);
+            std::ifstream fs = utils::openRead(path);
             fs >> importedBookmarks;
         }
         catch (const std::exception& e) {
@@ -1116,7 +1117,7 @@ private:
     }
 
     void exportBookmarks(std::string path) {
-        std::ofstream fs(path);
+        std::ofstream fs = utils::openWrite(path);
         fs << exportedBookmarks;
         fs.close();
     }

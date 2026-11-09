@@ -34,6 +34,7 @@
 #include <locale>
 #include <sstream>
 #include <stdexcept>
+#include <utils/file_utils.h>
 
 #include <core.h>
 #include <utils/flog.h>
@@ -77,7 +78,7 @@ namespace {
             auto last_write_sys = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
                 last_write_time - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
             if (std::chrono::system_clock::now() - last_write_sys < CACHE_TTL) {
-                std::ifstream ifs(cachePath);
+                std::ifstream ifs = utils::openRead(cachePath);
                 return std::string((std::istreambuf_iterator<char>(ifs)),
                                    std::istreambuf_iterator<char>());
             }
@@ -113,7 +114,7 @@ namespace {
 
         std::string cleaned = cleanJsResponse(response);
 
-        if (FILE* toSave = fopen(cachePath.c_str(), "wt")) {
+        if (FILE* toSave = utils::fopenPath(cachePath, "wt")) {
             fwrite(cleaned.c_str(), 1, cleaned.size(), toSave);
             fclose(toSave);
         }

@@ -18,6 +18,7 @@
 #define NOMINMAX
 #include <imgui.h>
 #include <utils/flog.h>
+#include <utils/file_utils.h>
 #include <module.h>
 #include <gui/gui.h>
 #include <gui/style.h>
@@ -104,7 +105,7 @@ static SampleConv getSampleConv(WAVE_FORMAT format, int bitDepth) {
 // else. The caller owns the returned reader.
 static SampleReader* openReader(const std::string& path) {
     uint8_t magic[4] = { 0 };
-    std::ifstream(path, std::ios::binary).read((char*)magic, sizeof(magic));
+    utils::openRead(path).read((char*)magic, sizeof(magic));
     if (!memcmp(magic, "fLaC", 4)) { return new FlacReader(path); }
     if (!memcmp(magic, "RIFF", 4) || !memcmp(magic, "RF64", 4)) { return new WavReader(path); }
     return NULL;

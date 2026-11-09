@@ -1,6 +1,7 @@
 #include "riff.h"
 #include <string.h>
 #include <stdexcept>
+#include <utils/file_utils.h>
 
 namespace riff {
     const char* RIFF_SIGNATURE      = "RIFF";
@@ -19,7 +20,7 @@ namespace riff {
         std::lock_guard<std::recursive_mutex> lck(mtx);
 
         // Open file
-        file = std::ofstream(path, std::ios::out | std::ios::binary);
+        file = utils::openWrite(path, std::ios::out);
         if (!file.is_open()) { return false; }
 
         // Begin RIFF chunk

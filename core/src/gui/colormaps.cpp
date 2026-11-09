@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <utils/flog.h>
 #include <utils/hex_color.h>
+#include <utils/file_utils.h>
 #include <fstream>
 #include <json.hpp>
 #include <utility>
@@ -21,7 +22,7 @@ namespace colormaps {
         std::vector<std::string> encodedColors;
 
         try {
-            std::ifstream file(path.c_str());
+            std::ifstream file = utils::openRead(path);
             json data;
             file >> data;
 
