@@ -2,6 +2,14 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
+## v1.4.3 - 2026-11-10
+
+Fixes the black screen on Android while the system entropy pool is unseeded.
+
+### Android
+
+- Startup no longer hangs waiting for entropy. SDRIAK calls `curl_global_init()` before the window appears, which seeds Mbed-TLS's CTR_DRBG. The bundled Mbed-TLS only compiles the `getrandom()` path when `__GLIBC__` is defined, and Bionic is not glibc, so it fell back to reading `/dev/random`. Before Linux 5.6 that file blocks until the pool is initialised, which on an emulator, or on a device that has just booted without a hardware RNG, takes long enough that the activity showed a black screen and the log stopped at the version banner. The Android build now points Mbed-TLS's entropy source at `/dev/urandom`, which never blocks. The change is in `deps/+mbedtls/sdriak_user_config.h`, so it only affects the bundled TLS stack.
+
 ## v1.4.2 - 2026-11-10
 
 Fixes a crash when a local recording is being played.

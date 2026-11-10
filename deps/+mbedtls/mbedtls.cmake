@@ -24,6 +24,12 @@ add_cmake_project(mbedtls
         -DENABLE_PROGRAMS=OFF
         -DENABLE_TESTING=OFF
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        # Appended to build_info.h after the stock config. Only real content so
+        # far is the Android entropy source: Bionic has no __GLIBC__, so
+        # mbedtls_platform_entropy_poll() is compiled without getrandom() and
+        # falls back to reading /dev/random, which blocks on kernels before 5.6
+        # while the pool is unseeded. See the header for the full story.
+        -DMBEDTLS_USER_CONFIG_FILE=${CMAKE_CURRENT_LIST_DIR}/sdriak_user_config.h
 )
 
 sdrpp_validate_dep(mbedtls
