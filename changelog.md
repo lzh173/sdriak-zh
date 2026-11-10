@@ -2,6 +2,15 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
+## v1.4.2 - 2026-11-10
+
+Fixes a crash when a local recording is being played.
+
+### File source
+
+- Playing a file no longer crashes the application. The playback bar drew a two-pixel playhead with rounded corners; ImGui clamps a rounded rect's radius to `width / 2 - 1`, so the playhead asked its arc helper for a radius of about 1e-6 and the circle segment count came out as 0, which made `_PathArcToFastEx()` divide by zero (`0xC0000094`). The playhead and the narrow end of the progress strip are now drawn square, and ImGui's arc helper no longer divides by a zero segment count.
+- The crash only appeared once playback started, which is why it was not seen while the file was merely loaded.
+
 ## v1.4.1 - 2026-11-10
 
 Simplified Chinese localization, a playback position bar for the File source, and non-ASCII path fixes.

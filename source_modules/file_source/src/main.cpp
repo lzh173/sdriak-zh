@@ -177,10 +177,15 @@ static bool drawPlaybackBar(uint64_t position, uint64_t totalSamples, uint32_t s
     const ImU32 grabCol = ImGui::GetColorU32(active ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab);
     const float stripH = std::min(height, std::max(2.0f, style::dp(3.0f)));
     if (fraction > 0.0) {
+        // Only round the strip once it is wide enough: ImGui clamps the radius to
+        // width / 2 - 1, so a strip a hair wider than 2 px keeps a ~0 radius and
+        // its arc helper divides by a zero segment count. Square below 3 px.
+        const float stripW = fillX - pMin.x;
         dl->AddRectFilled(ImVec2(pMin.x, pMax.y - stripH), ImVec2(fillX, pMax.y),
-                          grabCol, rounding, ImDrawFlags_RoundCornersBottom);
+                          grabCol, (stripW > 3.0f) ? rounding : 0.0f, ImDrawFlags_RoundCornersBottom);
+        // The playhead is two pixels wide, so it is drawn square for the same reason.
         dl->AddRectFilled(ImVec2(fillX - 1.0f, pMin.y + 2.0f), ImVec2(fillX + 1.0f, pMax.y - 2.0f),
-                          grabCol, 1.0f);
+                          grabCol, 0.0f);
     }
     if (hovered || active) {
         dl->AddRect(pMin, pMax, ImGui::GetColorU32(ImGuiCol_Border), rounding);

@@ -1065,7 +1065,16 @@ void ImDrawList::_PathArcToFastEx(const ImVec2& center, float radius, int a_min_
 
     // Calculate arc auto segment step size
     if (a_step <= 0)
-        a_step = IM_DRAWLIST_ARCFAST_SAMPLE_MAX / _CalcCircleAutoSegmentCount(radius);
+    {
+        // The auto segment count is 0 for a radius below ~1e-6, and the division
+        // below would then raise a hardware divide-by-zero (0xC0000094 on
+        // Windows). PathRect() reaches this: it clamps a requested rounding to
+        // (size * 0.5f - 1.0f), so a rect a hair wider than 2px leaves a tiny
+        // positive radius instead of 0.
+        int segmentCount = _CalcCircleAutoSegmentCount(radius);
+        if (segmentCount <= 0) { segmentCount = 1; }
+        a_step = IM_DRAWLIST_ARCFAST_SAMPLE_MAX / segmentCount;
+    }
 
     // Make sure we never do steps larger than one quarter of the circle
     a_step = ImClamp(a_step, 1, IM_DRAWLIST_ARCFAST_TABLE_SIZE / 4);
