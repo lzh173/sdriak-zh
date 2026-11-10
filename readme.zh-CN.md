@@ -63,4 +63,6 @@ python scripts/zh/gen_menu_names.py
 
 基于 Vojtech Bubnik (OK1IAK) 的 SDRIAK 和 Alexandre Rouma (ON5RYZ) 的 SDR++，以及各模块作者的贡献。完整名单见程序内的 Credits 窗口和上游仓库。
 
+本仓库的简体中文汉化（界面翻译、中文字体与文档）由 lzh173（BI7KGA）完成。
+
 本项目遵循 GPLv3；Noto Sans SC 字体遵循 SIL Open Font License，许可见 `root/res/licenses/`。

@@ -101,6 +101,7 @@ namespace credits {
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
+        ImGui::TextUnformatted("简体中文本地化：lzh173（BI7KGA）");
         ImGui::TextUnformatted("SDRIAK v" VERSION_STR "（构建于 " __TIME__ "，" __DATE__ "）");
         ImGui::TextUnformatted("版权所有（C）2020-2026 Alexandre Rouma、Vojtech Bubnik 及贡献者");
         ImGui::TextUnformatted("本程序不提供任何担保。它是遵循 GNU GPL 第 3 版发布的自由软件。");

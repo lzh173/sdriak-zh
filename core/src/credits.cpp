@@ -26,6 +26,7 @@ namespace sdrpp_credits {
         "jprincl",
         "konung-yaropolk",
         "Leonam Ramos",
+        "lzh173 (BI7KGA)",
         "M0OPK",
         "Manawyrm",
         "Marcelo Gadotti",

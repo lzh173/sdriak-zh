@@ -65,6 +65,7 @@ Please read [contributing.md](contributing.md), and open an issue to discuss a b
 SDRIAK is built on the work of many people. Thanks and due respect to all of them.
 
 * **Alexandre Rouma (ON5RYZ)**, the author of [SDR++](https://github.com/AlexandreRouma/SDRPlusPlus), and all its contributors, patrons and hardware donators. They are listed on the upstream page and in the About dialog of the application.
+* **lzh173 (BI7KGA)**, Simplified Chinese localization of this fork: UI translation, bundled CJK font and the Simplified Chinese documentation.
 
 ### Merged projects
 
