@@ -286,11 +286,16 @@ private:
     }
 
     void renderExportPopup() {
+        // OpenPopup() and BeginPopupModal() must use the exact same ID string:
+        // "##" hides the label but still feeds the whole string into the ID
+        // hash, so a different visible prefix would address a different popup.
+        std::string popupId = "##_recorder_export_popup_" + name;
+
         if (exportPopupPending) {
-            ImGui::OpenPopup(CONCAT("##_recorder_export_popup_", name));
+            ImGui::OpenPopup(popupId.c_str());
             exportPopupPending = false;
         }
-        if (!ImGui::BeginPopupModal(CONCAT("导出录音##_recorder_export_popup_", name), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (!ImGui::BeginPopupModal(popupId.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
             return;
         }
 
@@ -299,7 +304,8 @@ private:
         }
         else {
             float listHeight = std::min(320.0f, ImGui::GetTextLineHeightWithSpacing() * (float)exportFiles.size() + 8.0f);
-            ImGui::BeginChild(CONCAT("##_recorder_export_list_", name), ImVec2(420.0f, listHeight), false);
+            std::string listId = "##_recorder_export_list_" + name;
+            ImGui::BeginChild(listId.c_str(), ImVec2(420.0f, listHeight), false);
             for (const auto& file : exportFiles) {
                 if (ImGui::Selectable(file.c_str())) {
                     startExport(file);

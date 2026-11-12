@@ -604,7 +604,7 @@ class MainActivity : NativeActivity() {
                 }
             }
         }
-        return copyPickedToCache(uri)
+        return copyPickedToAppStorage(uri)
     }
 
     /**
@@ -623,10 +623,16 @@ class MainActivity : NativeActivity() {
         }
     }
 
-    private fun copyPickedToCache(uri: Uri): String? {
+    /**
+     * Fallback for documents the app cannot open by path (scoped storage, cloud
+     * providers, archives): stream them into app-private storage and hand that
+     * path to the native readers. filesDir rather than cacheDir, because the
+     * File source remembers the path across launches.
+     */
+    private fun copyPickedToAppStorage(uri: Uri): String? {
         return try {
             val name = queryDisplayName(uri) ?: "picked_${System.currentTimeMillis()}.wav"
-            val dir = File(cacheDir, "picked")
+            val dir = File(filesDir, "imported")
             if (!dir.exists() && !dir.mkdirs()) {
                 return null
             }
