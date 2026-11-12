@@ -1,8 +1,12 @@
 #include <gui/widgets/file_select.h>
 #include <regex>
 #include <filesystem>
-#include <gui/file_dialogs.h>
 #include <core.h>
+#ifdef __ANDROID__
+#include <android_backend.h>
+#else
+#include <gui/file_dialogs.h>
+#endif
 
 FileSelect::FileSelect(std::string defaultPath, std::vector<std::string> filter) {
     _filter = filter;
@@ -65,6 +69,17 @@ bool FileSelect::pathIsValid() {
 }
 
 void FileSelect::worker() {
+#ifdef __ANDROID__
+    // portable-file-dialogs only knows the desktop helpers (zenity/kdialog/
+    // osascript), so on Android the system document picker does the job and
+    // hands back a path the native readers can open.
+    std::string picked = backend::pickFile();
+    if (!picked.empty()) {
+        path = picked;
+        strcpy(strPath, path.c_str());
+        pathChanged = true;
+    }
+#else
     auto file = pfd::open_file("打开文件", pathValid ? std::filesystem::path(expandString(path)).parent_path().string() : "", _filter);
     std::vector<std::string> res = file.result();
 
@@ -73,6 +88,8 @@ void FileSelect::worker() {
         strcpy(strPath, path.c_str());
         pathChanged = true;
     }
+
+#endif
 
     pathValid = std::filesystem::is_regular_file(expandString(path));
     dialogOpen = false;

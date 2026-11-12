@@ -30,13 +30,19 @@ import android.util.Log;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.OpenableColumns;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.IntentCompat;
 
 import androidx.core.content.PermissionChecker;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.io.*;
 
 private val ACTION_USB_PERMISSION = "${BuildConfig.APPLICATION_ID}.USB_PERMISSION";
@@ -125,6 +131,7 @@ class MainActivity : NativeActivity() {
         private const val QMX_USB_VID = 0x0483
         private const val QMX_USB_PID = 0xA34C
         private const val STORAGE_PERMISSION_REQUEST_CODE = 100
+        private const val FILE_PICK_REQUEST = 101
         private val openUsbConnections = HashMap<Int, UsbDeviceConnection>()
         private val openUsbDeviceNames = HashMap<String, Int>()
 
@@ -449,6 +456,115 @@ class MainActivity : NativeActivity() {
         val decorView = getWindow().getDecorView();
         val uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
+    }
+
+    // ── System file picker (Storage Access Framework) ────────────────
+    // The native file dialog worker calls pickFileBlocking() through JNI and
+    // waits on the latch while the system picker activity is in front.
+
+    private var filePickLatch: CountDownLatch? = null
+    @Volatile private var filePickResult: String? = null
+
+    public fun pickFileBlocking(): String? {
+        val latch = CountDownLatch(1)
+        filePickLatch = latch
+        filePickResult = null
+
+        runOnUiThread {
+            try {
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                }
+                startActivityForResult(intent, FILE_PICK_REQUEST)
+            }
+            catch (t: Throwable) {
+                Log.w(TAG, "File picker could not be started: ${t.message}")
+                completeFilePick(null)
+            }
+        }
+
+        try {
+            latch.await(10, TimeUnit.MINUTES)
+        }
+        catch (_: InterruptedException) {
+        }
+        filePickLatch = null
+        return filePickResult
+    }
+
+    private fun completeFilePick(path: String?) {
+        filePickResult = path
+        filePickLatch?.countDown()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != FILE_PICK_REQUEST) {
+            return
+        }
+        val uri = if (resultCode == RESULT_OK) data?.data else null
+        completeFilePick(uri?.let { resolvePickedDocument(it) })
+    }
+
+    /**
+     * Turns the picked document into a path the native readers can open.
+     * Documents served by the external-storage provider map straight onto their
+     * filesystem path; anything else (cloud providers, archives) is copied into
+     * the app cache first, because the WAV/FLAC readers open files by path.
+     */
+    private fun resolvePickedDocument(uri: Uri): String? {
+        if (uri.scheme == "file") {
+            return uri.path
+        }
+        if ("com.android.externalstorage.documents" == uri.authority) {
+            val docId = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
+            val parts = docId?.split(":", limit = 2)
+            if (parts != null && parts.size == 2) {
+                val base = if (parts[0].equals("primary", ignoreCase = true)) {
+                    Environment.getExternalStorageDirectory().absolutePath
+                }
+                else {
+                    "/storage/${parts[0]}"
+                }
+                val path = "$base/${parts[1]}"
+                if (File(path).canRead()) {
+                    return path
+                }
+            }
+        }
+        return copyPickedToCache(uri)
+    }
+
+    private fun copyPickedToCache(uri: Uri): String? {
+        return try {
+            val name = queryDisplayName(uri) ?: "picked_${System.currentTimeMillis()}.wav"
+            val dir = File(cacheDir, "picked")
+            if (!dir.exists() && !dir.mkdirs()) {
+                return null
+            }
+            val out = File(dir, name)
+            contentResolver.openInputStream(uri)?.use { input ->
+                out.outputStream().use { output -> input.copyTo(output) }
+            } ?: return null
+            out.absolutePath
+        }
+        catch (t: Throwable) {
+            Log.w(TAG, "Copying the picked document failed: ${t.message}")
+            null
+        }
+    }
+
+    private fun queryDisplayName(uri: Uri): String? {
+        return try {
+            contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0) else null
+            }
+        }
+        catch (t: Throwable) {
+            null
+        }
     }
 
     public override fun onCreate(savedInstanceState: Bundle?) {

@@ -94,4 +94,13 @@ namespace backend {
     void setSleepTimerConfig(int mode, int dimAfterSec, int darkAfterSec);
     // Whether to restart the SDR source automatically when the app returns to the foreground.
     void setRestartOnResume(bool value);
+
+    // Opens the Android system document picker (Storage Access Framework) and
+    // returns the chosen file as an absolute path, or an empty string if the
+    // user cancelled or the pick failed. Documents that are not backed by a
+    // filesystem path (cloud providers, archives) are copied into the app cache
+    // first, because the native readers open files by path.
+    // Blocks the calling thread until the picker returns, so only call this
+    // from a worker thread, never from the render loop.
+    std::string pickFile();
 }

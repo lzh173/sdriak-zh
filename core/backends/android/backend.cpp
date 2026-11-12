@@ -112,6 +112,33 @@ namespace backend {
 
     void finishAppAndRemoveTask() { callActivityVoidMethod("finishAppAndRemoveTask"); }
 
+    // Shows the system document picker through MainActivity and waits for the
+    // result. Runs on whatever thread the caller used (the file dialog worker),
+    // so JniSession attaches it to the JVM for the duration of the call; the
+    // Java side blocks until the picker activity returns.
+    std::string pickFile() {
+        JniSession jni;
+        if (!jni.valid()) return {};
+
+        jmethodID method = jni.env->GetMethodID(jni.clazz, "pickFileBlocking", "()Ljava/lang/String;");
+        if (!method) {
+            flog::error("MainActivity.pickFileBlocking() not found");
+            return {};
+        }
+
+        auto result = (jstring)jni.env->CallObjectMethod(app->activity->clazz, method);
+        if (!result) return {};
+
+        const char* text = jni.env->GetStringUTFChars(result, nullptr);
+        std::string path = text ? text : "";
+        if (text) jni.env->ReleaseStringUTFChars(result, text);
+        jni.env->DeleteLocalRef(result);
+
+        // Java reports "cancelled" as null, which CallObjectMethod already
+        // turned into a null jstring; an empty string would be a real failure.
+        return path;
+    }
+
     int startSleepTimer() {
         sleepResetLastCall = std::chrono::steady_clock::now();
         return callActivityVoidMethod("startSleepTimer") ? 0 : -1;

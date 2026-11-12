@@ -362,6 +362,10 @@ int sdrpp_main(int argc, char* argv[]) {
         configAccess.set("modules", json::array({
             "airspy_source.so",
             "airspyhf_source.so",
+            // Playback of recordings. The file picker is the system document
+            // picker on Android (see FileSelect / backend::pickFile), so no
+            // desktop dialog helper is needed.
+            "file_source.so",
             "hackrf_source.so",
             "hermes_source.so",
             "hydrasdr_source.so",
