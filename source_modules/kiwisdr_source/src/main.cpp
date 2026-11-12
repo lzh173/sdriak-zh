@@ -151,6 +151,11 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
                 bufferMs = std::clamp<int>(storedBufferMs, BUFFER_MS_MIN, BUFFER_MS_MAX);
             }
             configAccess.tryGet("kiwisdr_use_system_proxy", useSystemProxy);
+            std::string proxyAddr;
+            if (configAccess.tryGet("kiwisdr_proxy_addr", proxyAddr)) {
+                std::strncpy(proxyAddress, proxyAddr.c_str(), sizeof(proxyAddress) - 1);
+                proxyAddress[sizeof(proxyAddress) - 1] = '\0';
+            }
             recent = configAccess.value("kiwisdr_recent", json());
         }
         // Parsed outside the access: loadRecent() walks the whole list and
@@ -353,18 +358,31 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
 
     // Pushes the proxy choice into the shared toggle (used by the directory
     // fetch and the /VER probe) and into the WebSocket client (applied at the
-    // start of each connection).
+    // start of each connection). A typed address wins over the platform proxy,
+    // because "system proxy" is often configured but switched off.
     void applyProxySetting() {
+        net::proxy::Settings manual;
+        std::string manualHost;
+        int manualPort = 0;
+        if (useSystemProxy && net::proxy::parseAddress(proxyAddress, manualHost, manualPort)) {
+            manual.host = manualHost;
+            manual.port = manualPort;
+        }
+        net::proxy::setOverride(manual);
         net::proxy::setUseSystemProxy(useSystemProxy);
         kiwiSdrClient.setUseSystemProxy(useSystemProxy);
         if (!useSystemProxy) { return; }
 
+        if (manual.valid()) {
+            flog::info("KiwiSDR: using manual proxy {}:{}", manual.host, manual.port);
+            return;
+        }
         auto settings = net::proxy::systemSettings();
         if (settings.valid()) {
             flog::info("KiwiSDR: using system proxy {}:{}", settings.host, settings.port);
         }
         else {
-            flog::warn("KiwiSDR: system proxy requested but none configured, connecting directly");
+            flog::warn("KiwiSDR: proxy requested but none configured, connecting directly");
         }
     }
 
@@ -534,6 +552,34 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("通过系统 HTTP 代理连接 KiwiSDR（目录、/VER 探测、WebSocket）。\n切换后需重新连接。");
         }
+        if (_this->useSystemProxy) {
+            // Manual address wins over the platform proxy: the Windows proxy is
+            // frequently configured yet left disabled, which otherwise looks
+            // like the toggle does nothing.
+            if (SmGui::InputText(("##_kiwisdr_proxy_addr_" + _this->name).c_str(),
+                                 _this->proxyAddress, sizeof(_this->proxyAddress))) {
+                config.edit().set("kiwisdr_proxy_addr", std::string(_this->proxyAddress));
+            }
+            if (ImGui::IsItemDeactivatedAfterEdit()) {
+                _this->applyProxySetting();
+            }
+
+            std::string manualHost;
+            int manualPort = 0;
+            if (net::proxy::parseAddress(_this->proxyAddress, manualHost, manualPort)) {
+                ImGui::TextDisabled("手动代理：%s:%d", manualHost.c_str(), manualPort);
+            }
+            else {
+                auto sys = net::proxy::systemSettings();
+                if (sys.valid()) {
+                    ImGui::TextDisabled("系统代理：%s:%d", sys.host.c_str(), sys.port);
+                }
+                else {
+                    ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f),
+                                       "未检测到可用代理，请填写上方地址");
+                }
+            }
+        }
 #endif
 
         // Recent servers, MRU first. Plain ImGui is fine here: this source
@@ -633,6 +679,9 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
     // Route KiwiSDR traffic through the OS proxy; persisted as
     // kiwisdr_use_system_proxy and applied by applyProxySetting().
     bool useSystemProxy = false;
+    // Optional manual "host:port" that overrides the system proxy; persisted as
+    // kiwisdr_proxy_addr. Handy when the OS proxy is configured but disabled.
+    char proxyAddress[128] = "";
     std::atomic<bool> running{false};
     std::atomic<bool> connected{false};
     // Shared prebuffer target in milliseconds; applied live while playing.

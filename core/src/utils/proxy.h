@@ -38,6 +38,14 @@ namespace net::proxy {
     void setUseSystemProxy(bool enable);
     bool useSystemProxy();
 
+    // Manual override (host:port typed by the user). Takes precedence over the
+    // platform proxy while set; an empty push clears it.
+    void setOverride(const Settings& settings);
+
+    // Parses "host:port" / "http://host:port" into its parts. Exposed so the UI
+    // can validate a typed address with the same rules the resolver uses.
+    bool parseAddress(const std::string& value, std::string& host, int& port);
+
     // Effective proxy: systemSettings() when the toggle is on, else disabled.
     Settings active();
 

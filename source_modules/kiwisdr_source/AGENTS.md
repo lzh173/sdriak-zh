@@ -189,6 +189,11 @@ same, and `KiwiSDRClient::start()` hands the resolved proxy to
 `WSClient::setProxy()` so `performHandshake` tunnels the WebSocket. Proxy
 bypass entries (`<local>`, `*.local`, …) are honoured by all of them.
 
+The panel also has an optional manual `host:port` (`kiwisdr_proxy_addr`)
+that is pushed through `setOverride()` and wins over the platform proxy.
+That exists because a machine can have `ProxyServer` configured while
+`ProxyEnable` is `0`, in which case "use system proxy" resolves to nothing.
+
 ## Error and loading states
 
 - `KiwiSDRDirectoryClient::errorMessage()` returns the HTTP/parse error

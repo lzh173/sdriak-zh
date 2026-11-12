@@ -9,6 +9,7 @@
 #include "proxy.h"
 
 #include <atomic>
+#include <mutex>
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
@@ -25,6 +26,8 @@
 namespace {
 
     std::atomic<bool> proxyToggle{ false };
+    std::mutex overrideMutex;
+    net::proxy::Settings overrideSettings;
 
     std::string trim(const std::string& in) {
         size_t begin = 0;
@@ -199,8 +202,23 @@ namespace net::proxy {
 
     bool useSystemProxy() { return proxyToggle.load(); }
 
+    void setOverride(const Settings& settings) {
+        std::lock_guard<std::mutex> lock(overrideMutex);
+        overrideSettings = settings;
+    }
+
+    bool parseAddress(const std::string& value, std::string& host, int& port) {
+        host.clear();
+        port = 0;
+        return parseHostPort(value, host, port);
+    }
+
     Settings active() {
         if (!proxyToggle.load()) { return Settings(); }
+        {
+            std::lock_guard<std::mutex> lock(overrideMutex);
+            if (overrideSettings.valid()) { return overrideSettings; }
+        }
         return systemSettings();
     }
 
@@ -271,4 +289,5 @@ namespace net::proxy {
         return sock;
     }
 }
+
 
