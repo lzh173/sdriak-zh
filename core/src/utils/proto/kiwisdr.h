@@ -69,6 +69,9 @@ private:
     // Touched only on the receive thread, so no synchronization needed.
     std::map<std::string, std::string> keyValues;
 
+    // Set by setUseSystemProxy(); applied at the start of each connection.
+    bool useSystemProxy = false;
+
 public:
     // AGC configuration; persisted across reconnects and re-sent on
     // (re)connect or live via setAgc(). Bundled because the six fields
@@ -115,6 +118,10 @@ public:
     int IQDATA_FREQUENCY = 12000;
 
     void init(const std::string& hostport);
+
+    // Route the WebSocket and the /VER probe through the system HTTP proxy.
+    // Read again on every start(), so toggling it does not need a reconnect.
+    void setUseSystemProxy(bool enable) { useSystemProxy = enable; }
 
     void tune(double freq, Modulation mod);
 

@@ -20,6 +20,7 @@
 
 #include <cerrno>
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 #include <string_view>
@@ -649,7 +650,8 @@ namespace net::websock {
         while (true) {
             const auto deadline = std::chrono::steady_clock::now() +
                                   std::chrono::milliseconds(HANDSHAKE_TIMEOUT_MS);
-            ::net::Address addr(currentHost, currentPort);
+            const bool viaProxy = !proxyHost.empty() && proxyPort > 0;
+            ::net::Address addr(viaProxy ? proxyHost : currentHost, viaProxy ? proxyPort : currentPort);
             RawSocketGuard sock(connectSocket(addr, deadline));
             if (!sock) { return std::nullopt; }
             emplaceSocket(sock.get(), addr);
@@ -658,7 +660,16 @@ namespace net::websock {
                 closeCurrentSocket(false);
                 return std::nullopt;
             }
-            flog::info("WSClient socket connected to {}:{}", currentHost, currentPort);
+            flog::info("WSClient socket connected to {}:{}",
+                       viaProxy ? proxyHost : currentHost, viaProxy ? proxyPort : currentPort);
+            if (viaProxy) {
+                flog::info("WSClient tunneling to {}:{} through proxy {}:{}",
+                           currentHost, currentPort, proxyHost, proxyPort);
+                if (!performProxyConnect(currentHost, currentPort, deadline)) {
+                    closeCurrentSocket(true);
+                    throw std::runtime_error("websock: proxy refused the CONNECT tunnel");
+                }
+            }
 
             secKey = generateSecKey();
             fragmentOpcode = 0;
@@ -777,6 +788,49 @@ namespace net::websock {
         // out. Socket method calls are serialized by socketMutex, so no
         // thread closes while another is inside send/recv.
         stopped = true;
+    }
+
+    void WSClient::setProxy(std::string host, int port) {
+        proxyHost = std::move(host);
+        proxyPort = port;
+    }
+
+    bool WSClient::performProxyConnect(const std::string& host, int port,
+                                       std::chrono::steady_clock::time_point deadline) {
+        const std::string authority = host + ":" + std::to_string(port);
+        const std::string request =
+            "CONNECT " + authority + " HTTP/1.1\r\n"
+            "Host: " + authority + "\r\n"
+            "Proxy-Connection: Keep-Alive\r\n\r\n";
+        sendAllRaw((const uint8_t*)request.data(), request.size());
+
+        // The response head is tiny, so a byte-at-a-time read is fine and keeps
+        // the deadline handling identical to the rest of the handshake.
+        std::string response;
+        response.reserve(256);
+        uint8_t byte = 0;
+        while (!stopped) {
+            if (response.size() > 8192) { return false; }
+            const int timeoutMs = deadlineSliceMs(deadline);
+            if (timeoutMs <= 0) {
+                throw std::runtime_error("websock: proxy CONNECT timed out");
+            }
+            int n = recvSocket(&byte, 1, timeoutMs);
+            if (n < 0) {
+                throw std::runtime_error("websock: proxy CONNECT recv failed");
+            }
+            if (n == 0) { continue; }
+            response.push_back((char)byte);
+            const size_t size = response.size();
+            if (size >= 4 && response.compare(size - 4, 4, "\r\n\r\n") == 0) { break; }
+        }
+        if (response.empty()) { return false; }
+
+        const auto space = response.find(' ');
+        if (space == std::string::npos) { return false; }
+        const int status = std::atoi(response.c_str() + space + 1);
+        flog::info("WSClient proxy CONNECT replied {}", status);
+        return status == 200;
     }
 
     void WSClient::reset() {

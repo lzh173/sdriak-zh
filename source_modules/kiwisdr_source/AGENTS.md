@@ -168,6 +168,27 @@ proceeds as follows:
 The tester is cancellable via `cancel()`; the flag is checked in the wait
 loop and on shutdown (the destructor sets it and joins).
 
+## System proxy
+
+The KiwiSDR path does not use libcurl: the directory fetch, the `/VER` probe
+and the WebSocket all run over raw sockets, so a proxy has to be applied by
+hand. `core/src/utils/proxy.{h,cpp}` supplies the pieces:
+
+- `systemSettings()` reads WinINET's `ProxyEnable`/`ProxyServer`/
+  `ProxyOverride` from the registry on Windows and falls back to the
+  `http_proxy`/`all_proxy` environment variables elsewhere.
+- `setUseSystemProxy()` is the global toggle, driven by the module's
+  `kiwisdr_use_system_proxy` config key (checkbox in the panel, desktop only).
+- `active()` returns the system settings only while that toggle is on, and
+  `connect(host, port, timeout, settings)` opens either a direct socket or an
+  HTTP `CONNECT` tunnel.
+
+Consumers: `net::http::get`/`net::http::Client` call `net::proxy::connect`
+(via `http.cpp`), `fetchDirectoryJson` in `kiwisdr_directory.cpp` does the
+same, and `KiwiSDRClient::start()` hands the resolved proxy to
+`WSClient::setProxy()` so `performHandshake` tunnels the WebSocket. Proxy
+bypass entries (`<local>`, `*.local`, …) are honoured by all of them.
+
 ## Error and loading states
 
 - `KiwiSDRDirectoryClient::errorMessage()` returns the HTTP/parse error

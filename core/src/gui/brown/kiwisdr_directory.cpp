@@ -40,6 +40,7 @@
 #include <utils/flog.h>
 #include "utils/proto/http.h"
 #include "utils/proto/kiwisdr.h"
+#include "utils/proxy.h"
 #include "utils/url.h"
 #include <gui/brown/geomap.h>
 
@@ -85,8 +86,9 @@ namespace {
         }
 
         // Bound DNS + TCP connect like the 5 s response timeout below, so a
-        // dead directory host can't pin the fetch worker for minutes.
-        auto controlSock = net::connect(DIRECTORY_HOST, 80, 5000);
+        // dead directory host can't pin the fetch worker for minutes. Goes
+        // through the system proxy when the KiwiSDR panel has it enabled.
+        auto controlSock = net::proxy::connect(DIRECTORY_HOST, 80, 5000, net::proxy::active());
         auto controlHttp = net::http::Client(controlSock);
 
         net::http::RequestHeader rqhdr(net::http::METHOD_GET, DIRECTORY_PATH, DIRECTORY_HOST);

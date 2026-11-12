@@ -37,6 +37,7 @@
 #include <config.h>
 #include <dsp/buffer/prebuffer.h>
 #include "utils/proto/kiwisdr.h"
+#include "utils/proxy.h"
 #include "utils/url.h"
 #include "gui/smgui.h"
 #include <algorithm>
@@ -149,11 +150,14 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
             if (configAccess.tryGet("kiwisdr_buffer_ms", storedBufferMs)) {
                 bufferMs = std::clamp<int>(storedBufferMs, BUFFER_MS_MIN, BUFFER_MS_MAX);
             }
+            configAccess.tryGet("kiwisdr_use_system_proxy", useSystemProxy);
             recent = configAccess.value("kiwisdr_recent", json());
         }
         // Parsed outside the access: loadRecent() walks the whole list and
         // builds a string per entry, none of which needs the config mutex.
         if (!recent.is_null()) { loadRecent(recent); }
+
+        applyProxySetting();
 
         kiwiSdrClient.init(kiwisdrHostPort());
         chain.init(&rawStream, &stream);
@@ -347,6 +351,23 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         commitServer(kiwisdrHost, kiwisdrPort, loc, band);
     }
 
+    // Pushes the proxy choice into the shared toggle (used by the directory
+    // fetch and the /VER probe) and into the WebSocket client (applied at the
+    // start of each connection).
+    void applyProxySetting() {
+        net::proxy::setUseSystemProxy(useSystemProxy);
+        kiwiSdrClient.setUseSystemProxy(useSystemProxy);
+        if (!useSystemProxy) { return; }
+
+        auto settings = net::proxy::systemSettings();
+        if (settings.valid()) {
+            flog::info("KiwiSDR: using system proxy {}:{}", settings.host, settings.port);
+        }
+        else {
+            flog::warn("KiwiSDR: system proxy requested but none configured, connecting directly");
+        }
+    }
+
     void applyRecent(int idx) {
         if (idx < 0 || idx >= (int)recentServers.size()) { return; }
         RecentServer r = recentServers[idx]; // copy: commitServer reorders the list
@@ -500,6 +521,21 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         }
         ImGui::EndDisabled();
 
+#ifndef __ANDROID__
+        // Desktop only: SDRIAK resolves the platform proxy itself because the
+        // KiwiSDR path uses raw sockets rather than libcurl.
+        ImGui::BeginDisabled(playing);
+        if (ImGui::Checkbox(("使用系统代理##_kiwisdr_proxy_" + _this->name).c_str(),
+                            &_this->useSystemProxy)) {
+            config.edit().set("kiwisdr_use_system_proxy", _this->useSystemProxy);
+            _this->applyProxySetting();
+        }
+        ImGui::EndDisabled();
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("通过系统 HTTP 代理连接 KiwiSDR（目录、/VER 探测、WebSocket）。\n切换后需重新连接。");
+        }
+#endif
+
         // Recent servers, MRU first. Plain ImGui is fine here: this source
         // is never registered on a headless server (see constructor).
         if (!_this->recentServers.empty()) {
@@ -594,6 +630,9 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
 
     std::string name;
     bool enabled = true;
+    // Route KiwiSDR traffic through the OS proxy; persisted as
+    // kiwisdr_use_system_proxy and applied by applyProxySetting().
+    bool useSystemProxy = false;
     std::atomic<bool> running{false};
     std::atomic<bool> connected{false};
     // Shared prebuffer target in milliseconds; applied live while playing.

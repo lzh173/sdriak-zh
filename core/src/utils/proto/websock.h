@@ -60,6 +60,11 @@ namespace net::websock {
         // again on this instance after a previous stopSocket() / disconnect.
         void reset();
 
+        // Route the next connection through an HTTP proxy (CONNECT tunnel).
+        // An empty host or a non-positive port disables it again. Set this
+        // before connectAndReceiveLoop(); not safe to change while connecting.
+        void setProxy(std::string host, int port);
+
         // True iff the receive loop has been asked to stop or has terminated.
         bool isStopped() const { return stopped.load(); }
 
@@ -98,6 +103,13 @@ namespace net::websock {
         std::atomic<bool> websocketReady{false};
 
         int maybeDecodeBuffer(const std::vector<uint8_t>& data);
+
+        // Optional HTTP proxy; see setProxy().
+        std::string proxyHost;
+        int proxyPort = 0;
+        // Sends CONNECT and validates the tunnel; false when the proxy says no.
+        bool performProxyConnect(const std::string& host, int port,
+                                 std::chrono::steady_clock::time_point deadline);
 
         int makeFrame(uint8_t firstByte, unsigned char* msg, int msg_length,
                       unsigned char* buffer, int buffer_size);

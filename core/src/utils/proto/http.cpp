@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../ascii.h"
+#include "../proxy.h"
 
 namespace net::http {
     namespace {
@@ -596,8 +597,10 @@ namespace net::http {
             const auto deadline = std::chrono::steady_clock::now() +
                                   std::chrono::milliseconds(options.timeoutMs);
             // Bound connection establishment (DNS + TCP) by the same request
-            // timeout that governs the response below.
-            auto sock = net::connect(current.host, current.port, options.timeoutMs);
+            // timeout that governs the response below. The system proxy, when
+            // enabled, is applied here so every HTTP caller honours it.
+            auto sock = net::proxy::connect(current.host, current.port, options.timeoutMs,
+                                            net::proxy::active());
 
             RequestHeader request(METHOD_GET, requestPathFor(current), hostHeaderFor(current));
             request.setField("Connection", "close");

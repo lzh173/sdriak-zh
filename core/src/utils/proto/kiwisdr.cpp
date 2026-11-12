@@ -11,6 +11,7 @@
 
 #include "utils/flog.h"
 #include "utils/proto/http.h"
+#include "utils/proxy.h"
 #include "utils/url.h"
 
 int16_t KiwiSDRClient::readBE16(const char* data) {
@@ -355,6 +356,16 @@ void KiwiSDRClient::start() {
             auto parsed = url::splitHostPort(hostPort);
             if (!parsed) {
                 throw std::runtime_error("KiwiSDRClient: malformed host:port: " + hostPort);
+            }
+            // Pick up the proxy choice for this connection. The /VER probe goes
+            // through net::http, which reads the same global toggle, while the
+            // WebSocket client has to be told explicitly.
+            const auto proxySettings = useSystemProxy ? net::proxy::active() : net::proxy::Settings();
+            if (proxySettings.valid() && !net::proxy::bypasses(proxySettings, parsed->host)) {
+                wsClient.setProxy(proxySettings.host, proxySettings.port);
+            }
+            else {
+                wsClient.setProxy(std::string(), 0);
             }
             const uint64_t ts = fetchServerTimestamp(parsed->host, parsed->port);
             wsClient.connectAndReceiveLoop(parsed->host, parsed->port, "/kiwi/" + std::to_string(ts) + "/SND");
