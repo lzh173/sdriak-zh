@@ -286,10 +286,10 @@ private:
     }
 
     void renderExportPopup() {
-        // OpenPopup() and BeginPopupModal() must use the exact same ID string:
-        // "##" hides the label but still feeds the whole string into the ID
-        // hash, so a different visible prefix would address a different popup.
-        std::string popupId = "##_recorder_export_popup_" + name;
+        // OpenPopup() and BeginPopupModal() must use the exact same ID string.
+        // "###" splits the string into a visible label and the ID, so the title
+        // bar shows "导出录音" while both calls still hash the same id.
+        std::string popupId = "导出录音###_recorder_export_popup_" + name;
 
         if (exportPopupPending) {
             ImGui::OpenPopup(popupId.c_str());
