@@ -103,4 +103,8 @@ namespace backend {
     // Blocks the calling thread until the picker returns, so only call this
     // from a worker thread, never from the render loop.
     std::string pickFile();
+
+    // Opens the system "save as" dialog and streams [sourcePath] into the
+    // document the user picks. Blocking; call from a worker thread.
+    bool saveFile(const std::string& sourcePath, const std::string& suggestedName);
 }

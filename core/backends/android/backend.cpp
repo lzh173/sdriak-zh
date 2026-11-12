@@ -139,7 +139,29 @@ namespace backend {
         return path;
     }
 
+    // Streams a file into a document the user picks in the system "save as"
+    // dialog. Same threading rules as pickFile(): the calling thread blocks.
+    bool saveFile(const std::string& sourcePath, const std::string& suggestedName) {
+        JniSession jni;
+        if (!jni.valid()) return false;
+
+        jmethodID method = jni.env->GetMethodID(jni.clazz, "saveFileBlocking", "(Ljava/lang/String;Ljava/lang/String;)Z");
+        if (!method) {
+            flog::error("MainActivity.saveFileBlocking() not found");
+            return false;
+        }
+
+        jstring jSource = jni.env->NewStringUTF(sourcePath.c_str());
+        jstring jName = jni.env->NewStringUTF(suggestedName.c_str());
+        jboolean ok = jni.env->CallBooleanMethod(app->activity->clazz, method, jSource, jName);
+        jni.env->DeleteLocalRef(jSource);
+        jni.env->DeleteLocalRef(jName);
+
+        return ok == JNI_TRUE;
+    }
+
     int startSleepTimer() {
+
         sleepResetLastCall = std::chrono::steady_clock::now();
         return callActivityVoidMethod("startSleepTimer") ? 0 : -1;
     }

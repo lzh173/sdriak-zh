@@ -132,6 +132,7 @@ class MainActivity : NativeActivity() {
         private const val QMX_USB_PID = 0xA34C
         private const val STORAGE_PERMISSION_REQUEST_CODE = 100
         private const val FILE_PICK_REQUEST = 101
+        private const val FILE_SAVE_REQUEST = 102
         private val openUsbConnections = HashMap<Int, UsbDeviceConnection>()
         private val openUsbDeviceNames = HashMap<String, Int>()
 
@@ -498,14 +499,83 @@ class MainActivity : NativeActivity() {
         filePickLatch?.countDown()
     }
 
+    // ── System "save as" dialog ──────────────────────────────────────
+    // Scoped storage forbids writing recordings to shared storage by path, so
+    // exports go through ACTION_CREATE_DOCUMENT: the user picks the destination
+    // and we stream the file into the returned document.
+
+    private var saveLatch: CountDownLatch? = null
+    @Volatile private var saveResult: Boolean = false
+    @Volatile private var saveSourcePath: String? = null
+
+    public fun saveFileBlocking(sourcePath: String, suggestedName: String): Boolean {
+        val latch = CountDownLatch(1)
+        saveLatch = latch
+        saveResult = false
+        saveSourcePath = sourcePath
+
+        runOnUiThread {
+            try {
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/octet-stream"
+                    putExtra(Intent.EXTRA_TITLE, suggestedName)
+                }
+                startActivityForResult(intent, FILE_SAVE_REQUEST)
+            }
+            catch (t: Throwable) {
+                Log.w(TAG, "Save dialog could not be started: ${t.message}")
+                completeFileSave(false)
+            }
+        }
+
+        try {
+            latch.await(10, TimeUnit.MINUTES)
+        }
+        catch (_: InterruptedException) {
+        }
+        saveLatch = null
+        saveSourcePath = null
+        return saveResult
+    }
+
+    private fun completeFileSave(ok: Boolean) {
+        saveResult = ok
+        saveLatch?.countDown()
+    }
+
+    private fun copyToDocument(uri: Uri, sourcePath: String): Boolean {
+        return try {
+            val src = File(sourcePath)
+            if (!src.isFile) {
+                return false
+            }
+            contentResolver.openOutputStream(uri)?.use { output ->
+                FileInputStream(src).use { input -> input.copyTo(output) }
+            } ?: return false
+            true
+        }
+        catch (t: Throwable) {
+            Log.w(TAG, "Copying to the chosen document failed: ${t.message}")
+            false
+        }
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode != FILE_PICK_REQUEST) {
+        val uri = if (resultCode == RESULT_OK) data?.data else null
+
+        if (requestCode == FILE_PICK_REQUEST) {
+            completeFilePick(uri?.let { resolvePickedDocument(it) })
             return
         }
-        val uri = if (resultCode == RESULT_OK) data?.data else null
-        completeFilePick(uri?.let { resolvePickedDocument(it) })
+
+        if (requestCode == FILE_SAVE_REQUEST) {
+            val source = saveSourcePath
+            completeFileSave(uri != null && source != null && copyToDocument(uri, source))
+            return
+        }
     }
 
     /**
@@ -529,12 +599,28 @@ class MainActivity : NativeActivity() {
                     "/storage/${parts[0]}"
                 }
                 val path = "$base/${parts[1]}"
-                if (File(path).canRead()) {
+                if (canOpenPath(path)) {
                     return path
                 }
             }
         }
         return copyPickedToCache(uri)
+    }
+
+    /**
+     * True when the native readers will actually be able to open [path].
+     * File.canRead() only checks access(2), which scoped storage can happily
+     * grant for shared storage while open(2) still fails, so probe for real:
+     * open the file and pull one byte.
+     */
+    private fun canOpenPath(path: String): Boolean {
+        return try {
+            FileInputStream(File(path)).use { it.read() }
+            true
+        }
+        catch (t: Throwable) {
+            false
+        }
     }
 
     private fun copyPickedToCache(uri: Uri): String? {
@@ -595,6 +681,12 @@ class MainActivity : NativeActivity() {
             if (needed.isNotEmpty()) {
                 ActivityCompat.requestPermissions(this, needed.toTypedArray(), STORAGE_PERMISSION_REQUEST_CODE)
             }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ split the storage permission by media type. Audio is
+            // what lets us open a picked recording in place instead of copying
+            // it into the cache first.
+            checkAndAsk(Manifest.permission.READ_MEDIA_AUDIO, STORAGE_PERMISSION_REQUEST_CODE)
         }
 
         // Register events

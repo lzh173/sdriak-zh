@@ -24,6 +24,12 @@
 #include <utils/optionlist.h>
 #include <utils/wav.h>
 #include <radio_interface.h>
+#include <algorithm>
+#include <vector>
+#ifdef __ANDROID__
+#include <android_backend.h>
+#include <utils/flog.h>
+#endif
 
 #define CONCAT(a, b) ((std::string(a) + b).c_str())
 
@@ -252,6 +258,62 @@ public:
     }
 
 private:
+#ifdef __ANDROID__
+    void refreshExportList() {
+        exportFiles.clear();
+        std::string dir = expandString(folderSelect.path);
+        std::error_code ec;
+        if (!std::filesystem::is_directory(dir, ec)) { return; }
+        for (const auto& entry : std::filesystem::directory_iterator(dir, ec)) {
+            if (!entry.is_regular_file()) { continue; }
+            exportFiles.push_back(entry.path().filename().string());
+        }
+        std::sort(exportFiles.begin(), exportFiles.end());
+    }
+
+    void startExport(const std::string& fileName) {
+        // The save dialog blocks its caller until the user answers, so keep it
+        // off the render thread.
+        std::string path = expandString(folderSelect.path + "/" + fileName);
+        std::thread([path, fileName]() {
+            if (backend::saveFile(path, fileName)) {
+                flog::info("Recorder: exported '{0}'", fileName);
+            }
+            else {
+                flog::warn("Recorder: export of '{0}' was cancelled or failed", fileName);
+            }
+        }).detach();
+    }
+
+    void renderExportPopup() {
+        if (exportPopupPending) {
+            ImGui::OpenPopup(CONCAT("##_recorder_export_popup_", name));
+            exportPopupPending = false;
+        }
+        if (!ImGui::BeginPopupModal(CONCAT("导出录音##_recorder_export_popup_", name), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            return;
+        }
+
+        if (exportFiles.empty()) {
+            ImGui::TextUnformatted("录音目录里没有文件");
+        }
+        else {
+            float listHeight = std::min(320.0f, ImGui::GetTextLineHeightWithSpacing() * (float)exportFiles.size() + 8.0f);
+            ImGui::BeginChild(CONCAT("##_recorder_export_list_", name), ImVec2(420.0f, listHeight), false);
+            for (const auto& file : exportFiles) {
+                if (ImGui::Selectable(file.c_str())) {
+                    startExport(file);
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::EndChild();
+        }
+
+        if (ImGui::Button("关闭", ImVec2(120.0f, 0))) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+#endif
+
     static void menuHandler(void* ctx) {
         RecorderModule* _this = (RecorderModule*)ctx;
 
@@ -277,6 +339,18 @@ private:
                 config.edit().section(_this->name).set("recPath", _this->folderSelect.path);
             }
         }
+
+#ifdef __ANDROID__
+        // Android 11+ enforces scoped storage: the app cannot drop files into a
+        // user-visible folder by path, so exporting goes through the system
+        // "save as" dialog instead.
+        if (ImGui::Button(CONCAT("导出录音…##_recorder_export_", _this->name),
+                          ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+            _this->refreshExportList();
+            _this->exportPopupPending = true;
+        }
+        _this->renderExportPopup();
+#endif
 
         ImGui::LeftLabel("文件名模板");
         ImGui::FillWidth();
@@ -631,6 +705,13 @@ private:
     OptionList<std::string, wav::Format> containers;
     OptionList<int, wav::SampleType> sampleTypes;
     FolderSelect folderSelect;
+
+#ifdef __ANDROID__
+    // Export state: scoped storage forbids writing recordings to shared storage
+    // by path, so finished files are handed to the system "save as" dialog.
+    bool exportPopupPending = false;
+    std::vector<std::string> exportFiles;
+#endif
 
     int recMode = RECORDER_MODE_AUDIO;
     int timezoneId;
