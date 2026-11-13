@@ -2,6 +2,20 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
+## v1.4.4-zh - 2026-11-13
+
+Fork release: Android can finally pick recordings, and KiwiSDR can go through a proxy.
+
+### Android
+
+- The File source is usable again. `file_source.so` was compiled into the APK but never loaded: Android cannot enumerate a plugin directory, so the module list is hardcoded in `core.cpp`, and it did not mention the file source. It is in the list now, and the `...` button opens the system document picker (Storage Access Framework) instead of the desktop dialog helper, which has no Android backend.
+- Picking a recording sometimes produced a path that could not be read. `File.canRead()` only checks `access(2)`; scoped storage can grant that for shared storage while `open(2)` is still denied, and the reader then reported "Unsupported file format (not a WAV or FLAC file)". The path is now probed by actually opening it, and documents that cannot be opened are imported into the app's private storage first. `READ_MEDIA_AUDIO` is requested on Android 13+ so media files can be read in place.
+- The Recorder has an `导出录音…` button: it lists the files in the recording directory and hands the chosen one to the system "save as" dialog, which is the only way to write into user-visible storage on Android 11+.
+
+### KiwiSDR
+
+- New `使用系统代理` option. The KiwiSDR path uses raw sockets rather than libcurl, so an OS proxy was ignored and receivers behind one were unreachable. The receiver list, the `/VER` probe and the WebSocket now honour the system proxy, and the panel also accepts a manual `host:port` for setups where the system proxy is configured but switched off.
+
 ## v1.4.3 - 2026-11-10
 
 Fixes the black screen on Android while the system entropy pool is unseeded.

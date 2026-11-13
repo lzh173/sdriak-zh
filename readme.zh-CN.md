@@ -39,7 +39,7 @@ SDRIAK 是 SDR++ 的一个跨平台分支（Windows / Linux / macOS / Android）
 - **macOS**：Intel / Apple Silicon 压缩包
 - **Android**：`android-arm.apk` / `android-x86.apk`，lzh173 发布签名，可直接安装
 
-当前版本 1.4.3（基于 SDRIAK 1.4.0-rc 的汉化版）。
+当前版本 1.4.4-zh（基于 SDRIAK 1.4.0-rc 的汉化版，版本号带 -zh 后缀以与上游主线区分）。
 
 ## 说明
 

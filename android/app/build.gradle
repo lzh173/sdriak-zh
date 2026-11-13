@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 // Read the authoritative version from version.h so there is a single source of truth.
 def readVersionFromHeader() {
     def versionFile = new File(rootDir.parentFile, "core/src/version.h")
-    def matcher = versionFile.text =~ /"(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc)(\d+)?)?"/
+    def matcher = versionFile.text =~ /"(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc|zh)(\d+)?)?"/
     if (!matcher) throw new GradleException("Cannot parse version from ${versionFile}")
     def major   = matcher[0][1] as int
     def minor   = matcher[0][2] as int
@@ -19,7 +19,7 @@ def readVersionFromHeader() {
     //   1.2.1-rc2    < 1.2.1                         (release = tier 999)
     // Formula: (major*10000 + minor*100 + patch) * 1000 + tier
     // Tier ranges: alpha 100-109, beta 200-209, rc 300-309, release 999.
-    def tierBase = (preType == "alpha") ? 100 : (preType == "beta") ? 200 : (preType == "rc") ? 300 : 999
+    def tierBase = (preType == "alpha") ? 100 : (preType == "beta") ? 200 : (preType == "rc") ? 300 : 999   // zh rides the release tier
     def tier = (preType != null) ? tierBase + (preNum ? (preNum as int) : 0) : 999
     def code = (major * 10000 + minor * 100 + patch) * 1000 + tier
 
@@ -159,3 +159,4 @@ dependencies {
 
 copyResources.dependsOn deleteTempAssets
 preBuild.dependsOn copyResources
+

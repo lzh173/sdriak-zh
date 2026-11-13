@@ -15,7 +15,7 @@ set -e
 
 REPO_ROOT="${1:-$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)}"
 
-VERSION=$(grep -oE '"[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)[0-9]*)?"' "$REPO_ROOT/core/src/version.h" | tr -d '"')
+VERSION=$(grep -oE '"[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc|zh)[0-9]*)?"' "$REPO_ROOT/core/src/version.h" | tr -d '"')
 if [ -z "$VERSION" ]; then
     echo "ERROR: could not parse version from core/src/version.h" >&2
     exit 1
@@ -46,3 +46,4 @@ fi
 
 echo "VERSION=$VERSION"
 echo "VERSION_FULL=$VERSION_FULL"
+
