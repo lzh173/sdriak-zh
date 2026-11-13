@@ -11,6 +11,7 @@ Fork release: Android can finally pick recordings, and KiwiSDR can go through a 
 - The File source is usable again. `file_source.so` was compiled into the APK but never loaded: Android cannot enumerate a plugin directory, so the module list is hardcoded in `core.cpp`, and it did not mention the file source. It is in the list now, and the `...` button opens the system document picker (Storage Access Framework) instead of the desktop dialog helper, which has no Android backend.
 - Picking a recording sometimes produced a path that could not be read. `File.canRead()` only checks `access(2)`; scoped storage can grant that for shared storage while `open(2)` is still denied, and the reader then reported "Unsupported file format (not a WAV or FLAC file)". The path is now probed by actually opening it, and documents that cannot be opened are imported into the app's private storage first. `READ_MEDIA_AUDIO` is requested on Android 13+ so media files can be read in place.
 - The Recorder has an `导出录音…` button: it lists the files in the recording directory and hands the chosen one to the system "save as" dialog, which is the only way to write into user-visible storage on Android 11+.
+- The application ID is now `org.ok1iak.zh.sdrpp`, so the Chinese build installs next to the upstream app instead of replacing it. An existing `org.ok1iak.sdrpp` install is not upgraded in place; its recordings and configuration stay with the old package.
 
 ### KiwiSDR
 

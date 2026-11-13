@@ -36,8 +36,10 @@ android {
     compileSdk 36
     ndkVersion "29.0.14206865"
     defaultConfig {
-        // Keep the published ID stable so SDRIAK upgrades the existing app and retains user data.
-        applicationId "org.ok1iak.sdrpp"
+        // Fork-specific ID: the Chinese build installs alongside the upstream
+        // app instead of replacing it. An existing org.ok1iak.sdrpp install is
+        // therefore not upgraded in place, and its app data stays behind.
+        applicationId "org.ok1iak.zh.sdrpp"
         minSdk 24
         targetSdk 36
         versionCode appVersion.code
