@@ -68,10 +68,10 @@ The cleaned JSON is cached as:
 `<root>` is whatever path the constructor receives from the source module
 (module-resolved root directory, not a hardcoded location). The cache is
 reused while it is less than one hour old; when missing or stale, the
-client fetches the service again. The fetch happens at most once per
-`KiwiSDRDirectoryClient` lifetime — there is no auto-refresh on cache
-expiry; the user has to restart the app (or the directory client) to pull
-fresh data.
+client fetches the service again. Within one client lifetime the fetch
+happens once, but `invalidate()` clears that state: the popup's 重试 button
+uses it after a failure, and `applyProxySetting()` calls it so a proxy
+enabled later is picked up without restarting the app.
 
 As a sanity check, the live response contained 892 entries on 2026-04-25;
 expect the count to stay on the order of several hundred to ~1000.
@@ -156,7 +156,10 @@ proceeds as follows:
    path/query/fragment is stripped, and the port defaults to `80` when not
    explicit. URLs that do not start with `http://` are rejected with status
    "Unsupported URL scheme (only http:// is supported): …".
-2. `KiwiSDRClient` connects to that endpoint and tunes 14.074 MHz IQ.
+2. `KiwiSDRClient` connects to that endpoint and tunes 14.074 MHz IQ. The
+   tester builds its own client, so it never sees the module's
+   `useSystemProxy` flag; `KiwiSDRClient::start()` ORs that flag with
+   `net::proxy::useSystemProxy()` so the tester inherits the panel setting.
 3. The test waits up to 5 s for the first IQ packet to arrive.
 4. Result is reported via `statusText()`: "Got some data. Server OK: …" on
    success, "Disconnect, no data. Server NOT OK: …" or

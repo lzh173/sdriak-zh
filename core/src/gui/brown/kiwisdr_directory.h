@@ -68,6 +68,11 @@ public:
     /// after that does nothing until the result has been delivered.
     void requestRefresh();
 
+    /// Forgets the previous attempt so the next requestRefresh() fetches again.
+    /// Used by the retry button and when the proxy settings change, since a
+    /// failed fetch would otherwise stick for the whole session.
+    void invalidate();
+
     bool isLoading() const;
     std::string errorMessage() const;
 

@@ -202,6 +202,17 @@ KiwiSDRDirectoryClient::~KiwiSDRDirectoryClient() {
     }
 }
 
+void KiwiSDRDirectoryClient::invalidate() {
+    // requestRefresh() joins the worker before starting a new one, so it is
+    // enough to clear the state here; an in-flight fetch cannot publish into
+    // a cleared state because it takes the same mutex when it finishes.
+    std::lock_guard<std::mutex> lock(stateMutex);
+    fetchAttempted = false;
+    loading = false;
+    result.reset();
+    errorMsg.clear();
+}
+
 void KiwiSDRDirectoryClient::requestRefresh() {
     {
         std::lock_guard<std::mutex> lock(stateMutex);

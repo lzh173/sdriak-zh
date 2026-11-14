@@ -80,6 +80,12 @@ void KiwiSDRMapSelector::openPopup() {
     ImGui::OpenPopup((configPrefix + "：KiwiSDR 地图").c_str());
 }
 
+void KiwiSDRMapSelector::invalidateDirectory() {
+    directory.invalidate();
+    servers.clear();
+    serversReady = false;
+}
+
 void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const std::string&, const std::optional<ServerEntry::FrequencyBand>&)> onSelected) {
     const ImVec2 displaySize = ImGui::GetIO().DisplaySize;
 #ifdef __ANDROID__
@@ -173,6 +179,12 @@ void KiwiSDRMapSelector::drawPopup(std::function<void(const std::string&, const 
     if (!serversReady) {
         if (!error.empty()) {
             ImGui::Text("%s", error.c_str());
+            // A failed fetch used to stick for the whole session, which made a
+            // proxy that was enabled after the first attempt look broken.
+            if (ImGui::Button("重试")) {
+                directory.invalidate();
+                directory.requestRefresh();
+            }
         }
         else {
             ImGui::Text("正在加载 KiwiSDR 服务器列表……");

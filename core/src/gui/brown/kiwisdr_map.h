@@ -40,6 +40,10 @@ struct KiwiSDRMapSelector {
     void openPopup();
     void drawPopup(std::function<void(const std::string&, const std::string&, const std::optional<ServerEntry::FrequencyBand>&)> onSelected);
 
+    // Drops the cached receiver list so the next popup refetches it. Called
+    // when the proxy configuration changes, and by the retry button.
+    void invalidateDirectory();
+
     // Runtime-toggleable. Default keeps the original behavior so existing
     // users see no surprise; a popup button cycles between styles.
     MarkerStyle markerStyle = MarkerStyle::HideFull;

@@ -359,8 +359,11 @@ void KiwiSDRClient::start() {
             }
             // Pick up the proxy choice for this connection. The /VER probe goes
             // through net::http, which reads the same global toggle, while the
-            // WebSocket client has to be told explicitly.
-            const auto proxySettings = useSystemProxy ? net::proxy::active() : net::proxy::Settings();
+            // WebSocket client has to be told explicitly. The tester builds its
+            // own client and never touches the per-module flag, so the global
+            // toggle wins when either one asks for a proxy.
+            const bool proxyWanted = useSystemProxy || net::proxy::useSystemProxy();
+            const auto proxySettings = proxyWanted ? net::proxy::active() : net::proxy::Settings();
             if (proxySettings.valid() && !net::proxy::bypasses(proxySettings, parsed->host)) {
                 wsClient.setProxy(proxySettings.host, proxySettings.port);
             }

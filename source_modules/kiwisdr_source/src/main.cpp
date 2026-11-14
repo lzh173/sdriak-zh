@@ -371,6 +371,12 @@ struct KiwiSDRSourceModule : public ModuleManager::Instance {
         net::proxy::setOverride(manual);
         net::proxy::setUseSystemProxy(useSystemProxy);
         kiwiSdrClient.setUseSystemProxy(useSystemProxy);
+
+        // The receiver list may already have been fetched (or failed) under the
+        // old settings, and the directory client only tries once per lifetime;
+        // drop it so the next popup goes through the new proxy.
+        selector.invalidateDirectory();
+
         if (!useSystemProxy) { return; }
 
         if (manual.valid()) {
