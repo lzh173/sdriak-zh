@@ -41,7 +41,7 @@ CJK_RANGES = [
     (0x3000, 0x303F),   # CJK Symbols and Punctuation
     (0xFF00, 0xFFEF),   # Halfwidth and Fullwidth Forms
 ]
-EXTRA_PUNCT = "　，。、；：？！“”‘’（）【】《》〈〉「」『』…—～·"
+EXTRA_PUNCT = "　，。、；：？！“”‘’（）【】《》〈〉「」『』…—–～·"
 
 
 def is_cjk(ch: str) -> bool:

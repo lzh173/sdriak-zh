@@ -374,7 +374,7 @@ private:
     void drawChannelsTab() {
         for (auto& group : groups) {
             if (!ImGui::CollapsingHeader(group.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) { continue; }
-            ImGui::Columns(3, ("##_china_ref_cols_" + group.name).c_str(), false);
+            ImGui::Columns(2, ("##_china_ref_cols_" + group.name).c_str(), false);
             for (auto& item : group.items) {
                 if (ImGui::Button((item.name + "##" + group.name).c_str(), ImVec2(-1, 0))) {
                     tune(item.freq);
