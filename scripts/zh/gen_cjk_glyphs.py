@@ -81,6 +81,29 @@ def collect_used_chars() -> set[str]:
     return chars
 
 
+def collect_resource_chars() -> set[str]:
+    """CJK characters rendered from the UI data files under root/res.
+
+    Band plan names and the frequency/channel tables are drawn verbatim, so
+    their glyphs must be in the atlas even though they are not C++ literals.
+    Only JSON under root/res is scanned; the rest of root/ is icons and fonts.
+    """
+    chars: set[str] = set()
+    res_root = os.path.join(REPO, "root", "res")
+    for dirpath, _dirnames, filenames in os.walk(res_root):
+        for fn in filenames:
+            if not fn.endswith(".json"):
+                continue
+            try:
+                text = open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore").read()
+            except OSError:
+                continue
+            for ch in text:
+                if is_cjk(ch):
+                    chars.add(ch)
+    return chars
+
+
 def parse_imgui_common() -> set[str]:
     """Reproduce ImFontAtlas::GetGlyphRangesChineseSimplifiedCommon()."""
     text = open(IMGUI_DRAW, encoding="utf-8", errors="ignore").read()
@@ -142,7 +165,8 @@ def main() -> int:
     ap.add_argument("--font", help="static Regular TTF to subset (default: cached Noto Sans SC)")
     args = ap.parse_args()
 
-    used = {c for c in collect_used_chars() if not covered_by_base_font(c)}
+    used = {c for c in (collect_used_chars() | collect_resource_chars())
+            if not covered_by_base_font(c)}
     common = {c for c in parse_imgui_common() if not covered_by_base_font(c)}
     all_chars = used | common
     print(f"UI characters: {len(used)}, ImGui common characters: {len(common)}, total: {len(all_chars)}")
