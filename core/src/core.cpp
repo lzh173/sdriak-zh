@@ -224,6 +224,8 @@ int sdrpp_main(int argc, char* argv[]) {
     defConfig["moduleInstances"]["Dragon Labs Source"]["enabled"] = true;
     defConfig["moduleInstances"]["File Source"]["module"] = "file_source";
     defConfig["moduleInstances"]["File Source"]["enabled"] = true;
+    defConfig["moduleInstances"]["频率参考"]["module"] = "china_ref";
+    defConfig["moduleInstances"]["频率参考"]["enabled"] = true;
     defConfig["moduleInstances"]["FobosSDR Source"]["module"] = "fobossdr_source";
     defConfig["moduleInstances"]["FobosSDR Source"]["enabled"] = true;
     defConfig["moduleInstances"]["HackRF Source"]["module"] = "hackrf_source";
@@ -366,6 +368,7 @@ int sdrpp_main(int argc, char* argv[]) {
             // picker on Android (see FileSelect / backend::pickFile), so no
             // desktop dialog helper is needed.
             "file_source.so",
+            "china_ref.so",
             "hackrf_source.so",
             "hermes_source.so",
             "hydrasdr_source.so",

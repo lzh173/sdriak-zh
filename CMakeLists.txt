@@ -86,6 +86,7 @@ option(OPT_BUILD_VOR_RECEIVER "VOR beacon receiver" OFF)
 option(OPT_BUILD_WEATHER_SAT_DECODER "Build the HRPT decoder module (no dependencies required)" OFF)
 
 # Misc
+option(OPT_BUILD_CHINA_REF "Chinese frequency annotations, channel tables and relay calculator" ON)
 option(OPT_BUILD_DISCORD_PRESENCE "Build the Discord Rich Presence module" ON)
 option(OPT_BUILD_FREQUENCY_MANAGER "Build the Frequency Manager module" ON)
 option(OPT_BUILD_IQ_EXPORTER "Build the IQ Exporter module" ON)
@@ -312,6 +313,7 @@ sdrpp_add_optional_modules(
 
 # Misc
 sdrpp_add_optional_modules(
+    CHINA_REF:misc_modules/china_ref
     DISCORD_PRESENCE:misc_modules/discord_integration
     FREQUENCY_MANAGER:misc_modules/frequency_manager
     IQ_EXPORTER:misc_modules/iq_exporter

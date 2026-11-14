@@ -1,0 +1,208 @@
+{
+    "name": "China (中文)",
+    "country_name": "中华人民共和国",
+    "country_code": "CN",
+    "author_name": "lzh173",
+    "author_url": "https://github.com/lzh173/sdriak-zh",
+    "bands": [
+        {
+            "name": "长波广播",
+            "type": "broadcast",
+            "start": 148500,
+            "end": 283500,
+            "chan": 9000
+        },
+        {
+            "name": "中波广播",
+            "type": "broadcast",
+            "start": 526500,
+            "end": 1606500,
+            "def_freq": 1000000,
+            "chan": 9000
+        },
+        {
+            "name": "160m 业余频段",
+            "type": "amateur",
+            "start": 1800000,
+            "end": 2000000
+        },
+        {
+            "name": "80m 业余频段",
+            "type": "amateur",
+            "start": 3500000,
+            "end": 3900000
+        },
+        {
+            "name": "60m 业余频段",
+            "type": "amateur",
+            "start": 5351500,
+            "end": 5366500
+        },
+        {
+            "name": "40m 业余频段",
+            "type": "amateur",
+            "start": 7000000,
+            "end": 7200000
+        },
+        {
+            "name": "30m 业余频段",
+            "type": "amateur",
+            "start": 10100000,
+            "end": 10150000
+        },
+        {
+            "name": "20m 业余频段",
+            "type": "amateur",
+            "start": 14000000,
+            "end": 14350000
+        },
+        {
+            "name": "17m 业余频段",
+            "type": "amateur",
+            "start": 18068000,
+            "end": 18168000
+        },
+        {
+            "name": "15m 业余频段",
+            "type": "amateur",
+            "start": 21000000,
+            "end": 21450000
+        },
+        {
+            "name": "12m 业余频段",
+            "type": "amateur",
+            "start": 24890000,
+            "end": 24990000
+        },
+        {
+            "name": "10m 业余频段",
+            "type": "amateur",
+            "start": 28000000,
+            "end": 29700000
+        },
+        {
+            "name": "短波广播 49m",
+            "type": "broadcast",
+            "start": 5900000,
+            "end": 6200000,
+            "chan": 5000
+        },
+        {
+            "name": "短波广播 41m",
+            "type": "broadcast",
+            "start": 7200000,
+            "end": 7450000,
+            "chan": 5000
+        },
+        {
+            "name": "短波广播 31m",
+            "type": "broadcast",
+            "start": 9400000,
+            "end": 9900000,
+            "chan": 5000
+        },
+        {
+            "name": "短波广播 25m",
+            "type": "broadcast",
+            "start": 11600000,
+            "end": 12100000,
+            "chan": 5000
+        },
+        {
+            "name": "短波广播 19m",
+            "type": "broadcast",
+            "start": 15100000,
+            "end": 15800000,
+            "chan": 5000
+        },
+        {
+            "name": "6m 业余频段",
+            "type": "amateur",
+            "start": 50000000,
+            "end": 54000000
+        },
+        {
+            "name": "调频广播",
+            "type": "broadcast",
+            "start": 87000000,
+            "end": 108000000,
+            "chan": 100000
+        },
+        {
+            "name": "航空导航（VOR/ILS）",
+            "type": "aviation",
+            "start": 108000000,
+            "end": 117975000,
+            "chan": 50000
+        },
+        {
+            "name": "航空通信（VHF）",
+            "type": "aviation",
+            "start": 117975000,
+            "end": 137000000,
+            "chan": 25000
+        },
+        {
+            "name": "气象卫星",
+            "type": "broadcast",
+            "start": 137000000,
+            "end": 138000000
+        },
+        {
+            "name": "2m 业余频段",
+            "type": "amateur",
+            "start": 144000000,
+            "end": 148000000
+        },
+        {
+            "name": "水上 VHF",
+            "type": "marine",
+            "start": 156000000,
+            "end": 163000000,
+            "chan": 25000
+        },
+        {
+            "name": "公众对讲机（409MHz）",
+            "type": "military",
+            "start": 409750000,
+            "end": 410000000,
+            "chan": 12500
+        },
+        {
+            "name": "70cm 业余频段",
+            "type": "amateur",
+            "start": 430000000,
+            "end": 440000000
+        },
+        {
+            "name": "ISM 433MHz",
+            "type": "military",
+            "start": 433050000,
+            "end": 434790000
+        },
+        {
+            "name": "铁路 GSM-R 上行",
+            "type": "military",
+            "start": 885000000,
+            "end": 889000000
+        },
+        {
+            "name": "铁路 GSM-R 下行",
+            "type": "military",
+            "start": 930000000,
+            "end": 934000000
+        },
+        {
+            "name": "23cm 业余频段",
+            "type": "amateur",
+            "start": 1240000000,
+            "end": 1300000000
+        },
+        {
+            "name": "ISM 2.4GHz",
+            "type": "military",
+            "start": 2400000000,
+            "end": 2483500000
+        }
+    ]
+}
