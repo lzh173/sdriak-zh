@@ -143,6 +143,9 @@ public:
         cqOnly = cfg.value("ft8CqOnly", false);
         selectedStreamName = cfg.value("ft8Stream", std::string());
         slotPeriod = protocolFt4 ? FT4_SLOT_TIME : FT8_SLOT_TIME;
+        slotOffset.store(cfg.value("ft8SlotOffset", 0.0));
+        savedSlotOffset = slotOffset.load();
+        autoSlotOffset = cfg.value("ft8AutoOffset", false);
 
         resetDecoder();
         running = true;
@@ -338,12 +341,14 @@ private:
 
     int64_t slotIndexForNow() const {
         using namespace std::chrono;
-        const double t = duration<double>(system_clock::now().time_since_epoch()).count();
+        // slotOffset compensates for clock skew and audio latency: it shifts
+        // the window so the decoded dt stays near zero.
+        const double t = duration<double>(system_clock::now().time_since_epoch()).count() - slotOffset.load();
         return (int64_t)std::floor(t / slotPeriod);
     }
 
     uint32_t slotStartUtcTime(int64_t slot) const {
-        const time_t start = (time_t)std::llround((double)slot * slotPeriod);
+        const time_t start = (time_t)std::llround((double)slot * slotPeriod + slotOffset.load());
         struct tm tmUtc{};
 #ifdef _WIN32
         gmtime_s(&tmUtc, &start);
@@ -363,6 +368,7 @@ private:
         flog::debug("ft8: slot {} candidates {}", slotStartUtc, count);
 
         std::vector<std::pair<uint32_t, std::array<uint8_t, 10>>> seen;
+        std::vector<float> slotDts;
         std::lock_guard<std::mutex> lock(resultsMutex);
         for (int i = 0; i < count; i++) {
             ftx_message_t message;
@@ -396,10 +402,33 @@ private:
             result.text = text;
             result.isCq = (result.text.rfind("CQ ", 0) == 0);
             result.seen = std::chrono::steady_clock::now();
+            slotDts.push_back(result.dt);
             results.push_back(std::move(result));
         }
         while (results.size() > MAX_RESULTS) { results.erase(results.begin()); }
-        flog::info("ft8: slot {} finished, {} results total", slotStartUtc, (int)results.size());
+
+        // Time-offset correction: the decoded dt is where the message actually
+        // sat inside our window, so the window should have started that much
+        // later. Manual mode just shows the number; auto mode steers the
+        // window with a slow filter so a wrong clock or audio latency is
+        // absorbed without overshooting.
+        if (!slotDts.empty()) {
+            std::sort(slotDts.begin(), slotDts.end());
+            lastDt.store(slotDts[slotDts.size() / 2]);
+            if (autoSlotOffset) {
+                const double target = std::clamp((double)lastDt.load(), -3.0, 3.0);
+                const double current = slotOffset.load();
+                const double next = std::clamp(current + 0.35 * (target - current), -3.0, 3.0);
+                slotOffset.store(next);
+                if (std::fabs(next - savedSlotOffset) > 0.02) {
+                    savedSlotOffset = next;
+                    core::configManager.edit().set("ft8SlotOffset", next);
+                }
+            }
+        }
+
+        flog::info("ft8: slot {} finished, {} results total (dt {:+.2f}s, offset {:+.2f}s)",
+                   slotStartUtc, (int)results.size(), (double)lastDt.load(), slotOffset.load());
     }
 
     // ---- UI ------------------------------------------------------------
@@ -431,6 +460,26 @@ private:
             _this->slotPeriod = _this->protocolFt4 ? FT4_SLOT_TIME : FT8_SLOT_TIME;
             core::configManager.edit().set("ft8ProtocolFt4", _this->protocolFt4);
             _this->resetDecoder();
+        }
+
+        if (ImGui::Checkbox(("自动修正时差##_ft8_autooff_" + _this->name).c_str(), &_this->autoSlotOffset)) {
+            core::configManager.edit().set("ft8AutoOffset", _this->autoSlotOffset);
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("上次偏差 %+.2f s", (double)_this->lastDt.load());
+
+        ImGui::BeginDisabled(_this->autoSlotOffset);
+        float offset = (float)_this->slotOffset.load();
+        if (ImGui::SliderFloat(("时差修正 (s)##_ft8_off_" + _this->name).c_str(), &offset, -3.0f, 3.0f, "%+.2f s")) {
+            _this->slotOffset.store((double)offset);
+            _this->savedSlotOffset = (double)offset;
+            core::configManager.edit().set("ft8SlotOffset", (double)offset);
+        }
+        ImGui::EndDisabled();
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("音频延迟或时钟偏差会把信号挤出解码窗口。\n"
+                              "开启自动修正后，程序用解出的时间偏差（dt）自动对齐；\n"
+                              "也可以关闭自动，手动微调。");
         }
 
         if (ImGui::Checkbox(("在瀑布图上显示##_ft8_wf_" + _this->name).c_str(), &_this->showOnWaterfall)) {
@@ -598,6 +647,12 @@ private:
     bool cqOnly = false;
     double overlayHoldSec = 30.0;
     double slotPeriod = FT8_SLOT_TIME;
+    // Time-offset correction (see decodeSlotLocked): positive means the window
+    // starts that many seconds after the UTC slot boundary.
+    std::atomic<double> slotOffset{ 0.0 };
+    std::atomic<float> lastDt{ 0.0f };
+    bool autoSlotOffset = false;
+    double savedSlotOffset = 0.0;
 
     OptionList<std::string, std::string> streams;
     std::string selectedStreamName;
