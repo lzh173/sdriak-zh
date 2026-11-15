@@ -226,6 +226,8 @@ int sdrpp_main(int argc, char* argv[]) {
     defConfig["moduleInstances"]["File Source"]["enabled"] = true;
     defConfig["moduleInstances"]["频率参考"]["module"] = "china_ref";
     defConfig["moduleInstances"]["频率参考"]["enabled"] = true;
+    defConfig["moduleInstances"]["FT8 解码"]["module"] = "ft8_decoder";
+    defConfig["moduleInstances"]["FT8 解码"]["enabled"] = true;
     defConfig["moduleInstances"]["FobosSDR Source"]["module"] = "fobossdr_source";
     defConfig["moduleInstances"]["FobosSDR Source"]["enabled"] = true;
     defConfig["moduleInstances"]["HackRF Source"]["module"] = "hackrf_source";
@@ -369,6 +371,7 @@ int sdrpp_main(int argc, char* argv[]) {
             // desktop dialog helper is needed.
             "file_source.so",
             "china_ref.so",
+            "ft8_decoder.so",
             "hackrf_source.so",
             "hermes_source.so",
             "hydrasdr_source.so",

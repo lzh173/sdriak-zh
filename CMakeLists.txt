@@ -75,6 +75,7 @@ option(OPT_BUILD_PORTAUDIO_SINK "Build PortAudio Sink Module (Dependencies: port
 option(OPT_BUILD_ATV_DECODER "Build ATV decoder (no dependencies required)" ON)
 option(OPT_BUILD_DAB_DECODER "Build the DAB/DAB+ decoder (no dependencies required)" OFF)
 option(OPT_BUILD_FALCON9_DECODER "Build the falcon9 live decoder (Dependencies: ffplay)" OFF)
+option(OPT_BUILD_FT8_DECODER "Build the FT8/FT4 receive decoder (vendored ft8_lib, no dependencies required)" ON)
 option(OPT_BUILD_KG_SSTV_DECODER "Build the KG SSTV (KG-STV) decoder module (no dependencies required)" OFF)
 option(OPT_BUILD_M17_DECODER "Build the M17 decoder module (Dependencies: codec2)" OFF)
 option(OPT_BUILD_METEOR_DEMODULATOR "Build the meteor demodulator module (no dependencies required)" ON)
@@ -300,6 +301,7 @@ sdrpp_add_optional_modules(
     ATV_DECODER:decoder_modules/atv_decoder
     DAB_DECODER:decoder_modules/dab_decoder
     FALCON9_DECODER:decoder_modules/falcon9_decoder
+    FT8_DECODER:decoder_modules/ft8_decoder
     KG_SSTV_DECODER:decoder_modules/kg_sstv_decoder
     M17_DECODER:decoder_modules/m17_decoder
     METEOR_DEMODULATOR:decoder_modules/meteor_demodulator
