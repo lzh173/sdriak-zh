@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <volk/volk.h>
+#include <dsp/buffer/buffer.h>   // volk-aligned alloc for the FFT buffers volk touches
 #include <utils/flog.h>
 #include <gui/gui.h>
 #include <gui/style.h>
@@ -108,8 +109,8 @@ namespace ImGui {
         lastWidgetPos.y = 0;
         lastWidgetSize.x = 0;
         lastWidgetSize.y = 0;
-        latestFFT = new float[dataWidth];
-        latestFFTHold = new float[dataWidth];
+        latestFFT = dsp::buffer::alloc<float>(dataWidth);
+        latestFFTHold = dsp::buffer::alloc<float>(dataWidth);
         // Fill with the "hide everything" sentinel so the buffers hold a
         // well-defined value before the first FFT frame / onResize() fill.
         for (int i = 0; i < dataWidth; i++) {
@@ -911,22 +912,22 @@ namespace ImGui {
             // ==============
         }
 
-        // Reallocate display FFT
-        if (latestFFT != NULL) {
-            delete[] latestFFT;
-        }
-        latestFFT = new float[dataWidth];
+        // Reallocate display FFT. Null after every free: alloc() throws on OOM
+        // and the draw path gates on these being non-NULL.
+        dsp::buffer::free(latestFFT);
+        latestFFT = NULL;
+        latestFFT = dsp::buffer::alloc<float>(dataWidth);
 
         // Reallocate hold FFT
-        if (latestFFTHold != NULL) {
-            delete[] latestFFTHold;
-        }
-        latestFFTHold = new float[dataWidth];
+        dsp::buffer::free(latestFFTHold);
+        latestFFTHold = NULL;
+        latestFFTHold = dsp::buffer::alloc<float>(dataWidth);
 
         // Reallocate smoothing buffer
         if (fftSmoothing) {
-            if (smoothingBuf) { delete[] smoothingBuf; }
-            smoothingBuf = new float[dataWidth];
+            dsp::buffer::free(smoothingBuf);
+            smoothingBuf = NULL;
+            smoothingBuf = dsp::buffer::alloc<float>(dataWidth);
             for (int i = 0; i < dataWidth; i++) {
                 smoothingBuf[i] = -1000.0f; 
             }
@@ -1547,22 +1548,27 @@ namespace ImGui {
     }
 
     void WaterFall::setFFTSmoothing(bool enabled) {
-        std::lock_guard<std::mutex> lck(smoothingBufMtx);
+        // Lock order must match pushFFT(): latestFFTMtx first, then
+        // smoothingBufMtx. Taking them the other way round -- which this used to
+        // do, acquiring latestFFTMtx only for the copy below -- deadlocks
+        // against an FFT frame that is already holding latestFFTMtx and waiting
+        // on smoothingBufMtx.
+        std::lock_guard<std::recursive_mutex> lck(latestFFTMtx);
+        std::lock_guard<std::mutex> lck2(smoothingBufMtx);
         fftSmoothing = enabled;
 
-        // Free buffer if not null
-        if (smoothingBuf) {delete[] smoothingBuf; }
+        // Release first and null immediately: pushFFT() gates on
+        // smoothingBuf != NULL, and dsp::buffer::alloc() throws on OOM, so a
+        // freed-but-not-nulled pointer is a use-after-free waiting to happen.
+        dsp::buffer::free(smoothingBuf);
+        smoothingBuf = NULL;
 
         // If disabled, stop here
-        if (!enabled) {
-            smoothingBuf = NULL;
-            return;
-        }
+        if (!enabled) { return; }
 
         // Allocate and copy existing FFT into it
-        smoothingBuf = new float[dataWidth];
+        smoothingBuf = dsp::buffer::alloc<float>(dataWidth);
         if (latestFFT) {
-            std::lock_guard<std::recursive_mutex> lck2(latestFFTMtx);
             memcpy(smoothingBuf, latestFFT, dataWidth * sizeof(float));
         }
         else {

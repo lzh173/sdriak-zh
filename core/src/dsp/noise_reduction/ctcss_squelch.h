@@ -147,19 +147,28 @@ namespace dsp::noise_reduction {
 
             // Stop the DSP thread
             base_type::stop();
+
         }
 
-        void init(stream<stereo_t>* in, double samplerate) {
+        void init(stream<stereo_t>* in, double samplerate, int maxBlock = STREAM_BUFFER_SIZE) {
             // Save settings
             _samplerate = samplerate;
-
-            // Create dummy taps just for initialization
-            float dummy[1] = { 1.0f };
-            auto dummyTaps = dsp::taps::fromArray(1, dummy);
+            _maxBlock = maxBlock;
 
             // Initialize the DDC and FM demod
-            ddc.init(NULL, samplerate, CTCSS_DECODE_SAMPLERATE, CTCSS_DECODE_BANDWIDTH, CTCSS_DECODE_OFFSET);
-            fm.init(NULL, 1.0, CTCSS_DECODE_SAMPLERATE);
+            ddc.init(samplerate, CTCSS_DECODE_SAMPLERATE, CTCSS_DECODE_BANDWIDTH, CTCSS_DECODE_OFFSET, _maxBlock);
+            fm.init(1.0, CTCSS_DECODE_SAMPLERATE);
+            // [RATE-SIZED] fmOut follows the final 500 Hz output bound. ddcOut
+            // is larger because the fused DDC first translates a full-rate
+            // block into it, then uses it for intermediate decimator stages.
+            // Query both bounds from the producer rather than the requested
+            // rate ratio, since the capped approximation may round upward or
+            // choose passthrough.
+            // see doc/design/buffer-size-requirements.md 2.6
+            _decodeMaxBlock = ddc.maxOutputBlock();
+            _ddcWorkMaxBlock = ddc.maxOutputBuffer();
+            ddcOut.allocate(_ddcWorkMaxBlock);
+            fmOut.allocate(_decodeMaxBlock);
 
             // Initilize the base block class
             base_type::init(in);
@@ -168,10 +177,38 @@ namespace dsp::noise_reduction {
         void setSamplerate(double samplerate) {
             assert(base_type::_block_init);
             std::lock_guard<std::recursive_mutex> lck(base_type::ctrlMtx);
-            base_type::tempStop();
-            _samplerate = samplerate;
+            dsp::block::TempStop guard(this);
+
+            // Both buffers are internal to this block and the worker is stopped.
+            // ddcOut is sized for the largest write made anywhere in the fused
+            // VFO (including its full-rate xlator); fmOut only needs the final
+            // returned sample count.
+            // [RATE-SIZED] see doc/design/buffer-size-requirements.md 2.6
+            //
+            // Grow every destination before mutating the DDC, and never shrink
+            // it here. This covers every failure point: a preview/allocation
+            // failure leaves the old producer and capacities together; a DDC
+            // failure either leaves the old producer or switches its resampler
+            // into the no-output failure mode; and a failure after its
+            // resampler commits still has the requested larger buffers. A later
+            // lower rate may retain excess capacity, which costs memory but not
+            // correctness.
+            const int wantedOutput = ddc.maxOutputBlockForInSamplerate(samplerate);
+            const int wantedWork = ddc.maxOutputBufferForInSamplerate(samplerate);
+            if (wantedWork > _ddcWorkMaxBlock) {
+                ddcOut.allocate(wantedWork);
+                _ddcWorkMaxBlock = wantedWork;
+            }
+            if (wantedOutput > _decodeMaxBlock) {
+                fmOut.allocate(wantedOutput);
+                _decodeMaxBlock = wantedOutput;
+            }
+
             ddc.setInSamplerate(samplerate);
-            base_type::tempStart();
+            assert(ddc.maxOutputBlock() <= _decodeMaxBlock);
+            assert(ddc.maxOutputBuffer() <= _ddcWorkMaxBlock);
+
+            _samplerate = samplerate;
         }
 
         void setRequiredTone(CTCSSTone tone) {
@@ -184,12 +221,13 @@ namespace dsp::noise_reduction {
             return currentTone;
         }
 
+        // IN-PLACE: safe (in == out).
         inline int process(int count, const stereo_t* in, stereo_t* out) {
             // Shift and resample to the correct samplerate
-            int ddcOutCount = ddc.process(count, (complex_t*)in, ddc.out.writeBuf);
+            int ddcOutCount = ddc.process(count, (complex_t*)in, ddcOut);
 
             // FM Demod the CTCSS tone
-            fm.process(ddcOutCount, ddc.out.writeBuf, fm.out.writeBuf);
+            fm.process(ddcOutCount, ddcOut, fmOut);
 
             // Get the required tone
             const CTCSSTone rtone = requiredTone;
@@ -197,7 +235,7 @@ namespace dsp::noise_reduction {
             // Detect the tone frequency
             for (int i = 0; i < ddcOutCount; i++) {
                 // Compute the running mean
-                const float val = fm.out.writeBuf[i];
+                const float val = fmOut[i];
                 mean = 0.95f*mean + 0.05f*val;
 
                 // Compute the running variance
@@ -268,7 +306,7 @@ namespace dsp::noise_reduction {
                 memset(out, 0, count * sizeof(stereo_t));
             }
             else {
-                memcpy(out, in, count * sizeof(stereo_t));
+                if (out != in) { memcpy(out, in, count * sizeof(stereo_t)); }
             }
 
             return count;
@@ -297,7 +335,12 @@ namespace dsp::noise_reduction {
         bool mute = true;
         std::atomic<CTCSSTone> currentTone = CTCSS_TONE_NONE;
 
-        channel::RxVFO ddc;
+        int _maxBlock = STREAM_BUFFER_SIZE;
+        int _decodeMaxBlock = STREAM_BUFFER_SIZE;
+        int _ddcWorkMaxBlock = STREAM_BUFFER_SIZE;
+        channel::RxVFOKernel ddc;
+        buffer::Buffer<complex_t> ddcOut;   // scratch, in place of its old out stream
         demod::Quadrature fm;
+        buffer::Buffer<float> fmOut;   // scratch, in place of fm's old out stream
     };
 }
