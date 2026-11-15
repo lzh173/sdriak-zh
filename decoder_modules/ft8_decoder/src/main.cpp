@@ -439,6 +439,25 @@ private:
 
         ImGui::TextDisabled("%d 条结果%s", shown, _this->selectedStreamName.empty() ? "（未绑定流）" : "");
         ImGui::SameLine();
+#ifdef SDRPP_ENABLE_DEBUG_MENU
+        // Debug-only helper: injects a few fake decodes so the waterfall
+        // overlay and the list can be checked without an on-air signal.
+        ImGui::SameLine();
+        if (ImGui::SmallButton(("注入测试解码##_ft8_inject_" + _this->name).c_str())) {
+            std::lock_guard<std::mutex> lock(_this->resultsMutex);
+            for (int i = 0; i < 6; i++) {
+                DecodeResult r;
+                r.slotUtc = _this->slotStartUtc;
+                r.audioFreq = 300.0 + i * 240.0;
+                r.snr = -18.0f + i * 2.5f;
+                r.dt = 0.1f * i;
+                r.text = (i == 0) ? "CQ BY1XX OM89" : "BY1XX JA1YYY -12";
+                r.isCq = (i == 0);
+                r.seen = std::chrono::steady_clock::now();
+                _this->results.push_back(std::move(r));
+            }
+        }
+#endif
         if (ImGui::SmallButton(("清空##_ft8_clear_" + _this->name).c_str())) {
             std::lock_guard<std::mutex> lock(_this->resultsMutex);
             _this->results.clear();
