@@ -376,7 +376,7 @@ private:
             int streamIndex = _this->streams.keyId(_this->selectedStreamName);
             if (streamIndex < 0) { streamIndex = 0; }
             ImGui::SetNextItemWidth(-1);
-            if (ImGui::BeginCombo(("##_ft8_stream_" + _this->name).c_str(), _this->streams.name(streamIndex).c_str()) {
+            if (ImGui::BeginCombo(("##_ft8_stream_" + _this->name).c_str(), _this->streams.name(streamIndex).c_str())) {
                 for (int i = 0; i < (int)_this->streams.size(); i++) {
                     if (ImGui::Selectable(_this->streams.name(i).c_str(), i == streamIndex)) {
                         _this->selectStream(_this->streams.key(i));
