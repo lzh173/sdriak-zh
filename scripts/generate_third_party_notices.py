@@ -63,6 +63,7 @@ LIBRARIES = [
     ('RapidJSON', '', 'https://github.com/Tencent/rapidjson', gh('Tencent/rapidjson', 'v1.1.0', 'license.txt')),
     ('libsddc', '', 'https://github.com/ik1xpv/ExtIO_sddc', local('source_modules/sddc_source/libsddc/license')),
     ('sdrpp_radiosonde', '', 'https://github.com/dbdexter-dev/sdrpp_radiosonde', local('decoder_modules/radiosonde_decoder/LICENSE')),
+    ('ft8_lib', '', 'https://github.com/kgoba/ft8_lib', local('decoder_modules/ft8_decoder/vendor/ft8_lib/LICENSE')),
     ('logmmse', '', 'https://github.com/rajivpoddar/logmmse', gh('rajivpoddar/logmmse', 'master', 'LICENSE')),
     ('Roboto font', '', 'https://github.com/googlefonts/roboto', [APACHE_2]),
 

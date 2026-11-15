@@ -426,19 +426,45 @@ private:
         // later. Manual mode just shows the number; auto mode steers the
         // window with a slow filter so a wrong clock or audio latency is
         // absorbed without overshooting.
+        bool gotDt = false;
         if (!slotDts.empty()) {
             std::sort(slotDts.begin(), slotDts.end());
             lastDt.store(slotDts[slotDts.size() / 2]);
+            gotDt = true;
             if (autoSlotOffset && slotDts.size() >= 2) {
-                const double target = std::clamp((double)lastDt.load(), -3.0, 3.0);
+                const double target = std::clamp((double)lastDt.load(), -6.0, 6.0);
                 const double current = slotOffset.load();
-                const double next = std::clamp(current + 0.35 * (target - current), -3.0, 3.0);
+                const double next = std::clamp(current + 0.35 * (target - current), -6.0, 6.0);
                 slotOffset.store(next);
+                huntSlots = 0;
                 if (std::fabs(next - savedSlotOffset) > 0.02) {
                     savedSlotOffset = next;
                     core::configManager.edit().set("ft8SlotOffset", next);
                 }
             }
+        }
+
+        // Auto hunting: plenty of sync candidates but nothing decoded usually
+        // means the window is misaligned far enough to cut the message tail, so
+        // no dt is ever produced to steer the filter. Nudge the window and try
+        // again; a successful slot takes over from here.
+        if (autoSlotOffset && !gotDt && count >= 30) {
+            if (++huntSlots >= 2) {
+                huntSlots = 0;
+                const double next = std::clamp(slotOffset.load() + 0.6, -6.0, 6.0);
+                slotOffset.store(next);
+                if (std::fabs(next - savedSlotOffset) > 0.02) {
+                    savedSlotOffset = next;
+                    core::configManager.edit().set("ft8SlotOffset", next);
+                }
+                char hunt[96];
+                std::snprintf(hunt, sizeof(hunt), "no decodes with %d candidates, window moved to %+.2f s",
+                              count, next);
+                flog::info("ft8: {}", hunt);
+            }
+        }
+        else if (gotDt) {
+            huntSlots = 0;
         }
 
         // flog only understands plain {} placeholders, so pre-format the numbers.
@@ -487,7 +513,7 @@ private:
 
         ImGui::BeginDisabled(_this->autoSlotOffset);
         float offset = (float)_this->slotOffset.load();
-        if (ImGui::SliderFloat(("时差修正 (s)##_ft8_off_" + _this->name).c_str(), &offset, -3.0f, 3.0f, "%+.2f s")) {
+        if (ImGui::SliderFloat(("时差修正 (s)##_ft8_off_" + _this->name).c_str(), &offset, -6.0f, 6.0f, "%+.2f s")) {
             _this->slotOffset.store((double)offset);
             _this->savedSlotOffset = (double)offset;
             core::configManager.edit().set("ft8SlotOffset", (double)offset);
@@ -670,6 +696,7 @@ private:
     std::atomic<double> slotOffset{ 0.0 };
     std::atomic<float> lastDt{ 0.0f };
     bool autoSlotOffset = false;
+    int huntSlots = 0;
     double savedSlotOffset = 0.0;
 
     OptionList<std::string, std::string> streams;
