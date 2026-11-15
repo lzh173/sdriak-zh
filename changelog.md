@@ -2,6 +2,34 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
+## v1.4.5-zh - 2026-11-15
+
+Fork release: FT8/FT4 reception that draws the decoded messages on the spectrum, plus a Chinese band plan.
+
+### FT8/FT4 decoder
+
+- New `FT8 解码` module (plugin `ft8_decoder`). It taps the audio of the selected VFO, resamples it to the 12 kHz that [ft8_lib](https://github.com/kgoba/ft8_lib) expects, and decodes every UTC-aligned slot — 15 s for FT8, 7.5 s for FT4. Reception only; nothing is transmitted.
+- Each decoded message is drawn over the waterfall at the frequency it was heard on, so a busy band reads at a glance, and CQ calls are highlighted. The panel lists time, SNR, dt, audio offset and text; clicking a row tunes to that signal. Labels stay on screen for 30 s.
+- `立即解码` decodes the most recent complete window (15 s FT8 / 7.5 s FT4) on demand, without waiting for the next slot boundary.
+- Time-offset correction. A stream that buffers (a KiwiSDR connection typically delays the audio by several seconds) pushes the signals out of the decode window. The panel shows the measured offset, which can be corrected with a slider or by `自动修正时差`, which integrates the decoded dt and, when nothing decodes at all, nudges the window until it does.
+- The module is an ordinary plugin: disabling it in the module manager stops the audio tap, hides the panel and removes the spectrum labels; enabling it rebinds.
+
+Known issue: FT4 slots are wired up (576-sample blocks, 7.5 s period) but no FT4 messages decode yet — the vendored ft8_lib fails to decode FT4 even the signals its own `gen_ft8 -ft4` generates, so this is an upstream decoder problem rather than a plumbing one. FT8 is unaffected.
+
+### Band plan and frequency reference
+
+- `频率参考` (`china_ref`) lists Chinese band allocations, channel tables (walkie-talkies, PMR/FRP, marine, airband, repeaters) with CTCSS tones and a relay frequency calculator, and can label the bands on the waterfall.
+- New `China (中文)` band plan (`res/bandplans/china-zh.json`), 31 bands with Chinese names.
+
+### KiwiSDR
+
+- The receiver map and its `测试` button now use the configured proxy too, and the directory is invalidated when the proxy setting changes, so a map that failed behind a proxy recovers without a restart.
+
+### Under the hood
+
+- Modules added by a new version are merged into an existing `config.json`. The defaults were only merged at the top level, so an upgrade kept its old `moduleInstances` map and never created the new modules.
+- The CJK glyph subset now also scans `res/**.json`, so strings that come from data files (band plan names, channel tables) no longer render as `?`.
+
 ## v1.4.4-zh - 2026-11-13
 
 Fork release: Android can finally pick recordings, and KiwiSDR can go through a proxy.

@@ -185,7 +185,8 @@ public:
         onStreamUnregisterHandler.handler = streamUnregisterHandler;
         sigpath::sinkManager.onStreamUnregister.bindHandler(&onStreamUnregisterHandler);
 
-        selectStream(selectedStreamName);
+        // A config can hold the instance as disabled; enable() binds later.
+        if (enabled.load()) { selectStream(selectedStreamName); }
     }
 
     void enable() {
