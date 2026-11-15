@@ -572,6 +572,9 @@ private:
             core::configManager.edit().set("ft8ProtocolFt4", _this->protocolFt4);
             _this->resetDecoder();
         }
+        if (_this->protocolFt4) {
+            ImGui::TextDisabled("FT4 为实验性：当前解码库还解不出报文");
+        }
 
         if (ImGui::Checkbox(("自动修正时差##_ft8_autooff_" + _this->name).c_str(), &_this->autoSlotOffset)) {
             core::configManager.edit().set("ft8AutoOffset", _this->autoSlotOffset);

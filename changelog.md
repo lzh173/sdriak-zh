@@ -15,7 +15,7 @@ Fork release: FT8/FT4 reception that draws the decoded messages on the spectrum,
 - Time-offset correction. A stream that buffers (a KiwiSDR connection typically delays the audio by several seconds) pushes the signals out of the decode window. The panel shows the measured offset, which can be corrected with a slider or by `自动修正时差`, which integrates the decoded dt and, when nothing decodes at all, nudges the window until it does.
 - The module is an ordinary plugin: disabling it in the module manager stops the audio tap, hides the panel and removes the spectrum labels; enabling it rebinds.
 
-Known issue: FT4 slots are wired up (576-sample blocks, 7.5 s period) but no FT4 messages decode yet — the vendored ft8_lib fails to decode FT4 even the signals its own `gen_ft8 -ft4` generates, so this is an upstream decoder problem rather than a plumbing one. FT8 is unaffected.
+FT4 support is experimental and flagged as such in the panel: the slots are wired up (576-sample blocks, 7.5 s period) but the vendored ft8_lib currently decodes no FT4 messages at all — not even the signals its own `gen_ft8 -ft4` generates — so the gap is in the upstream decoder rather than in the module. FT8 is unaffected.
 
 ### Band plan and frequency reference
 
