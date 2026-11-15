@@ -188,11 +188,21 @@ public:
         selectStream(selectedStreamName);
     }
 
-    void enable() { enabled = true; }
+    void enable() {
+        if (enabled.exchange(true)) { return; }
+        gui::menu.registerEntry(name, menuHandler, this, NULL);
+        selectStream(selectedStreamName);
+    }
 
-    void disable() { enabled = false; }
+    void disable() {
+        if (!enabled.exchange(false)) { return; }
+        // Stop the audio tap and hide the panel; the module stays loaded so the
+        // user can switch it back on from the module manager.
+        deselectStream();
+        gui::menu.removeEntry(name);
+    }
 
-    bool isEnabled() { return enabled; }
+    bool isEnabled() { return enabled.load(); }
 
 private:
     struct DecodeResult {
@@ -299,6 +309,10 @@ private:
 
     void workerMain() {
         while (running.load()) {
+            if (!enabled.load()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                continue;
+            }
             int blockSize = 0;
             {
                 std::lock_guard<std::mutex> lock(decoderMutex);
@@ -573,6 +587,7 @@ private:
 
     static void fftRedraw(ImGui::WaterFall::FFTRedrawArgs args, void* ctx) {
         Ft8DecoderModule* _this = (Ft8DecoderModule*)ctx;
+        if (!_this->enabled.load()) { return; }
         if (!_this->showOnWaterfall || _this->selectedStreamName.empty()) { return; }
         auto vfo = gui::waterfall.vfos.find(_this->selectedStreamName);
         if (vfo == gui::waterfall.vfos.end() || !vfo->second) { return; }
@@ -644,7 +659,7 @@ private:
     // ---- state ---------------------------------------------------------
 
     std::string name;
-    bool enabled = true;
+    std::atomic<bool> enabled{ true };
     bool protocolFt4 = false;
     bool showOnWaterfall = true;
     bool cqOnly = false;
