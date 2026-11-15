@@ -432,9 +432,10 @@ private:
             lastDt.store(slotDts[slotDts.size() / 2]);
             gotDt = true;
             if (autoSlotOffset && slotDts.size() >= 2) {
-                const double target = std::clamp((double)lastDt.load(), -6.0, 6.0);
+                // dt = D - offset, where D is the true audio delay, so the
+                // window start moves *by* dt, not *to* dt.
                 const double current = slotOffset.load();
-                const double next = std::clamp(current + 0.35 * (target - current), -6.0, 6.0);
+                const double next = std::clamp(current + 0.5 * (double)lastDt.load(), -9.0, 9.0);
                 slotOffset.store(next);
                 huntSlots = 0;
                 if (std::fabs(next - savedSlotOffset) > 0.02) {
@@ -451,7 +452,8 @@ private:
         if (autoSlotOffset && !gotDt && count >= 30) {
             if (++huntSlots >= 2) {
                 huntSlots = 0;
-                const double next = std::clamp(slotOffset.load() + 0.6, -6.0, 6.0);
+                double next = slotOffset.load() + 2.0;
+                if (next > 9.0) { next = -9.0; }
                 slotOffset.store(next);
                 if (std::fabs(next - savedSlotOffset) > 0.02) {
                     savedSlotOffset = next;
@@ -513,7 +515,7 @@ private:
 
         ImGui::BeginDisabled(_this->autoSlotOffset);
         float offset = (float)_this->slotOffset.load();
-        if (ImGui::SliderFloat(("时差修正 (s)##_ft8_off_" + _this->name).c_str(), &offset, -6.0f, 6.0f, "%+.2f s")) {
+        if (ImGui::SliderFloat(("时差修正 (s)##_ft8_off_" + _this->name).c_str(), &offset, -9.0f, 9.0f, "%+.2f s")) {
             _this->slotOffset.store((double)offset);
             _this->savedSlotOffset = (double)offset;
             core::configManager.edit().set("ft8SlotOffset", (double)offset);
