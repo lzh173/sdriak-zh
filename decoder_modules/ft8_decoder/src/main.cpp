@@ -796,7 +796,7 @@ private:
 
     dsp::stream<dsp::stereo_t>* audioStream = NULL;
     dsp::convert::StereoToMono s2m;
-    dsp::multirate::RationalResampler<float> resamp;
+    dsp::multirate::RationalResamplerBlock<float> resamp;
     dsp::sink::Handler<float> sink;
     std::recursive_mutex pathMutex;
 
