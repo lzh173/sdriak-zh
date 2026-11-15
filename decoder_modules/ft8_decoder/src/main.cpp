@@ -130,6 +130,18 @@ namespace {
         return buf;
     }
 
+    std::string utcHhmmss(time_t t) {
+        struct tm tmUtc{};
+#ifdef _WIN32
+        gmtime_s(&tmUtc, &t);
+#else
+        gmtime_r(&t, &tmUtc);
+#endif
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%02d:%02d:%02d", tmUtc.tm_hour, tmUtc.tm_min, tmUtc.tm_sec);
+        return buf;
+    }
+
 }  // namespace
 
 class Ft8DecoderModule : public ModuleManager::Instance {
@@ -593,12 +605,21 @@ private:
         ImGui::InputTextWithHint(("##_ft8_search_" + _this->name).c_str(), "搜索呼号/内容…",
                                  _this->searchBuf, sizeof(_this->searchBuf));
 
-        const double now = std::chrono::duration<double>(
+        // The slot the decoder is filling is the *corrected* one, so both the
+        // progress bar and the timestamps have to follow the offset.
+        const double nowSec = std::chrono::duration<double>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-        const double phase = std::fmod(now, _this->slotPeriod) / _this->slotPeriod;
+        const double slotOff = _this->slotOffset.load();
+        const double corrected = nowSec - slotOff;
+        const double phase = std::fmod(corrected, _this->slotPeriod) / _this->slotPeriod;
         char overlay[32];
         std::snprintf(overlay, sizeof(overlay), "%.0f%%", phase * 100.0);
         ImGui::ProgressBar((float)phase, ImVec2(-1, 0), overlay);
+
+        char times[96];
+        std::snprintf(times, sizeof(times), "UTC %s  校正后 %s",
+                      utcHhmmss((time_t)nowSec).c_str(), utcHhmmss((time_t)corrected).c_str());
+        ImGui::TextDisabled("%s", times);
 
         const std::string query = _this->lower(_this->searchBuf);
         int shown = 0;
