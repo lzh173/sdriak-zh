@@ -265,6 +265,17 @@ private:
         }
         _this->sampleQueue.insert(_this->sampleQueue.end(), data, data + count);
         _this->queueCv.notify_one();
+
+        // Rolling history for the manual "立即解码" button: two slots of audio.
+        {
+            std::lock_guard<std::mutex> hlock(_this->historyMutex);
+            _this->historyBuf.insert(_this->historyBuf.end(), data, data + count);
+            const size_t cap = (size_t)std::llround(2.0 * DECODE_RATE * _this->slotPeriod);
+            if (_this->historyBuf.size() > cap) {
+                _this->historyBuf.erase(_this->historyBuf.begin(),
+                                        _this->historyBuf.begin() + (std::ptrdiff_t)(_this->historyBuf.size() - cap));
+            }
+        }
     }
 
     std::vector<float> takeSamples(int blockSize) {
@@ -295,6 +306,7 @@ private:
         cfg.freq_osr = 2;
         cfg.protocol = protocolFt4 ? FTX_PROTOCOL_FT4 : FTX_PROTOCOL_FT8;
         monitor_init(&monitor, &cfg);
+        monitorCfg = cfg;
         monitorReady = true;
         currentSlot = INT64_MIN;
         slotStartUtc = 0;
@@ -309,6 +321,10 @@ private:
 
     void workerMain() {
         while (running.load()) {
+            if (decodeNowRequested.exchange(false)) {
+                std::lock_guard<std::mutex> lock(decoderMutex);
+                if (monitorReady) { decodeRecentWindow(); }
+            }
             if (!enabled.load()) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 continue;
@@ -372,22 +388,22 @@ private:
         return (uint32_t)(tmUtc.tm_hour * 10000 + tmUtc.tm_min * 100 + tmUtc.tm_sec);
     }
 
-    // Decodes the accumulated slot. Caller holds decoderMutex.
-    void decodeSlotLocked() {
-        const int minBlocks = monitor.wf.max_blocks * 2 / 3;
-        if (monitor.wf.num_blocks < minBlocks) { return; }
-
+    // Decodes one accumulated window and appends the results. Caller holds
+    // decoderMutex. Returns the per-decode dt values so the caller can steer
+    // the slot window; candidateCount receives the sync candidate count.
+    std::vector<float> decodeMonitorLocked(monitor_t& mon, uint32_t slotUtc, int& candidateCount) {
+        std::vector<float> slotDts;
         ftx_candidate_t candidates[MAX_CANDIDATES];
-        const int count = ftx_find_candidates(&monitor.wf, MAX_CANDIDATES, candidates, MIN_SCORE);
-        flog::debug("ft8: slot {} candidates {}", slotStartUtc, count);
+        const int count = ftx_find_candidates(&mon.wf, MAX_CANDIDATES, candidates, MIN_SCORE);
+        candidateCount = count;
+        flog::debug("ft8: slot {} candidates {}", slotUtc, count);
 
         std::vector<std::pair<uint32_t, std::array<uint8_t, 10>>> seen;
-        std::vector<float> slotDts;
         std::lock_guard<std::mutex> lock(resultsMutex);
         for (int i = 0; i < count; i++) {
             ftx_message_t message;
             ftx_decode_status_t status;
-            if (!ftx_decode_candidate(&monitor.wf, &candidates[i], LDPC_ITERATIONS, &message, &status)) { continue; }
+            if (!ftx_decode_candidate(&mon.wf, &candidates[i], LDPC_ITERATIONS, &message, &status)) { continue; }
 
             bool duplicate = false;
             for (const auto& entry : seen) {
@@ -407,11 +423,11 @@ private:
             if (ftx_message_decode(&message, &hashIf, text, &offsets) != FTX_MESSAGE_RC_OK) { continue; }
 
             DecodeResult result;
-            result.slotUtc = slotStartUtc;
-            result.audioFreq = (monitor.min_bin + candidates[i].freq_offset +
-                                (float)candidates[i].freq_sub / monitor.wf.freq_osr) / monitor.symbol_period;
+            result.slotUtc = slotUtc;
+            result.audioFreq = (mon.min_bin + candidates[i].freq_offset +
+                                (float)candidates[i].freq_sub / mon.wf.freq_osr) / mon.symbol_period;
             result.dt = (candidates[i].time_offset +
-                         (float)candidates[i].time_sub / monitor.wf.time_osr) * monitor.symbol_period;
+                         (float)candidates[i].time_sub / mon.wf.time_osr) * mon.symbol_period;
             result.snr = candidates[i].score * 0.5f;
             result.text = text;
             result.isCq = (result.text.rfind("CQ ", 0) == 0);
@@ -420,20 +436,24 @@ private:
             results.push_back(std::move(result));
         }
         while (results.size() > MAX_RESULTS) { results.erase(results.begin()); }
+        return slotDts;
+    }
 
-        // Time-offset correction: the decoded dt is where the message actually
-        // sat inside our window, so the window should have started that much
-        // later. Manual mode just shows the number; auto mode steers the
-        // window with a slow filter so a wrong clock or audio latency is
-        // absorbed without overshooting.
-        bool gotDt = false;
-        if (!slotDts.empty()) {
+    // Decodes the slot that just ended. Caller holds decoderMutex.
+    void decodeSlotLocked() {
+        const int minBlocks = monitor.wf.max_blocks * 2 / 3;
+        if (monitor.wf.num_blocks < minBlocks) { return; }
+
+        int count = 0;
+        std::vector<float> slotDts = decodeMonitorLocked(monitor, slotStartUtc, count);
+        bool gotDt = !slotDts.empty();
+
+        // Time-offset correction: dt = D - offset, where D is the true audio
+        // delay, so the window start integrates dt rather than jumping to it.
+        if (gotDt) {
             std::sort(slotDts.begin(), slotDts.end());
             lastDt.store(slotDts[slotDts.size() / 2]);
-            gotDt = true;
             if (autoSlotOffset && slotDts.size() >= 2) {
-                // dt = D - offset, where D is the true audio delay, so the
-                // window start moves *by* dt, not *to* dt.
                 const double current = slotOffset.load();
                 const double next = std::clamp(current + 0.5 * (double)lastDt.load(), -9.0, 9.0);
                 slotOffset.store(next);
@@ -474,6 +494,39 @@ private:
         std::snprintf(timing, sizeof(timing), "dt %+.2f s, offset %+.2f s",
                       (double)lastDt.load(), slotOffset.load());
         flog::info("ft8: slot {} finished, {} results [{}]", slotStartUtc, (int)results.size(), timing);
+    }
+
+    // Decodes the most recent slotPeriod seconds of audio, ignoring the current
+    // slot boundary. Used by the 立即解码 button. Caller holds decoderMutex.
+    void decodeRecentWindow() {
+        const size_t want = (size_t)std::llround(slotPeriod * DECODE_RATE);
+        std::vector<float> window;
+        {
+            std::lock_guard<std::mutex> lock(historyMutex);
+            if (historyBuf.size() < want * 9 / 10) {
+                flog::warn("ft8: manual decode skipped, only {} samples buffered", (int)historyBuf.size());
+                return;
+            }
+            window.assign(historyBuf.end() - (std::ptrdiff_t)want, historyBuf.end());
+        }
+
+        monitor_t temp;
+        monitor_init(&temp, &monitorCfg);
+        for (size_t pos = 0; pos + temp.block_size <= window.size(); pos += temp.block_size) {
+            monitor_process(&temp, window.data() + pos);
+        }
+        int candidates = 0;
+        const uint32_t slotUtc = slotStartUtcTime(slotIndexForNow());
+        std::vector<float> dts = decodeMonitorLocked(temp, slotUtc, candidates);
+        monitor_free(&temp);
+
+        if (!dts.empty()) {
+            std::sort(dts.begin(), dts.end());
+            lastDt.store(dts[dts.size() / 2]);
+        }
+        char summary[96];
+        std::snprintf(summary, sizeof(summary), "last %.1f s window, %d decodes", slotPeriod, (int)dts.size());
+        flog::info("ft8: manual decode: {}", summary);
     }
 
     // ---- UI ------------------------------------------------------------
@@ -597,6 +650,16 @@ private:
             }
         }
 #endif
+        if (ImGui::SmallButton(("立即解码##_ft8_now_" + _this->name).c_str())) {
+            // Decodes the last slotPeriod seconds of audio regardless of where
+            // the slot boundary currently is.
+            _this->decodeNowRequested.store(true);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("直接解码最近一段完整窗口（FT8 15 秒 / FT4 7.5 秒）的音频，\n"
+                              "不等待下一个时隙边界，可用于检查时差是否对齐。");
+        }
+        ImGui::SameLine();
         if (ImGui::SmallButton(("清空##_ft8_clear_" + _this->name).c_str())) {
             std::lock_guard<std::mutex> lock(_this->resultsMutex);
             _this->results.clear();
@@ -714,13 +777,17 @@ private:
 
     std::thread worker;
     std::atomic<bool> running{ false };
+    std::atomic<bool> decodeNowRequested{ false };
     std::mutex queueMutex;
     std::condition_variable queueCv;
     std::vector<float> sampleQueue;
 
     std::mutex decoderMutex;
     monitor_t monitor;
+    monitor_config_t monitorCfg{};
     bool monitorReady = false;
+    std::mutex historyMutex;
+    std::vector<float> historyBuf;
     int64_t currentSlot = INT64_MIN;
     uint32_t slotStartUtc = 0;
 
