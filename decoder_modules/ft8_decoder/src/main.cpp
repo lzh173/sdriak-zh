@@ -415,7 +415,7 @@ private:
         if (!slotDts.empty()) {
             std::sort(slotDts.begin(), slotDts.end());
             lastDt.store(slotDts[slotDts.size() / 2]);
-            if (autoSlotOffset) {
+            if (autoSlotOffset && slotDts.size() >= 2) {
                 const double target = std::clamp((double)lastDt.load(), -3.0, 3.0);
                 const double current = slotOffset.load();
                 const double next = std::clamp(current + 0.35 * (target - current), -3.0, 3.0);
@@ -427,8 +427,11 @@ private:
             }
         }
 
-        flog::info("ft8: slot {} finished, {} results total (dt {:+.2f}s, offset {:+.2f}s)",
-                   slotStartUtc, (int)results.size(), (double)lastDt.load(), slotOffset.load());
+        // flog only understands plain {} placeholders, so pre-format the numbers.
+        char timing[96];
+        std::snprintf(timing, sizeof(timing), "dt %+.2f s, offset %+.2f s",
+                      (double)lastDt.load(), slotOffset.load());
+        flog::info("ft8: slot {} finished, {} results [{}]", slotStartUtc, (int)results.size(), timing);
     }
 
     // ---- UI ------------------------------------------------------------
