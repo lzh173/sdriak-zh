@@ -513,7 +513,12 @@ static void ft8_decode_multi_symbols(const WF_ELEM_T* wf, int num_bins, int n_sy
     const int n_bits = 3 * n_syms;
     const int n_tones = (1 << n_bits);
 
-    float s2[n_tones];
+    // Patched for MSVC: the original code used a VLA sized by n_tones. The
+    // decoder only ever asks for up to 4 symbols at a time (8^4 = 4096 tones),
+    // so a fixed upper bound keeps the same behaviour without a VLA.
+    enum { FTX_MAX_S2_TONES = 4096 };
+    if (n_tones > FTX_MAX_S2_TONES) { return; }
+    float s2[FTX_MAX_S2_TONES];
 
     for (int j = 0; j < n_tones; ++j)
     {
