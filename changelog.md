@@ -2,6 +2,21 @@
 
 Major releases only. For the detailed per-release history including alpha and beta pre-releases, see [changelog-full.md](changelog-full.md).
 
+## v1.4.6-zh - 2026-11-15
+
+Upstream sync: no new fork features, but a substantial DSP robustness pass from upstream.
+
+### Upstream sync
+
+- Rate-sized buffers are now sized from one `RatePlan` that `RationalResampler` computes, exposed as `maxOutputBlock()` / `maxOutputBuffer()`. The owners that used to estimate `ratio + 64 samples` (the broadcast-FM RDS branch, CTCSS squelch, the VOR receiver, POCSAG and the sub-waterfall) size from those instead. That estimate was not a bound: 5001 → 5000 Hz RDS produced 999,865 samples for a 1,000,000-sample output, and a multi-stage power decimator writes its first, larger stage into the caller's destination, so those buffers could overflow on every block.
+- The resampler is split into the `RationalResampler` computation kernel and the `RationalResamplerBlock` processor. The FT8 decoder had kept using the kernel as a processor and no longer compiled; it now uses the block.
+- A FIR whose block capacity changes keeps its history: `HistoryBuffer::setMaxBlock()` reallocates and preserves the retained samples, and `RxVFOKernel` only resets its filter when the sample domain actually changes.
+- MM clock recovery derives its worst-case output count from the clamped phase error and rejects parameters with no finite bound; POCSAG sizes its symbol streams from that instead of the nominal baud ratio.
+- `fftwMutex()` moved out of line into core and is exported, so FFTW planning is serialised across modules — until now each module DLL linked its own inline copy and planning in dab_decoder or logmmse was not serialised against core. The mutex is intentionally leaked so plan destructors of static owners do not lock a destroyed mutex at exit.
+- The FFT-waterfall display buffers (latest FFT, hold, smoothing) use volk-aligned allocations.
+- The frequency-ruler scroll buttons that upstream had carried along with the DSP work are dropped again: they changed what a press near either end of the ruler does.
+- New design notes (`doc/design/volk.md`, `doc/design/buffer-size-requirements.md`) and four unit tests (resampler workspace, MM bound, FIR history across resizes, FFTW mutex lifetime). The tests build only with `OPT_BUILD_TESTS`.
+
 ## v1.4.5-zh - 2026-11-15
 
 Fork release: FT8/FT4 reception that draws the decoded messages on the spectrum, plus a Chinese band plan.
