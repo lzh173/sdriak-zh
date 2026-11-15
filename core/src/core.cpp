@@ -354,6 +354,24 @@ int sdrpp_main(int argc, char* argv[]) {
     bool firstStart = !std::filesystem::exists(root + "/config.json");
     core::configManager.load(defConfig);
 
+    // ConfigManager only merges the top-level defaults, so a config written by
+    // an older version would keep its old moduleInstances map and never create
+    // modules added since (china_ref, ft8_decoder, ...). Merge the missing
+    // instances explicitly; menu entries for them are appended by
+    // Menu::registerEntry() when the instance is created.
+    {
+        auto configAccess = core::configManager.edit();
+        json instances = configAccess.value("moduleInstances", json::object());
+        bool changed = false;
+        for (const auto& item : defConfig["moduleInstances"].items()) {
+            if (!instances.contains(item.key())) {
+                instances[item.key()] = item.value();
+                changed = true;
+            }
+        }
+        if (changed) { configAccess.set("moduleInstances", instances); }
+    }
+
 
     core::configManager.enableAutoSave();
 

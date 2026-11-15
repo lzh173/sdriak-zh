@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -96,6 +97,32 @@ namespace {
 
     ftx_callsign_hash_interface_t hashIf = { hashtableLookup, hashtableAdd };
 
+    // Debug helper: write 12 kHz mono float samples as a PCM16 WAV.
+    void writeWavMono16(const std::string& path, const std::vector<float>& samples, int rate) {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open()) { return; }
+        const uint32_t dataSize = (uint32_t)(samples.size() * 2);
+        auto write32 = [&](uint32_t v) { file.write((const char*)&v, 4); };
+        auto write16 = [&](uint16_t v) { file.write((const char*)&v, 2); };
+        file.write("RIFF", 4);
+        write32(36 + dataSize);
+        file.write("WAVE", 4);
+        file.write("fmt ", 4);
+        write32(16);
+        write16(1);
+        write16(1);
+        write32((uint32_t)rate);
+        write32((uint32_t)rate * 2);
+        write16(2);
+        write16(16);
+        file.write("data", 4);
+        write32(dataSize);
+        for (float sample : samples) {
+            const float clamped = std::clamp(sample, -1.0f, 1.0f);
+            const int16_t pcm = (int16_t)std::lround(clamped * 32767.0f);
+            file.write((const char*)&pcm, 2);
+        }
+    }
     std::string formatUtc(uint32_t hhmmss) {
         char buf[16];
         std::snprintf(buf, sizeof(buf), "%02u:%02u:%02u",
@@ -294,10 +321,18 @@ private:
         }
         else if (slot != currentSlot) {
             decodeSlotLocked();
+#ifdef SDRPP_ENABLE_DEBUG_MENU
+            slotAudio.clear();
+#endif
             monitor_reset(&monitor);
             currentSlot = slot;
             slotStartUtc = slotStartUtcTime(slot);
         }
+#ifdef SDRPP_ENABLE_DEBUG_MENU
+        // Keep the raw 12 kHz audio of the current slot so it can be dumped and
+        // decoded offline when investigating a missing decode.
+        slotAudio.insert(slotAudio.end(), chunk.begin(), chunk.end());
+#endif
         monitor_process(&monitor, chunk.data());
     }
 
@@ -440,6 +475,16 @@ private:
         ImGui::TextDisabled("%d 条结果%s", shown, _this->selectedStreamName.empty() ? "（未绑定流）" : "");
         ImGui::SameLine();
 #ifdef SDRPP_ENABLE_DEBUG_MENU
+        // Debug-only: dump the current slot's 12 kHz audio so it can be decoded
+        // offline, which tells apart "no signal" from "decoder wiring" issues.
+        ImGui::SameLine();
+        if (ImGui::SmallButton(("保存本槽音频##_ft8_dump_" + _this->name).c_str())) {
+            std::lock_guard<std::mutex> lock(_this->decoderMutex);
+            const std::string path = (std::string)core::args["root"] + "/ft8_slot.wav";
+            writeWavMono16(path, _this->slotAudio, (int)DECODE_RATE);
+            flog::info("ft8: wrote {} samples to {}", (int)_this->slotAudio.size(), path);
+        }
+
         // Debug-only helper: injects a few fake decodes so the waterfall
         // overlay and the list can be checked without an on-air signal.
         ImGui::SameLine();
@@ -576,6 +621,10 @@ private:
     bool monitorReady = false;
     int64_t currentSlot = INT64_MIN;
     uint32_t slotStartUtc = 0;
+
+#ifdef SDRPP_ENABLE_DEBUG_MENU
+    std::vector<float> slotAudio;
+#endif
 
     std::mutex resultsMutex;
     std::vector<DecodeResult> results;
