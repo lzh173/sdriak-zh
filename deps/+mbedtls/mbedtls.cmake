@@ -29,7 +29,7 @@ add_cmake_project(mbedtls
         # mbedtls_platform_entropy_poll() is compiled without getrandom() and
         # falls back to reading /dev/random, which blocks on kernels before 5.6
         # while the pool is unseeded. See the header for the full story.
-        -DMBEDTLS_USER_CONFIG_FILE=${CMAKE_CURRENT_LIST_DIR}/sdriak_user_config.h
+        -DMBEDTLS_USER_CONFIG_FILE:FILEPATH=${CMAKE_CURRENT_LIST_DIR}/sdriak_user_config.h
 )
 
 sdrpp_validate_dep(mbedtls
