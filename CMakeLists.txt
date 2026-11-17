@@ -72,6 +72,8 @@ option(OPT_BUILD_NEW_PORTAUDIO_SINK "Build the new PortAudio Sink Module (Depend
 option(OPT_BUILD_PORTAUDIO_SINK "Build PortAudio Sink Module (Dependencies: portaudio)" OFF)
 
 # Decoders
+option(OPT_BUILD_CW_ENGINE "Build the CW skimmer engine library the CW decoder modules link (no dependencies required)" ON)
+option(OPT_BUILD_CW_DEEPCW "Also build the optional DeepCW neural backends of cw_engine (models and ONNX Runtime are loaded at run time)" OFF)
 option(OPT_BUILD_ATV_DECODER "Build ATV decoder (no dependencies required)" ON)
 option(OPT_BUILD_DAB_DECODER "Build the DAB/DAB+ decoder (no dependencies required)" OFF)
 option(OPT_BUILD_FALCON9_DECODER "Build the falcon9 live decoder (Dependencies: ffplay)" OFF)
@@ -299,6 +301,7 @@ sdrpp_add_optional_modules(
 # Decoders
 sdrpp_add_optional_modules(
     ATV_DECODER:decoder_modules/atv_decoder
+    CW_ENGINE:decoder_modules/cw_engine
     DAB_DECODER:decoder_modules/dab_decoder
     FALCON9_DECODER:decoder_modules/falcon9_decoder
     FT8_DECODER:decoder_modules/ft8_decoder
