@@ -186,7 +186,12 @@ sdrpp_register_dep(sondedump
     DEFAULT_LINKAGE portable:static distro:static android:static
     USAGE module-private)
 
+# spdlog is ABI-coupled to the fmt it was built against. Debian sid ships a
+# system spdlog 1.15.3 built against libfmt12, and librfnm (bundled, shared)
+# ends up with unresolved spdlog/fmt symbols when linked against that
+# combination (utils/rfnm_info fails to link). Build our own copy on distro
+# profiles too, so spdlog and the fmt it uses come from one build.
 sdrpp_register_dep(spdlog
-    DEFAULT_SOURCE  portable:bundled distro:system android:bundled
+    DEFAULT_SOURCE  portable:bundled distro:bundled android:bundled
     DEFAULT_LINKAGE portable:shared distro:shared android:shared
     USAGE module-private)
